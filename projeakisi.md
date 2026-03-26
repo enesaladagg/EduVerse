@@ -67,6 +67,8 @@ Proje ile ilgili iletişim GitHub üzerinden ve ders sorumlusunun resmi web site
 **Sorumlu:** Hüseyin Enes DEMİR
 *Hüseyin, gereksinim listeni ve önceliklendirmelerini bu başlığın altına yazabilirsin.*
 
+---
+
 ### 3. Teknoloji Araştırması ve Seçimi
 **Sorumlu:** Muhammed Eren YAPRAKCI
 
@@ -85,10 +87,13 @@ Veritabanı için **MongoDB**: MongoDB hem şemasız olduğu için hem de kullan
 
 Canlı yayın için **WebRTC**: Gecikmesiz, ücretsiz ve açık kaynak bir proje olduğundan ötürü entegrasyonu ve kullanımı rahat. Sadece sıfırdan bir sistem yazmak bizi zorlayacağından ötürü belli başlı kütüphaneler kullanılabilir.
 
+---
+
 ### 4. Genel Mimari Yapı ve Tasarım Desenleri
 **Sorumlu:** ZÜBEYİR ASLAN
 *Zübeyir, modüller arası ilişkiler ve veri akışı tasarımlarını bu başlığın altına yazabilirsin.*
 
+---
 
 ### 5. Geliştirme Ortamı Kurulumu
 **Sorumlu:** Enes ALADAĞ
