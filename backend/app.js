@@ -1,5 +1,6 @@
 const express = require('express');
 const morgan = require('morgan');
+const logger = require('./utils/logger');
 
 const healthRoutes = require('./routes/health');
 const usersRoutes = require('./routes/users');
@@ -7,8 +8,9 @@ const { notFoundHandler, errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
 
+app.use(require('express-status-monitor')());
 app.use(express.json({ limit: '1mb' }));
-app.use(morgan('dev'));
+app.use(morgan('combined', { stream: logger.stream }));
 
 app.use('/api', healthRoutes);
 app.use('/api', usersRoutes);
