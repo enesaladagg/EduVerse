@@ -2,8 +2,7 @@
 
  
 ## 🔒 1. Güvenlik Denetimleri (Security Checks)
-
-Sistemi incelerken ciddi güvenlik zafiyetlerine yol açabilecek bazı noktalar çarptı gözüme. Endişeye gerek yok, çözümleriyle birlikte listeliyorum:
+ 
 
 ### 🚨 A. Şifrelerin Düz Metin (Plaintext) Olarak Saklanması
 - **Sorun:** `backend/routes/users.js` dosyasında `User.create(req.body)` kullanılırken, kullanıcının girdiği şifre (password) modelde herhangi bir hashleme işleminden geçmeden veritabanına doğrudan kaydediliyor.
