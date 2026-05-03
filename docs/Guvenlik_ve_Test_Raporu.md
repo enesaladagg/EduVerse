@@ -1,7 +1,8 @@
 # 🕵️‍♀️ Proje Güvenlik ve Test Raporu (Online Eğitim Platformu)
 
  
-## 🔒 1. Güvenlik Denetimleri (Security Checks)
+## 🔒 1. Güvenlik Denetimleri (Security Checks)   
+
  
 
 ### 🚨 A. Şifrelerin Düz Metin (Plaintext) Olarak Saklanması
