@@ -137,3 +137,10 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Security reports (may contain sensitive findings)
+backend/security-report.json
+security-report.json
+
+# Application log files
+backend/logs/
