@@ -5,6 +5,13 @@ const toNumber = (value, fallback) => {
   return Number.isFinite(parsed) ? parsed : fallback;
 };
 
+const jwtSecret = process.env.JWT_SECRET;
+if (!jwtSecret || jwtSecret.length < 32) {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('JWT_SECRET must be set and at least 32 characters in production');
+  }
+}
+
 module.exports = {
   nodeEnv: process.env.NODE_ENV || 'development',
   port: toNumber(process.env.PORT, 5000),
@@ -18,4 +25,7 @@ module.exports = {
   mongoHeartbeatFrequencyMs: toNumber(process.env.MONGO_HEARTBEAT_FREQUENCY_MS, 10000),
   dbConnectRetries: toNumber(process.env.DB_CONNECT_RETRIES, 3),
   dbRetryBaseDelayMs: toNumber(process.env.DB_RETRY_BASE_DELAY_MS, 1000),
+  jwtSecret: jwtSecret || 'dev-only-insecure-secret-change-in-production',
+  jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
+  corsOrigins: process.env.CORS_ORIGINS || 'http://localhost:5173',
 };
