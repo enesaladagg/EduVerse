@@ -9,6 +9,7 @@ const logger = require('./utils/logger');
 const healthRoutes = require('./routes/health');
 const usersRoutes = require('./routes/users');
 const authRoutes = require('./routes/auth');
+const adminRoutes = require('./routes/admin');
 const { notFoundHandler, errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
@@ -62,6 +63,7 @@ app.use(morgan('combined', { stream: logger.stream }));
 app.use('/api', healthRoutes);
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api', usersRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.get('/', (req, res) => {
   return res.json({
