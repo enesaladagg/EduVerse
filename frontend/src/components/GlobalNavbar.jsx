@@ -430,8 +430,7 @@ export default function GlobalNavbar({ activePage, onNavigate }) {
           </button>
 
           {/* Notifications */}
-          {isAuthenticated && (
-            <div style={{ position: 'relative' }} ref={notifRef}>
+          <div style={{ position: 'relative' }} ref={notifRef}>
               <button
                 onClick={() => { 
                   setShowNotifs(!showNotifs); 
@@ -505,7 +504,6 @@ export default function GlobalNavbar({ activePage, onNavigate }) {
                 </div>
               )}
             </div>
-          )}
 
           <button
             onClick={toggleTheme}
