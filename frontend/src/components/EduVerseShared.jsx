@@ -24,7 +24,7 @@ export const mono = "'JetBrains Mono', monospace";
 export const COURSE_DETAIL = {
   title: "Python ile Sıfırdan Uzmanlığa: Kapsamlı Eğitim",
   subtitle: "Python programlama dilini sıfırdan öğrenin, gerçek projelerle pekiştirin ve veri bilimi, web geliştirme, otomasyon alanlarında uzmanlaşın.",
-  instructor: { name: "Dr. Ahmet Yılmaz", avatar: "👨‍🏫", title: "Senior Software Engineer @ Google", students: 84521, courses: 12, rating: 4.9 },
+  instructor: { name: "Dr. Ahmet Yılmaz", avatar: <UserCircle size={48} color={C.accent} />, title: "Senior Software Engineer @ Google", students: 84521, courses: 12, rating: 4.9 },
   rating: 4.8, reviewCount: 12450, students: 34521, lastUpdate: "Mayıs 2026",
   price: 199.99, oldPrice: 599.99, hours: 42, lectures: 324, level: "Başlangıç → İleri",
   language: "Türkçe", certificate: true, lifetime: true, mobile: true,

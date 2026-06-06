@@ -274,6 +274,8 @@ function CodeSandbox({
         fontFamily: t.typography.fontFamily.mono,
         display: 'flex',
         flexDirection: 'column',
+        flex: 1,
+        minHeight: 0,
       }}
     >
       {/* ---- Toolbar ---- */}
@@ -384,8 +386,8 @@ function CodeSandbox({
         style={{
           display: 'grid',
           gridTemplateColumns: '1fr 1fr',
-          minHeight: '320px',
-          maxHeight: '480px',
+          flex: 1,
+          minHeight: 0,
         }}
       >
         {/* Editor pane */}

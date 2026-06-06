@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useTheme } from "../context/ThemeContext";
 import GlobalNavbar from "../components/GlobalNavbar";
+import { User, Code2, Atom, Palette, Target, PartyPopper, Flame, MessageCircle, CircleDot, PlayCircle, Brain, Globe, ShieldCheck } from 'lucide-react';
 
 /*
  ╔══════════════════════════════════════════════════════════════════╗
@@ -47,12 +48,12 @@ const T_LIGHT = {
   gCard: "linear-gradient(165deg, #ffffff 0%, #f1f5f9 100%)",
 };
 
-const USER = { name: "Elif", level: 24, xp: 12450, xpNext: 15000, streak: 14, avatar: "👩‍💻" };
+const USER = { name: "Elif", level: 24, xp: 12450, xpNext: 15000, streak: 14, avatar: <User size={24} /> };
 
 const COURSES = [
-  { id: 1, title: "Python ile Sıfırdan Uzmanlığa", instructor: "Dr. Ahmet Yılmaz", progress: 68, icon: "🐍", color: "#00b894", totalLessons: 324, completed: 220, currentModule: "Nesne Yönelimli Programlama", currentLesson: "Kalıtım ve Polimorfizm", nextLesson: "Soyut Sınıflar ve Interface", timeLeft: "13s 24dk", lastAccess: "2 saat önce", weeklyGoal: 5, weeklyDone: 3 },
-  { id: 2, title: "React & Next.js Full Stack", instructor: "Elif Kaya", progress: 34, icon: "⚛️", color: "#6c5ce7", totalLessons: 412, completed: 140, currentModule: "React Hooks Derinlemesine", currentLesson: "useEffect Lifecycle", nextLesson: "Custom Hooks Yazımı", timeLeft: "36s 48dk", lastAccess: "dün", weeklyGoal: 4, weeklyDone: 1 },
-  { id: 3, title: "UI/UX Tasarım Masterclass", instructor: "Zeynep Arslan", progress: 12, icon: "🎨", color: "#f43f5e", totalLessons: 186, completed: 22, currentModule: "Renk Teorisi ve Tipografi", currentLesson: "Renk Psikolojisi", nextLesson: "Tipografi Temelleri", timeLeft: "33s 12dk", lastAccess: "3 gün önce", weeklyGoal: 3, weeklyDone: 0 },
+  { id: 1, title: "Python ile Sıfırdan Uzmanlığa", instructor: "Dr. Ahmet Yılmaz", progress: 68, icon: <Code2 size={24} color="#00b894" />, color: "#00b894", totalLessons: 324, completed: 220, currentModule: "Nesne Yönelimli Programlama", currentLesson: "Kalıtım ve Polimorfizm", nextLesson: "Soyut Sınıflar ve Interface", timeLeft: "13s 24dk", lastAccess: "2 saat önce", weeklyGoal: 5, weeklyDone: 3 },
+  { id: 2, title: "React & Next.js Full Stack", instructor: "Elif Kaya", progress: 34, icon: <Atom size={24} color="#6c5ce7" />, color: "#6c5ce7", totalLessons: 412, completed: 140, currentModule: "React Hooks Derinlemesine", currentLesson: "useEffect Lifecycle", nextLesson: "Custom Hooks Yazımı", timeLeft: "36s 48dk", lastAccess: "dün", weeklyGoal: 4, weeklyDone: 1 },
+  { id: 3, title: "UI/UX Tasarım Masterclass", instructor: "Zeynep Arslan", progress: 12, icon: <Palette size={24} color="#f43f5e" />, color: "#f43f5e", totalLessons: 186, completed: 22, currentModule: "Renk Teorisi ve Tipografi", currentLesson: "Renk Psikolojisi", nextLesson: "Tipografi Temelleri", timeLeft: "33s 12dk", lastAccess: "3 gün önce", weeklyGoal: 3, weeklyDone: 0 },
 ];
 
 const DAILY_GOALS = [
@@ -73,11 +74,11 @@ const SCHEDULE = [
 const WEEKLY_HOURS = [ { d: "Pzt", h: 2.5 }, { d: "Sal", h: 1.8 }, { d: "Çar", h: 3.2 }, { d: "Per", h: 0.5 }, { d: "Cum", h: 2.1 }, { d: "Cmt", h: 4.0 }, { d: "Paz", h: 0 } ];
 
 const SOCIAL_PULSE = [
-  { user: "Burak K.", action: "Python OOP quizinde %95 aldı", time: "5dk", emoji: "🎯" },
-  { user: "Merve T.", action: "React kursunu tamamladı!", time: "12dk", emoji: "🎉" },
-  { user: "Can Ö.", action: "28 günlük seri rekorunu kırdı", time: "20dk", emoji: "🔥" },
-  { user: "Ayşe D.", action: "UI/UX projesini paylaştı", time: "1s", emoji: "🎨" },
-  { user: "Emre K.", action: "Forumda 50. cevabını verdi", time: "2s", emoji: "💬" },
+  { user: "Burak K.", action: "Python OOP quizinde %95 aldı", time: "5dk", icon: <Target size={16} /> },
+  { user: "Merve T.", action: "React kursunu tamamladı!", time: "12dk", icon: <PartyPopper size={16} /> },
+  { user: "Can Ö.", action: "28 günlük seri rekorunu kırdı", time: "20dk", icon: <Flame size={16} /> },
+  { user: "Ayşe D.", action: "UI/UX projesini paylaştı", time: "1s", icon: <Palette size={16} /> },
+  { user: "Emre K.", action: "Forumda 50. cevabını verdi", time: "2s", icon: <MessageCircle size={16} /> },
 ];
 
 const AI_MESSAGES = [
@@ -135,7 +136,7 @@ function Glow({ T, color, size = 200, x = "50%", y = "50%", opacity = 0.06 }) {
 }
 
 function TypeBadge({ T, type }) {
-  const map = { live: { c: T.rose, l: "CANLI", i: "🔴" }, mentor: { c: T.violet, l: "MENTOR", i: "🧠" }, community: { c: T.emerald, l: "TOPLULUK", i: "🌐" } };
+  const map = { live: { c: T.rose, l: "CANLI", i: <PlayCircle size={10} /> }, mentor: { c: T.violet, l: "MENTOR", i: <Brain size={10} /> }, community: { c: T.emerald, l: "TOPLULUK", i: <Globe size={10} /> } };
   const m = map[type] || map.community;
   return <span style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "3px 10px", borderRadius: 8, fontSize: 10, fontWeight: 700, letterSpacing: 0.6, background: `${m.c}15`, color: m.c, border: `1px solid ${m.c}25` }}>{m.i} {m.l}</span>;
 }
@@ -194,7 +195,7 @@ function AIMentor({ T, expanded, onToggle }) {
       <div onClick={onToggle} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px", cursor: "pointer", position: "relative", zIndex: 2 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <div style={{ width: 44, height: 44, borderRadius: 14, background: T.gViolet, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 0 20px ${T.violetGlow}` }}>
-            <span style={{ fontSize: 20 }}>🧠</span>
+            <span style={{ fontSize: 20, display: 'flex' }}><Brain size={24} color="#fff" /></span>
           </div>
           <div>
             <div style={{ fontFamily: T.display, fontWeight: 700, fontSize: 15, color: T.t1, display: "flex", alignItems: "center", gap: 8 }}>
@@ -309,7 +310,7 @@ export default function DashboardView() {
               </div>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 16, padding: "12px 20px", borderRadius: T.r2, background: T.bg2, border: `1px solid ${T.b1}` }}>
-              <div style={{ width: 44, height: 44, borderRadius: 12, background: T.bg3, border: `1px solid ${T.b1}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>{USER.avatar}</div>
+              <div style={{ width: 48, height: 48, borderRadius: 16, background: T.bg1, border: `1px solid ${T.b1}`, display: "flex", alignItems: "center", justifyContent: "center", color: T.t1 }}><User size={24} /></div>
               <div>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
                   <span style={{ fontSize: 11, color: T.t3, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1 }}>Seviye {USER.level}</span>

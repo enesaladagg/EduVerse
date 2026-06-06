@@ -11,26 +11,28 @@ import {
   Moon,
   Sun,
   Briefcase,
-  Menu
+  Menu,
+  Award
 } from 'lucide-react';
 
 const NAV_ITEMS = [
   { id: 'home', icon: Home, label: 'Ana Sayfa' },
-  { id: 'profile', icon: GraduationCap, label: 'Profilim', auth: true, role: 'student' },
-  { id: 'instructor', icon: Briefcase, label: 'Eğitmen Paneli', auth: true, role: 'teacher' },
-  { id: 'courses', icon: BookOpen, label: 'Tüm Kurslar' },
+  { id: 'courses', icon: BookOpen, label: 'Kurslar' },
   { id: 'live', icon: MonitorPlay, label: 'Canlı Dersler' },
   { id: 'calendar', icon: Calendar, label: 'Takvim & Plan', auth: true },
   { id: 'messages', icon: MessageSquare, label: 'Mesajlar', auth: true },
+  { id: 'certificates', icon: Award, label: 'Sertifikalar', auth: true },
+  { id: 'profile', icon: GraduationCap, label: 'Profilim', auth: true, role: 'student' },
+  { id: 'instructor', icon: Briefcase, label: 'Eğitmen Paneli', auth: true, role: 'teacher' },
 ];
 
-const HORIZONTAL_LINKS = [
-  { id: 'h-courses', label: 'Kurslar' },
+const EXTRA_LINKS = [
   { id: 'h-paths', label: 'Yol Haritaları' },
-  { id: 'h-certs', label: 'Sertifikalar' },
   { id: 'h-community', label: 'Topluluk' },
   { id: 'h-corporate', label: 'Kurumsal' },
 ];
+
+
 
 export default function GlobalNavbar({ activePage, onNavigate }) {
   const { isDark, toggleTheme } = useTheme();
@@ -88,11 +90,13 @@ export default function GlobalNavbar({ activePage, onNavigate }) {
         `}
       </style>
       <div style={{
-        maxWidth: 1400,
+        maxWidth: 1800,
+        width: '100%',
         margin: '0 auto',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between',
+        justifyContent: 'flex-start',
+        gap: 32,
         height: 80
       }}>
         
@@ -117,7 +121,12 @@ export default function GlobalNavbar({ activePage, onNavigate }) {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 32, flex: 1 }}>
           
           {/* Menu Dropdown */}
-          <div ref={menuRef} style={{ position: 'relative' }}>
+          <div 
+            ref={menuRef} 
+            style={{ position: 'relative' }}
+            onMouseEnter={() => setMenuOpen(true)}
+            onMouseLeave={() => setMenuOpen(false)}
+          >
             <button
               onClick={() => setMenuOpen(!menuOpen)}
               style={{
@@ -140,16 +149,16 @@ export default function GlobalNavbar({ activePage, onNavigate }) {
             </button>
 
             {menuOpen && (
-              <div style={{
-                boxSizing: 'border-box',
-                position: 'absolute', top: '100%', left: 0, marginTop: 12,
-                width: 250, background: isDark ? '#0f172a' : '#f8fafc',
-                borderRadius: 16, padding: 8,
-                boxShadow: isDark ? '0 10px 40px rgba(0,0,0,0.5)' : '0 10px 40px rgba(0,0,0,0.08)',
-                border: `1px solid ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'}`,
-                display: 'flex', flexDirection: 'column', gap: 4,
-                animation: 'slideDownFade 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
-              }}>
+              <div style={{ position: 'absolute', top: '100%', left: 0, paddingTop: 12, zIndex: 1000 }}>
+                <div style={{
+                  boxSizing: 'border-box',
+                  width: 250, background: isDark ? '#0f172a' : '#f8fafc',
+                  borderRadius: 16, padding: 8,
+                  boxShadow: isDark ? '0 10px 40px rgba(0,0,0,0.5)' : '0 10px 40px rgba(0,0,0,0.08)',
+                  border: `1px solid ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'}`,
+                  display: 'flex', flexDirection: 'column', gap: 4,
+                  animation: 'slideDownFade 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
+                }}>
                 {visibleNavItems.map(({ id, icon: Icon, label }) => {
                   const isActive = activePage === id;
                   return (
@@ -195,50 +204,142 @@ export default function GlobalNavbar({ activePage, onNavigate }) {
                     </button>
                   );
                 })}
+
+                <div style={{ height: 1, background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)', margin: '8px 0' }} />
+
+                {EXTRA_LINKS.map(link => (
+                  <button
+                    key={link.id}
+                    onClick={() => {
+                      onNavigate(link.id);
+                      setMenuOpen(false);
+                    }}
+                    style={{
+                      boxSizing: 'border-box',
+                      display: 'flex', alignItems: 'center', gap: 12,
+                      width: '100%', padding: '10px 16px',
+                      background: 'transparent', border: 'none', cursor: 'pointer',
+                      color: isDark ? '#cbd5e1' : '#64748b',
+                      fontSize: 14, fontWeight: 500, textAlign: 'left',
+                      borderRadius: 8, transition: 'all 0.2s'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
+                      e.currentTarget.style.color = '#00d4aa';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'transparent';
+                      e.currentTarget.style.color = isDark ? '#cbd5e1' : '#64748b';
+                    }}
+                  >
+                    {link.label}
+                  </button>
+                ))}
+                </div>
               </div>
             )}
           </div>
 
           {/* Horizontal Links */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
-            {HORIZONTAL_LINKS.map(link => (
-              <button
-                key={link.id}
-                onClick={() => onNavigate('courses')}
-                style={{
-                  background: 'transparent', border: 'none', cursor: 'pointer',
-                  color: isDark ? '#cbd5e1' : '#64748b', fontSize: 14, fontWeight: 500,
-                  transition: 'color 0.2s',
-                  position: 'relative',
-                  padding: '6px 0'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = '#00d4aa';
-                  const bar = e.currentTarget.querySelector('div');
-                  if (bar) {
-                    bar.style.width = '100%';
-                    bar.style.opacity = '1';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color = isDark ? '#cbd5e1' : '#64748b';
-                  const bar = e.currentTarget.querySelector('div');
-                  if (bar) {
-                    bar.style.width = '0px';
-                    bar.style.opacity = '0';
-                  }
-                }}
-              >
-                {link.label}
-                <div 
+          <div className="desktop-nav-links" style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+            {visibleNavItems.map(({ id, icon: Icon, label }) => {
+              const isActive = activePage === id;
+              return (
+                <button
+                  key={id}
+                  onClick={() => onNavigate(id)}
                   style={{
-                    position: 'absolute', bottom: 0, left: '50%', transform: 'translateX(-50%)',
-                    height: 2, width: 0, background: '#00d4aa', opacity: 0,
-                    transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', borderRadius: 2
+                    background: 'transparent',
+                    border: 'none', cursor: 'pointer',
+                    color: isActive ? '#00d4aa' : (isDark ? '#cbd5e1' : '#64748b'),
+                    fontSize: 14, fontWeight: isActive ? 600 : 500,
+                    transition: 'all 0.2s',
+                    padding: '8px 4px',
+                    whiteSpace: 'nowrap',
+                    position: 'relative'
                   }}
-                />
-              </button>
-            ))}
+                  onMouseEnter={(e) => {
+                    if (!isActive) {
+                      e.currentTarget.style.color = '#00d4aa';
+                      const underline = e.currentTarget.querySelector('.nav-underline');
+                      if (underline) underline.style.width = '100%';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isActive) {
+                      e.currentTarget.style.color = isDark ? '#cbd5e1' : '#64748b';
+                      const underline = e.currentTarget.querySelector('.nav-underline');
+                      if (underline) underline.style.width = '0%';
+                    }
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <Icon size={18} strokeWidth={isActive ? 2.5 : 2} />
+                    {label}
+                  </div>
+                  <div 
+                    className="nav-underline"
+                    style={{
+                      position: 'absolute', bottom: 4, left: '50%', transform: 'translateX(-50%)', height: 2,
+                      background: '#00d4aa', transition: 'width 0.3s ease',
+                      width: isActive ? '100%' : '0%'
+                    }}
+                  />
+                </button>
+              );
+            })}
+
+            {/* Unauthenticated extra links next to main nav */}
+            {!isAuthenticated && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                {[
+                  { id: 'h-paths', label: 'Yol Haritaları' },
+                  { id: 'certificates', label: 'Sertifikalar' },
+                  { id: 'h-corporate', label: 'Kurumsal' }
+                ].map((link, idx) => {
+                  const isActive = activePage === link.id;
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => onNavigate(link.id)}
+                      style={{
+                        background: 'transparent', border: 'none', cursor: 'pointer',
+                        color: isActive ? '#00d4aa' : (isDark ? '#cbd5e1' : '#64748b'), 
+                        fontSize: 14, fontWeight: isActive ? 600 : 500,
+                        padding: '8px 4px', transition: 'all 0.2s',
+                        whiteSpace: 'nowrap', position: 'relative'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!isActive) {
+                          e.currentTarget.style.color = '#00d4aa';
+                          const underline = e.currentTarget.querySelector('.nav-underline-extra');
+                          if (underline) underline.style.width = '100%';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!isActive) {
+                          e.currentTarget.style.color = isDark ? '#cbd5e1' : '#64748b';
+                          const underline = e.currentTarget.querySelector('.nav-underline-extra');
+                          if (underline) underline.style.width = '0%';
+                        }
+                      }}
+                    >
+                      {link.label}
+                      <div 
+                        className="nav-underline-extra"
+                        style={{
+                          position: 'absolute', bottom: 4, left: '50%', transform: 'translateX(-50%)', height: 2,
+                          background: '#00d4aa', transition: 'width 0.3s ease',
+                          width: isActive ? '100%' : '0%'
+                        }}
+                      />
+                    </button>
+                  );
+                })}
+                {/* Separator before right actions if needed visually, or just remove since we moved it to center */}
+                <div style={{ width: 1, height: 24, background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)', marginLeft: 16 }} />
+              </div>
+            )}
           </div>
 
         </div>
@@ -263,6 +364,7 @@ export default function GlobalNavbar({ activePage, onNavigate }) {
 
           {!isAuthenticated ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+
               <button 
                 onClick={() => onNavigate('login')}
                 style={{

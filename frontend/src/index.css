@@ -177,3 +177,30 @@ iframe[sandbox] {
   display: block;
   width: 100%;
 }
+
+/* Course Detail View Responsiveness */
+.course-detail-layout {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 40px;
+  align-items: start;
+}
+@media (max-width: 1024px) {
+  .course-detail-layout {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 32px;
+  }
+}
+
+.what-you-learn-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+@media (max-width: 640px) {
+  .what-you-learn-grid {
+    grid-template-columns: 1fr;
+  }
+}
+

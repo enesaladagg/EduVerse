@@ -6,7 +6,7 @@ import {
   Terminal, Blocks, BrainCircuit, Layout, Server,
   Rocket, Database, Settings,
   Users, BookOpen, GraduationCap, Star,
-  User, Briefcase, Play, Video, Award, Globe
+  User, Briefcase, Play, Video, Award, Globe, Clock
 } from 'lucide-react';
 import '../hero.css';
 
@@ -168,8 +168,7 @@ function AnimatedCounter({ target, suffix = "" }) {
 }
 
 export default function HomeView({ onNavigate }) {
-  const { theme, toggleTheme } = useTheme();
-  const isDark = theme === 'dark';
+  const { isDark, toggleTheme } = useTheme();
   const COLORS = isDark ? DARK_COLORS : LIGHT_COLORS;
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -313,21 +312,17 @@ export default function HomeView({ onNavigate }) {
         .cat-card { cursor: pointer; padding: 20px 16px; border-radius: 16px; background: ${COLORS.surface}; border: 1px solid transparent; transition: all 0.4s cubic-bezier(0.175,0.885,0.32,1.275); text-align: center; min-width: 130px; }
         .cat-card:hover { transform: translateY(-6px); border-color: var(--cat-color); box-shadow: 0 12px 40px rgba(0,0,0,0.3); }
         
-        .cat-deck-container { width: 100%; overflow-x: auto; padding: 20px 0 40px; }
-        .cat-deck { display: flex; align-items: center; min-height: 180px; width: max-content; margin: 0 auto; padding: 0 20px; }
-        .cat-deck-card { width: 150px; height: 160px; flex-shrink: 0; background: ${COLORS.surface}; border: 2px solid ${COLORS.border}; border-radius: 20px; padding: 20px 12px; text-align: center; transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 4px 20px rgba(0,0,0,0.05); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-left: -150px; }
-        .cat-deck-card:first-child { margin-left: 0; }
-        .cat-deck-card:nth-child(1) { transform: rotate(-4deg) translateY(2px); }
-        .cat-deck-card:nth-child(2) { transform: rotate(3deg) translateY(-2px); }
-        .cat-deck-card:nth-child(3) { transform: rotate(-2deg) translateY(4px); }
-        .cat-deck-card:nth-child(4) { transform: rotate(5deg) translateY(-1px); }
-        .cat-deck-card:nth-child(5) { transform: rotate(-3deg) translateY(3px); }
-        .cat-deck-card:nth-child(6) { transform: rotate(2deg) translateY(-4px); }
-        .cat-deck-card:nth-child(7) { transform: rotate(-5deg) translateY(1px); }
-        .cat-deck-card:nth-child(8) { transform: rotate(0deg) translateY(0); box-shadow: 0 10px 30px rgba(0,212,170,0.15); }
-        .cat-deck:hover .cat-deck-card { margin-left: 16px; transform: rotate(0deg) translateY(0); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
-        .cat-deck:hover .cat-deck-card:first-child { margin-left: 0; }
-        .cat-deck-card:hover { border-color: var(--cat-color) !important; transform: translateY(-16px) scale(1.08) !important; box-shadow: 0 20px 40px rgba(0,0,0,0.15) !important; z-index: 20; filter: brightness(1.05); }
+        .cat-deck-container { width: 100%; padding: 20px 0 40px; display: flex; justify-content: center; }
+        .cat-deck { display: flex; flex-wrap: nowrap; justify-content: flex-start; gap: 12px; max-width: 1400px; margin: 0 auto; overflow-x: auto; padding-bottom: 20px; width: fit-content; }
+        .cat-deck::-webkit-scrollbar { height: 8px; }
+        .cat-deck::-webkit-scrollbar-track { background: ${COLORS.surface}; border-radius: 4px; }
+        .cat-deck::-webkit-scrollbar-thumb { background: ${COLORS.border}; border-radius: 4px; }
+        .cat-deck-card { box-sizing: border-box; width: 140px; height: 140px; flex-shrink: 0; background: ${COLORS.surface}; border: 2px solid ${COLORS.border}; border-radius: 20px; padding: 16px 8px; text-align: center; transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1); box-shadow: 0 4px 20px rgba(0,0,0,0.05); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+        .cat-deck-card:hover { width: 220px; border-color: var(--cat-color) !important; transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.12) !important; z-index: 20; }
+        .cat-deck-card > .cat-content { transition: transform 0.4s ease; display: flex; flex-direction: column; align-items: center; width: 100%; }
+        .cat-deck-card:hover > .cat-content { transform: translateY(-12px); }
+        .cat-explore { position: absolute; bottom: -30px; opacity: 0; font-weight: 700; font-size: 14px; color: var(--cat-color); transition: all 0.4s ease; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+        .cat-deck-card:hover .cat-explore { bottom: 20px; opacity: 1; transition-delay: 0.1s; }
 
         .course-card { background: ${COLORS.surface}; border-radius: 16px; border: 1px solid ${COLORS.border}; overflow: hidden; transition: all 0.4s cubic-bezier(0.175,0.885,0.32,1.275); cursor: pointer; }
         .course-card:hover { transform: translateY(-8px); box-shadow: 0 20px 60px rgba(0,0,0,0.4); border-color: ${COLORS.accent}; }
@@ -499,7 +494,7 @@ export default function HomeView({ onNavigate }) {
             <div className="search-bar" style={{ background: isDark ? '#1a2035' : '#fff', boxShadow: `0 4px 28px rgba(0,0,0,${isDark ? '0.3' : '0.06'}), 0 0 0 1px rgba(0,212,170,0.1)` }}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
               <input type="text" placeholder="Ne öğrenmek istiyorsun? (ör. Python, React...)" style={{ color: isDark ? '#fff' : '#1A1A2E' }} />
-              <button className="btn" onClick={() => onNavigate && onNavigate('courses')}>Keşfet</button>
+              <button className="btn" onClick={() => onNavigate && onNavigate('courses')} style={{ background: '#00d4aa', color: '#fff', borderRadius: 10, padding: '10px 24px', fontWeight: 600, border: 'none', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 4px 12px rgba(0,212,170,0.25)' }}>Keşfet</button>
             </div>
             <div className="hero-tags">
               <span className="tag" style={{ background: isDark ? 'rgba(30,41,59,0.7)' : 'rgba(255,255,255,0.7)', color: isDark ? '#cbd5e1' : '#5A6670' }}>İngilizce</span>
@@ -655,16 +650,22 @@ export default function HomeView({ onNavigate }) {
         </div>
         <div className="cat-deck-container">
           <div className="cat-deck">
-            {CATEGORIES.map((cat) => (
+            {CATEGORIES.map((cat, index) => (
               <div
-                key={cat.name}
+                key={index}
                 className="cat-deck-card"
-                style={{ "--cat-color": cat.color }}
+                style={{ "--cat-color": cat.color, width: '140px' }}
                 onClick={() => setActiveCategory(activeCategory === cat.name ? null : cat.name)}
               >
-                <div style={{ marginBottom: 10, color: cat.color }}><cat.icon size={36} strokeWidth={1.5} /></div>
-                <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 4 }}>{cat.name}</div>
-                <div style={{ fontSize: 12, color: COLORS.textMuted }}>{cat.count.toLocaleString("tr-TR")} kurs</div>
+                <div className="cat-content">
+                  <cat.icon size={44} color={cat.color} strokeWidth={1.5} style={{ marginBottom: '12px' }} />
+                  <h3 style={{ fontSize: cat.name.length > 12 ? '14px' : '16px', fontWeight: '800', marginBottom: '6px', lineHeight: 1.2, wordBreak: 'break-word', padding: '0 4px' }}>{cat.name}</h3>
+                  <p style={{ fontSize: '13px', color: COLORS.textMuted, fontWeight: '600' }}>{cat.count.toLocaleString('tr-TR')} kurs</p>
+                </div>
+                <div className="cat-explore">
+                  Eğitimleri Keşfet
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+                </div>
               </div>
             ))}
           </div>
@@ -697,7 +698,7 @@ export default function HomeView({ onNavigate }) {
           display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: 24,
         }}>
           {filteredCourses.map((course, i) => (
-            <div key={course.id} className="course-card" style={{ animationDelay: `${i * 0.1}s` }} onClick={() => onNavigate && onNavigate('courses')}>
+            <div key={course.id} className="course-card" style={{ animationDelay: `${i * 0.1}s` }} onClick={() => onNavigate && onNavigate('course-detail')}>
               {/* Course image area */}
               <div style={{
                 height: 180, background: `linear-gradient(135deg, ${COLORS.secondary}, ${COLORS.surfaceLight})`,
@@ -716,8 +717,8 @@ export default function HomeView({ onNavigate }) {
                   position: "absolute", top: 12, right: 12,
                   background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)",
                   color: "white", padding: "4px 10px", borderRadius: 8,
-                  fontSize: 11, fontWeight: 500
-                }}>⏱ {course.hours} saat</span>
+                  fontSize: 11, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 4
+                }}><Clock size={11} /> {course.hours} saat</span>
               </div>
               {/* Course info */}
               <div style={{ padding: "20px 20px 24px" }}>
@@ -763,8 +764,7 @@ export default function HomeView({ onNavigate }) {
               <div style={{ marginBottom: 12, color: COLORS.accent }}><stat.icon size={40} strokeWidth={1.5} /></div>
               <div style={{
                 fontFamily: "'Outfit', sans-serif", fontSize: 42, fontWeight: 800,
-                background: `linear-gradient(135deg, ${COLORS.accent}, ${COLORS.accentAlt})`,
-                WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+                color: COLORS.accent,
                 marginBottom: 8,
               }}>
                 <AnimatedCounter target={stat.value} />
@@ -813,8 +813,8 @@ export default function HomeView({ onNavigate }) {
                 display: "flex", gap: 20, fontSize: 13, color: COLORS.textMuted,
                 borderTop: `1px solid ${COLORS.border}`, paddingTop: 16
               }}>
-                <span>📚 {path.courses} Kurs</span>
-                <span>⏱ {path.hours} Saat</span>
+                <span style={{display: 'flex', alignItems: 'center', gap: 6}}><BookOpen size={14} /> {path.courses} Kurs</span>
+                <span style={{display: 'flex', alignItems: 'center', gap: 6}}><Clock size={14} /> {path.hours} Saat</span>
               </div>
             </div>
           ))}
@@ -895,21 +895,30 @@ export default function HomeView({ onNavigate }) {
           position: "absolute", top: -60, right: -60, width: 200, height: 200,
           borderRadius: "50%", background: `radial-gradient(circle, ${COLORS.accent}10, transparent)`,
         }} />
-        <h2 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 40, fontWeight: 800, marginBottom: 16, position: "relative" }}>
+        <h2 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 40, fontWeight: 800, marginBottom: 16, position: "relative", color: COLORS.text }}>
           Öğrenmeye Başlamak İçin
-          <span style={{
-            background: `linear-gradient(135deg, ${COLORS.accent}, ${COLORS.accentAlt})`,
-            WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-          }}> Geç Değil!</span>
+          <span style={{ color: COLORS.accent }}> Geç Değil!</span>
         </h2>
         <p style={{ color: COLORS.textMuted, fontSize: 17, maxWidth: 500, margin: "0 auto 32px", lineHeight: 1.7, position: "relative" }}>
           Ücretsiz hesap oluştur, ilk kursunu seç ve geleceğine yatırım yapmaya hemen başla.
         </p>
         <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap", position: "relative" }}>
-          <button className="btn-primary" style={{ padding: "16px 40px", fontSize: 16 }} onClick={() => onNavigate && onNavigate('register')}>
+          <button style={{ 
+            background: `linear-gradient(135deg, ${COLORS.accent}, ${COLORS.accentAlt})`, 
+            color: 'white', border: 'none', padding: '16px 40px', borderRadius: 12, 
+            fontWeight: 700, fontSize: 16, cursor: 'pointer', transition: 'all 0.3s',
+            boxShadow: `0 8px 24px ${COLORS.accent}40`
+          }} onClick={() => onNavigate && onNavigate('register')}>
             Ücretsiz Hesap Oluştur
           </button>
-          <button className="btn-secondary" style={{ padding: "16px 40px", fontSize: 16 }} onClick={() => onNavigate && onNavigate('courses')}>
+          <button style={{ 
+            background: 'transparent', color: COLORS.text, border: `2px solid ${COLORS.border}`, 
+            padding: '16px 40px', borderRadius: 12, fontWeight: 600, fontSize: 16, cursor: 'pointer', 
+            transition: 'all 0.3s'
+          }} 
+          onMouseEnter={(e) => { e.currentTarget.style.borderColor = COLORS.accent; e.currentTarget.style.color = COLORS.accent; }}
+          onMouseLeave={(e) => { e.currentTarget.style.borderColor = COLORS.border; e.currentTarget.style.color = COLORS.text; }}
+          onClick={() => onNavigate && onNavigate('courses')}>
             Kursları İncele
           </button>
         </div>

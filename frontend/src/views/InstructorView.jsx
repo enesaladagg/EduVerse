@@ -1,5 +1,5 @@
 import React from 'react';
-import { Users, Wallet, Star, BookOpen, TrendingUp, Zap } from 'lucide-react';
+import { Users, Wallet, Star, BookOpen, TrendingUp, Zap, BarChart2, MessageCircle, Mail } from 'lucide-react';
 import { C, font, mono, INSTRUCTOR_DATA, Card, SectionTitle, MiniChart, Badge, Stars } from '../components/EduVerseShared';
 
 export default function InstructorView() {
@@ -44,7 +44,7 @@ export default function InstructorView() {
             {/* Revenue chart */}
             <Card hover={false} style={{ marginBottom: 28, padding: 28 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
-                <h3 style={{ fontFamily: font, fontSize: 18, fontWeight: 700 }}>📊 Gelir Grafiği</h3>
+                <h3 style={{ fontFamily: font, fontSize: 18, fontWeight: 700, display: 'flex', alignItems: 'center' }}><BarChart2 size={20} style={{marginRight: 8}} color={C.accent} /> Gelir Grafiği</h3>
                 <Badge color={C.green}>+18% bu ay</Badge>
               </div>
               <MiniChart data={d.revenueChart} color={C.accent} height={120} />
@@ -76,7 +76,7 @@ export default function InstructorView() {
           <div>
             {/* Recent reviews */}
             <Card hover={false} style={{ marginBottom: 20, padding: 24 }}>
-              <h3 style={{ fontFamily: font, fontSize: 16, fontWeight: 700, marginBottom: 16 }}>💬 Son Yorumlar</h3>
+              <h3 style={{ fontFamily: font, fontSize: 16, fontWeight: 700, marginBottom: 16, display: 'flex', alignItems: 'center' }}><MessageCircle size={18} style={{marginRight: 8}} color={C.accent} /> Son Yorumlar</h3>
               <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                 {d.recentReviews.map((rev, i) => (
                   <div key={i} style={{ padding: 14, borderRadius: 14, background: C.surface }}>
@@ -98,7 +98,7 @@ export default function InstructorView() {
             {/* Messages */}
             <Card hover={false} style={{ padding: 24 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-                <h3 style={{ fontFamily: font, fontSize: 16, fontWeight: 700 }}>✉️ Mesajlar</h3>
+                <h3 style={{ fontFamily: font, fontSize: 16, fontWeight: 700, display: 'flex', alignItems: 'center' }}><Mail size={18} style={{marginRight: 8}} color={C.accent} /> Mesajlar</h3>
                 <Badge color={C.warm}>{d.messages.filter(m => m.unread).length} yeni</Badge>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>

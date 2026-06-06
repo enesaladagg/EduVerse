@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { C, font, mono, COURSE_DETAIL, Stars, Badge, SectionTitle } from '../components/EduVerseShared';
-import { Code2, Play, Clock, FileText, Smartphone, Infinity as InfinityIcon, Award, MessageCircle, Download } from 'lucide-react';
+import { Code2, Play, Clock, FileText, Smartphone, Infinity as InfinityIcon, Award, MessageCircle, Download, Users, Star, Library } from 'lucide-react';
 
 export default function CourseDetailView({ onNavigate }) {
   const d = COURSE_DETAIL;
@@ -19,7 +19,7 @@ export default function CourseDetailView({ onNavigate }) {
           <span style={{ color: C.accent }}>Python</span>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "380px 1fr", gap: 40, alignItems: "start" }}>
+        <div className="course-detail-layout">
           {/* LEFT COLUMN — STICKY PURCHASE CARD */}
           <div style={{ position: "sticky", top: 90 }}>
             {/* Video preview */}
@@ -82,7 +82,7 @@ export default function CourseDetailView({ onNavigate }) {
               <div style={{ display: "flex", flexWrap: "wrap", gap: 16, alignItems: "center", fontSize: 14, color: C.textSec }}>
                 <Stars r={d.rating} />
                 <span>({d.reviewCount.toLocaleString("tr-TR")} değerlendirme)</span>
-                <span>👨‍🎓 {d.students.toLocaleString("tr-TR")} öğrenci</span>
+                <span><Users size={14} style={{verticalAlign: 'middle', marginRight: 4}} />{d.students.toLocaleString("tr-TR")} öğrenci</span>
               </div>
             </div>
 
@@ -92,10 +92,10 @@ export default function CourseDetailView({ onNavigate }) {
               <div>
                 <div style={{ fontWeight: 600, fontSize: 15 }}>{d.instructor.name}</div>
                 <div style={{ fontSize: 13, color: C.textSec }}>{d.instructor.title}</div>
-                <div style={{ display: "flex", gap: 16, fontSize: 12, color: C.textDim, marginTop: 4 }}>
-                  <span>⭐ {d.instructor.rating}</span>
-                  <span>👨‍🎓 {d.instructor.students.toLocaleString("tr-TR")}</span>
-                  <span>📚 {d.instructor.courses} kurs</span>
+                <div style={{ display: "flex", gap: 16, fontSize: 12, color: C.textDim, marginTop: 4, alignItems: 'center' }}>
+                  <span style={{display: 'flex', alignItems: 'center', gap: 4}}><Star size={12} color={C.gold} fill={C.gold} /> {d.instructor.rating}</span>
+                  <span style={{display: 'flex', alignItems: 'center', gap: 4}}><Users size={12} /> {d.instructor.students.toLocaleString("tr-TR")}</span>
+                  <span style={{display: 'flex', alignItems: 'center', gap: 4}}><Library size={12} /> {d.instructor.courses} kurs</span>
                 </div>
               </div>
             </div>
@@ -103,7 +103,7 @@ export default function CourseDetailView({ onNavigate }) {
             {/* What you'll learn */}
             <div style={{ marginBottom: 40 }}>
               <SectionTitle>Neler Öğreneceksin?</SectionTitle>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, padding: 28, borderRadius: 18, border: `1px solid ${C.borderActive}`, background: C.accentDim }}>
+              <div className="what-you-learn-grid" style={{ padding: 28, borderRadius: 18, border: `1px solid ${C.borderActive}`, background: C.accentDim }}>
                 {d.whatYouLearn.map((item, i) => (
                   <div key={i} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
                     <span style={{ color: C.accent, fontSize: 16, marginTop: 2, flexShrink: 0 }}>✓</span>

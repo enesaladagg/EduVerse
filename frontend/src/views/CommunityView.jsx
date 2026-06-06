@@ -1,12 +1,212 @@
-import React from "react";
-import { useTheme } from "../context/ThemeContext";
+import React, { useState } from 'react';
+import { useTheme } from '../context/ThemeContext';
+import GlobalNavbar from '../components/GlobalNavbar';
+import { Badge, Card, Tag } from '../components/PageBlocks';
 
-export default function CommunityView() {
-  const { palette: p } = useTheme();
+const FORUM_TOPICS = [
+  { title: "React 19'daki yeni Server Components nasıl çalışıyor?", author: "Burak K.", avatar: "👨‍💻", replies: 24, views: 1840, likes: 67, time: "2 saat önce", tags: ["React", "Frontend"], hot: true },
+  { title: "Python ile Web Scraping: BeautifulSoup vs Scrapy karşılaştırması", author: "Merve T.", avatar: "👩‍💻", replies: 18, views: 1230, likes: 45, time: "5 saat önce", tags: ["Python", "Veri"], hot: false },
+  { title: "Junior Developer olarak ilk iş görüşmesinde neler sorulur?", author: "Can Ö.", avatar: "👨‍🎓", replies: 42, views: 3450, likes: 128, time: "1 gün önce", tags: ["Kariyer", "İpucu"], hot: true },
+  { title: "MongoDB vs PostgreSQL: Hangi projeye hangisi uygun?", author: "Selin A.", avatar: "👩‍🔬", replies: 31, views: 2100, likes: 76, time: "1 gün önce", tags: ["Veritabanı", "Backend"], hot: false },
+  { title: "Docker öğrenmeye nereden başlamalıyım?", author: "Emre K.", avatar: "🧑‍💼", replies: 15, views: 890, likes: 34, time: "2 gün önce", tags: ["DevOps", "Docker"], hot: false },
+  { title: "Freelance yazılımcı olarak nasıl müşteri bulunur?", author: "Ayşe D.", avatar: "👩‍🎨", replies: 56, views: 4200, likes: 189, time: "3 gün önce", tags: ["Kariyer", "Freelance"], hot: true },
+];
+
+const LEADERBOARD = [
+  { rank: 1, name: "Burak Korkmaz", xp: 28450, streak: 42, level: 38, avatar: "👨‍💻", badge: "🥇" },
+  { rank: 2, name: "Merve Toprak", xp: 26800, streak: 35, level: 36, avatar: "👩‍💻", badge: "🥈" },
+  { rank: 3, name: "Can Özdemir", xp: 24100, streak: 28, level: 34, avatar: "👨‍🎓", badge: "🥉" },
+  { rank: 4, name: "Selin Aydın", xp: 22650, streak: 21, level: 32, avatar: "👩‍🔬", badge: "" },
+  { rank: 5, name: "Emre Kılıç", xp: 21200, streak: 18, level: 31, avatar: "🧑‍💼", badge: "" },
+  { rank: 6, name: "Elif Yılmaz", xp: 12450, streak: 14, level: 24, avatar: "👩‍💻", badge: "← Sen", isMe: true },
+];
+
+const STUDY_GROUPS = [
+  { name: "Python Çalışma Grubu", members: 156, active: 12, icon: "🐍", color: "#10b981", nextSession: "Bugün 20:00" },
+  { name: "React Projeler", members: 98, active: 8, icon: "⚛️", color: "#6366f1", nextSession: "Yarın 19:00" },
+  { name: "Algoritma Kulübü", members: 234, active: 18, icon: "🧩", color: "#f59e0b", nextSession: "Çarşamba 21:00" },
+  { name: "Kariyer Mentorluk", members: 312, active: 24, icon: "🎯", color: "#f43f5e", nextSession: "Cuma 18:00" },
+];
+
+const EVENTS = [
+  { title: "Python ile Otomasyon Workshop", date: "12 Haziran", time: "20:00", type: "workshop", speaker: "Dr. Ahmet Yılmaz", spots: 45, color: "#10b981" },
+  { title: "CV & Portfolio İnceleme", date: "15 Haziran", time: "19:00", type: "webinar", speaker: "HR Panel", spots: 120, color: "#6366f1" },
+  { title: "Hackathon: AI Çözümleri", date: "20-22 Haziran", time: "Tüm gün", type: "hackathon", speaker: "Topluluk", spots: 200, color: "#f59e0b" },
+];
+
+export default function CommunityView({ onNavigate }) {
+  const { isDark, palette } = useTheme();
+  const [forumTab, setForumTab] = useState("hot");
+
+  const C = {
+    navBg: isDark ? "#0f172a" : "#ffffff",
+    pageBg: isDark ? "#0a0f1d" : "#f1f5f9",
+    white: isDark ? "#1e293b" : "#ffffff",
+    primary: palette.accent,
+    primaryDim: isDark ? "rgba(0,212,170,0.15)" : "rgba(0,212,170,0.08)",
+    primaryBorder: isDark ? "rgba(0,212,170,0.3)" : "rgba(0,212,170,0.2)",
+    heading: isDark ? "#f8fafc" : "#0f172a",
+    body: isDark ? "#cbd5e1" : "#334155",
+    muted: isDark ? "#94a3b8" : "#64748b",
+    faint: isDark ? "#64748b" : "#94a3b8",
+    gold: "#f59e0b",
+    rose: "#f43f5e",
+    border: isDark ? "rgba(255,255,255,0.1)" : "#e2e8f0",
+    shadow: isDark ? "0 4px 20px rgba(0,0,0,0.2)" : "0 1px 3px rgba(0,0,0,0.06)",
+    shadowLg: isDark ? "0 10px 30px rgba(0,0,0,0.4)" : "0 10px 25px -3px rgba(0,0,0,0.08)",
+    font: "'Outfit', sans-serif",
+    mono: "'JetBrains Mono', monospace",
+  };
+
   return (
-    <div style={{ padding: 40, color: p.text, background: p.shell, minHeight: "100vh" }}>
-      <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 32, marginBottom: 16 }}>Topluluk ve Forum</h1>
-      <p style={{ color: p.textMuted }}>10.000+ üyeli aktif toplulukta sektör profesyonelleriyle bağlantı kurabilirsin.</p>
-    </div>
+    <>
+      <GlobalNavbar activePage="community" onNavigate={onNavigate} />
+      <div style={{ minHeight: 'calc(100vh - 80px)', background: C.pageBg, padding: '40px 5%', color: C.body, fontFamily: C.font }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+          
+          <div style={{
+            borderRadius: 24, padding: "40px 36px", marginBottom: 32, position: "relative", overflow: "hidden",
+            background: `linear-gradient(135deg, ${isDark ? '#0f172a' : '#1e293b'}, ${isDark ? '#020617' : '#0f172a'})`,
+            boxShadow: C.shadowLg
+          }}>
+            <div style={{ position: "absolute", top: -40, left: "40%", width: 250, height: 250, borderRadius: "50%", background: C.gold, filter: "blur(140px)", opacity: .08 }} />
+            <div style={{ position: "relative", zIndex: 2, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 20 }}>
+              <div>
+                <h1 style={{ fontFamily: C.font, fontSize: 36, fontWeight: 900, color: "#f8fafc", marginBottom: 12 }}>🌐 Topluluk</h1>
+                <p style={{ fontSize: 16, color: "#94a3b8", maxWidth: 480, lineHeight: 1.6 }}>Soru sor, paylaş, birlikte öğren. 50.000+ aktif üyeyle Türkiye'nin en büyük teknoloji öğrenme topluluğu.</p>
+              </div>
+              <div style={{ display: "flex", gap: 24, textAlign: "center" }}>
+                {[{ v: "50K+", l: "Üye" }, { v: "1.2K", l: "Çevrimiçi" }, { v: "15K+", l: "Konu" }].map((s, i) => (
+                  <div key={i} style={{ background: 'rgba(255,255,255,0.05)', padding: '16px 24px', borderRadius: 16, backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                    <div style={{ fontFamily: C.mono, fontSize: 32, fontWeight: 800, color: C.primary }}>{s.v}</div>
+                    <div style={{ fontSize: 13, color: "#94a3b8", fontWeight: 600 }}>{s.l}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 32, alignItems: "start" }}>
+            
+            <div className="fade-in-up">
+              <div style={{ display: "flex", gap: 4, marginBottom: 24, background: C.white, borderRadius: 12, padding: 4, border: `1px solid ${C.border}`, width: "fit-content", boxShadow: C.shadow }}>
+                {[{ k: "hot", l: "🔥 Gündem" }, { k: "new", l: "✨ Yeni" }, { k: "unanswered", l: "❓ Cevaplanmamış" }].map(t => (
+                  <button key={t.k} onClick={() => setForumTab(t.k)} style={{
+                    padding: "10px 20px", borderRadius: 10, border: "none", cursor: "pointer", fontFamily: C.font,
+                    fontSize: 14, fontWeight: forumTab === t.k ? 700 : 600, transition: 'all 0.2s',
+                    background: forumTab === t.k ? C.primaryDim : "transparent", color: forumTab === t.k ? C.primary : C.muted,
+                  }}>{t.l}</button>
+                ))}
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                {FORUM_TOPICS.map((topic, i) => (
+                  <Card key={i} style={{ padding: 24 }} C={C}>
+                    <div style={{ display: "flex", gap: 16 }}>
+                      <div style={{ width: 52, height: 52, borderRadius: 16, background: C.pageBg, border: `1px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, flexShrink: 0 }}>{topic.avatar}</div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
+                          <h4 style={{ fontFamily: C.font, fontSize: 16, fontWeight: 800, color: C.heading, flex: 1, lineHeight: 1.4 }}>{topic.title}</h4>
+                          {topic.hot && <Badge color={C.rose}>🔥 Gündem</Badge>}
+                        </div>
+                        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+                          <span style={{ fontSize: 14, color: C.muted, fontWeight: 600 }}>{topic.author}</span>
+                          <span style={{ fontSize: 13, color: C.faint }}>· {topic.time}</span>
+                        </div>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: 'wrap', gap: 12 }}>
+                          <div style={{ display: "flex", gap: 6 }}>
+                            {topic.tags.map(t => <Tag key={t} color={C.primary}>{t}</Tag>)}
+                          </div>
+                          <div style={{ display: "flex", gap: 16, fontSize: 14, color: C.muted, fontWeight: 500 }}>
+                            <span style={{display: 'flex', alignItems: 'center', gap: 6}}>💬 {topic.replies}</span>
+                            <span style={{display: 'flex', alignItems: 'center', gap: 6}}>👁 {topic.views.toLocaleString("tr-TR")}</span>
+                            <span style={{display: 'flex', alignItems: 'center', gap: 6}}>❤️ {topic.likes}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+
+              <button style={{
+                width: "100%", marginTop: 24, padding: "16px", borderRadius: 16,
+                border: `2px dashed ${C.border}`, background: C.white, color: C.primary,
+                fontFamily: C.font, fontSize: 15, fontWeight: 800, cursor: "pointer", transition: 'all 0.2s'
+              }} onMouseEnter={e=>{e.currentTarget.style.background=C.primaryDim; e.currentTarget.style.borderColor=C.primary;}} onMouseLeave={e=>{e.currentTarget.style.background=C.white; e.currentTarget.style.borderColor=C.border;}}>+ Yeni Konu Aç</button>
+            </div>
+
+            <div className="fade-in-right" style={{ display: "flex", flexDirection: "column", gap: 24, position: "sticky", top: 100 }}>
+              
+              <Card hover={false} style={{ padding: 24 }} C={C}>
+                <h3 style={{ fontFamily: C.font, fontSize: 18, fontWeight: 900, color: C.heading, marginBottom: 20 }}>🏆 Liderlik Tablosu</h3>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {LEADERBOARD.map((u, i) => (
+                    <div key={i} style={{
+                      display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", borderRadius: 12,
+                      background: u.isMe ? C.primaryDim : i < 3 ? `${C.gold}10` : "transparent",
+                      border: `1px solid ${u.isMe ? C.primaryBorder : i < 3 ? `${C.gold}20` : "transparent"}`,
+                    }}>
+                      <span style={{ fontFamily: C.mono, fontSize: 14, fontWeight: 900, color: i < 3 ? C.gold : C.faint, width: 24, textAlign: "center" }}>
+                        {u.badge || `${u.rank}`}
+                      </span>
+                      <span style={{ fontSize: 22 }}>{u.avatar}</span>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 14, fontWeight: u.isMe ? 800 : 700, color: u.isMe ? C.primary : C.heading, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                          {u.name} {u.isMe && <span style={{ fontSize: 12, color: C.primary }}>(Sen)</span>}
+                        </div>
+                        <div style={{ fontSize: 12, color: C.faint, marginTop: 2 }}>Lv.{u.level} · 🔥{u.streak}</div>
+                      </div>
+                      <span style={{ fontFamily: C.mono, fontSize: 13, fontWeight: 800, color: C.primary }}>{(u.xp / 1000).toFixed(1)}K</span>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+
+              <Card hover={false} style={{ padding: 24 }} C={C}>
+                <h3 style={{ fontFamily: C.font, fontSize: 18, fontWeight: 900, color: C.heading, marginBottom: 16 }}>👥 Çalışma Grupları</h3>
+                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  {STUDY_GROUPS.map((g, i) => (
+                    <div key={i} style={{
+                      display: "flex", alignItems: "center", gap: 14, padding: "14px", borderRadius: 16,
+                      background: C.pageBg, border: `1px solid ${C.border}`, cursor: "pointer", transition: "all 0.2s",
+                    }}
+                      onMouseEnter={e => e.currentTarget.style.borderColor = g.color + "60"}
+                      onMouseLeave={e => e.currentTarget.style.borderColor = C.border}>
+                      <span style={{ fontSize: 24, background: `${g.color}15`, padding: 8, borderRadius: 12 }}>{g.icon}</span>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: 14, fontWeight: 700, color: C.heading, marginBottom: 4 }}>{g.name}</div>
+                        <div style={{ fontSize: 12, color: C.faint }}>{g.members} üye · {g.active} çevrimiçi</div>
+                      </div>
+                      <div style={{ fontSize: 12, color: g.color, fontWeight: 800, textAlign: "right" }}>{g.nextSession.split(' ')[0]}<br/>{g.nextSession.split(' ')[1]}</div>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+
+              <Card hover={false} style={{ padding: 24 }} C={C}>
+                <h3 style={{ fontFamily: C.font, fontSize: 18, fontWeight: 900, color: C.heading, marginBottom: 16 }}>📅 Yaklaşan Etkinlikler</h3>
+                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  {EVENTS.map((ev, i) => (
+                    <div key={i} style={{ padding: 16, borderRadius: 16, background: C.pageBg, border: `1px solid ${C.border}`, borderLeft: `4px solid ${ev.color}` }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                        <span style={{ fontSize: 15, fontWeight: 800, color: C.heading }}>{ev.title}</span>
+                      </div>
+                      <div style={{ display: "flex", gap: 12, alignItems: "center", fontSize: 13, color: C.muted, fontWeight: 500 }}>
+                        <span>📅 {ev.date}</span><span>🕐 {ev.time}</span>
+                      </div>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 12 }}>
+                        <Badge color={ev.color}>{ev.type === "workshop" ? "🛠 Workshop" : ev.type === "webinar" ? "🎙 Webinar" : "🏆 Hackathon"}</Badge>
+                        <span style={{ fontSize: 12, color: C.faint, fontWeight: 600 }}>{ev.spots} kota</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
