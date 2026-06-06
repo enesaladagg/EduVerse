@@ -387,6 +387,22 @@ export default function GlobalNavbar({ activePage, onNavigate }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           
           <button
+            onClick={toggleTheme}
+            style={{
+              position: 'relative',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              width: 36, height: 36, borderRadius: '50%',
+              border: 'none',
+              background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
+              color: isDark ? '#fff' : '#1e293b',
+              cursor: 'pointer',
+              transition: 'background 0.2s'
+            }}
+          >
+            {isDark ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
+
+          <button
             onClick={openCart}
             style={{
               position: 'relative',
