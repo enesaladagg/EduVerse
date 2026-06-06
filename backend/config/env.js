@@ -27,5 +27,5 @@ module.exports = {
   dbRetryBaseDelayMs: toNumber(process.env.DB_RETRY_BASE_DELAY_MS, 1000),
   jwtSecret: jwtSecret || 'dev-only-insecure-secret-change-in-production',
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
-  corsOrigins: process.env.CORS_ORIGINS || 'http://localhost:5173',
+  corsOrigins: process.env.CORS_ORIGINS || 'http://localhost:5173,http://localhost:5174',
 };

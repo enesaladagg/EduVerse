@@ -1,0 +1,113 @@
+/* =========================================================
+   Global Standardized UI Components (Step 1 Refactor)
+   ========================================================= */
+
+/* Button System */
+#root .btn-core {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-sizing: border-box;
+  outline: none;
+}
+
+#root .btn-core:disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Button Variants */
+#root .btn-variant-primary {
+  background: var(--color-accent);
+  color: #000;
+  border: 2px solid var(--color-accent);
+}
+#root .btn-variant-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px var(--color-border), 0 0 0 4px var(--color-border);
+  background: var(--color-accentHover);
+  border-color: var(--color-accentHover);
+}
+
+#root .btn-variant-secondary {
+  background: var(--color-surfaceLight);
+  color: var(--color-text);
+  border: 1px solid var(--c-accent);
+}
+#root .btn-variant-secondary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(var(--c-accent-rgb), 0.2);
+  border-color: var(--color-accentHover);
+  color: var(--color-accent);
+  background: transparent;
+}
+
+#root .btn-variant-ghost {
+  background: transparent;
+  color: var(--color-textMuted);
+  border: 1px solid transparent;
+}
+#root .btn-variant-ghost:hover {
+  background: var(--color-panelElevated);
+  color: var(--color-text);
+}
+
+/* Button Sizes */
+#root .btn-size-sm {
+  padding: 6px 16px;
+  font-size: 13px;
+  border-radius: 99px;
+}
+#root .btn-size-md {
+  padding: 10px 24px;
+  font-size: 15px;
+  border-radius: 99px;
+}
+#root .btn-size-lg {
+  padding: 14px 32px;
+  font-size: 16px;
+  border-radius: 99px;
+}
+
+/* Card System */
+.card-core {
+  background: var(--color-panel);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.card-hoverable:hover {
+  transform: translateY(-6px);
+  border-color: var(--color-accent);
+  box-shadow: 0 15px 40px var(--color-border);
+  z-index: 10;
+}
+
+/* Input System */
+.input-core {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: var(--color-shell);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  transition: all 0.3s;
+  box-sizing: border-box;
+}
+
+.input-core:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-border);
+}

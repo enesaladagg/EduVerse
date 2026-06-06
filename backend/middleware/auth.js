@@ -11,7 +11,12 @@ const authenticate = (req, res, next) => {
   const token = authHeader.slice(7);
   try {
     const payload = jwt.verify(token, env.jwtSecret);
-    req.user = { id: payload.sub, role: payload.role };
+    req.user = {
+      id: payload.sub,
+      role: payload.role,
+      name: payload.name || null,
+      demo: !!payload.demo,
+    };
     return next();
   } catch (err) {
     if (err.name === 'TokenExpiredError') {

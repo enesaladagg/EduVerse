@@ -283,3 +283,601 @@ Projenin hata takip ve izleme sistemi, endüstri standartlarına uygun olarak ya
 4. **Gerçek Akış Testleri ve Hata Kodları:** Yeni hata yönetimi mimarisi `POST /api/users` ve `GET /api/users` endpoint'leriyle canlı akışta doğrulandı. Mükerrer kayıt (duplicate email) gibi spesifik senaryolarda sistemin net bir şekilde `409 Conflict` (DUPLICATE_RESOURCE) kodu dönmesi sağlandı.
 5. **Dokümantasyon ve PR Süreci:** Geliştirilen tüm hata senaryoları için bir checklist ve backend dokümantasyonu oluşturuldu. Projenin `main` dalı koruma kuralları (branch protection) gereği, yapılan tüm değişiklikler standartlara uygun bir Pull Request (PR) akışına dahil edildi.
 
+---
+
+## Frontend & UI Sprinti
+
+**Tarih:** 2 Haziran 2026
+**Sorumlu:** Enes ALADAĞ
+**Kapsam:** Yeni UI modülleri, React performans optimizasyonları, mobil uyumluluk ve cross-browser düzeltmeleri
+
+---
+
+### 1. Yeni UI Modülleri
+
+#### 1.1 İnteraktif Kod Editörü — `CodeSandbox.jsx`
+
+**Dosya:** `frontend/src/components/CodeSandbox.jsx`
+
+Öğrencilerin ders sırasında tarayıcı üzerinden kod yazıp çalıştırabildiği gömülü bir kod editörü bileşeni oluşturuldu.
+
+**Özellikler:**
+- **Dil desteği:** JavaScript, Python, HTML (dil seçici butonlarla)
+- **Satır numaraları:** Senkronize kaydırma destekli ayrı `LineNumbers` alt bileşeni (`React.memo` ile optimize edildi)
+- **Çalıştırma motoru:**
+  - JavaScript için `new Function()` sandbox'ı — `console.log` çıktıları gerçek zamanlı yakalanır
+  - Python için `print()` ifadelerini simüle eden regex tabanlı ayrıştırıcı
+  - HTML için güvenli `<iframe sandbox>` önizlemesi
+- **Tab girişi:** Textarea içinde `Tab` tuşu ile 2 boşluk girintileme
+- **Split panel:** Editör (sol) + Çıktı (sağ) yan yana görünüm; mobilde dikey düzene geçer
+- **`React.memo` ile sarıldı** — parent re-render'lardan etkilenmez
+- **Code splitting:** `lazy()` ile `App.jsx` içine yüklendi
+
+**Öğrenilen sorun:** `Button.jsx`'te `shadows` token'ı `designTokens` destructuring'den eksikti; `CodeSandbox` yazımı sırasında tespit edilerek düzeltildi.
+
+---
+
+#### 1.2 Oyunlaştırma Sistemi — `GamificationBadges.jsx`
+
+**Dosya:** `frontend/src/components/GamificationBadges.jsx`
+
+Kullanıcı profil sayfasına ve platform header'ına entegre edilen XP / rozet / seviye sistemi.
+
+**Özellikler:**
+- **`XPBar` bileşeni (ayrı export):** Header'da kompakt, profil sayfasında geniş görünüm. Gradient progress bar, seviye rozeti, sonraki seviye XP bilgisi.
+- **`ACHIEVEMENT_CATALOG`:** 8 adet başarı rozeti; `common`, `uncommon`, `rare`, `epic` nadir seviyeleriyle. Her seviye farklı renk ve glow efektine sahip.
+- **`AchievementBadge` alt bileşeni:** Kazanılmamış rozetler gri + filtreli gösterilir; kazanılanlar rarity'ye göre parlar.
+- **Seviye hesabı (`calcLevel`):** 10 kademeli eşik değeri (0 → 12 000 XP). Yüzde ilerlemesi anlık hesaplanır.
+- **`compact` modu:** Header'da XPBar + son 5 rozet ikonu olarak gösterilir, detay için profil sekmesine yönlendirilir.
+- Tüm alt bileşenler `React.memo` ile sarıldı. `earnedIds` değişmediğinde badge grid yeniden render edilmez.
+
+---
+
+#### 1.3 İşbirlikçi Beyaz Tahta — `CollaborativeWhiteboard.jsx`
+
+**Dosya:** `frontend/src/components/CollaborativeWhiteboard.jsx`
+
+HTML5 Canvas API ile oluşturulmuş, canlı ders ekranına entegre ortak çizim tahtası.
+
+**Özellikler:**
+- **Araçlar:** Kalem, düz çizgi, dikdörtgen, daire, metin, silgi
+- **Renk paleti:** 9 renk + dinamik renk seçici
+- **Fırça boyutu:** 4 boyut seçeneği; aktif renk ile önizleme
+- **Şekil önizlemesi:** Ayrı overlay canvas'ı üzerinde gerçek zamanlı önizleme; `onPointerUp`'ta ana canvas'a işlenir
+- **Metin ekleme:** Canvas üzerine tıklayınca açılan modal input
+- **Geri al / Yinele:** 30 snapshot'a kadar history stack (`useState` ile yönetilir)
+- **Arkaplan rengi:** `<input type="color">` ile dinamik değiştirme
+- **Dokunmatik destek:** `onTouchStart/Move/End` eventi, `touch-action: none` CSS ile çakışma önlendi
+- **Katılımcı göstergesi:** Simüle edilmiş "3 katılımcı" bilgisi header'da gösterilir
+- Bileşen `React.memo` ile sarıldı. `useCallback` ile tüm event handler'lar memoize edildi.
+
+---
+
+#### 1.4 WebRTC Canlı Ders Kontrolü — `WebRTCControls.jsx`
+
+**Dosya:** `frontend/src/components/WebRTCControls.jsx`
+
+Canlı ders ekranı için WebRTC medya kontrolleri ve yapay zeka destekli görüntü/ses işleme paneli.
+
+**Özellikler:**
+- **Medya kontrolleri:** Mikrofon açma/kapama, kamera, ekran paylaşımı, el kaldırma — `CircleBtn` bileşeni, aktif/pasif için farklı görsel ve diyagonal kesme çizgisi efekti
+- **Katılımcı grid:** 4 katılımcı tile'ı; her tile'da isim, kamera/mikrofon/el durumu göstergesi ve "Sen" etiketi
+- **AI Kontrolleri paneli** (açılıp kapanabilir):
+  - Arka plan kaldırma (AI)
+  - Arka plan bulanıklaştırma
+  - Sanal arka plan seçici (6 seçenek: Yok, Hafif Bulanık, Güçlü Bulanık, Sınıf, Ofis, Uzay)
+  - AI gürültü engelleme toggle
+  - Ders kaydetme butonu (kırmızı kayıt göstergesi)
+- **Kayıt göstergesi:** `recording` state'inde header'daki yeşil/kırmızı indicator + başlık değişimi
+- `ToggleSwitch`, `CircleBtn`, `ParticipantTile`, `AIBadge` alt bileşenlerinin tümü `React.memo` ile optimize edildi.
+
+---
+
+### 2. Performans Optimizasyonları
+
+#### 2.1 Code Splitting (Lazy Loading)
+
+`App.jsx` içindeki tüm ağır modüller `React.lazy()` + `Suspense` ile lazy load edildi:
+
+```
+CodeSandbox          → lazy(() => import('./components/CodeSandbox'))
+GamificationBadges   → lazy(() => import('./components/GamificationBadges'))
+CollaborativeWhiteboard → lazy(() => import('./components/CollaborativeWhiteboard'))
+WebRTCControls       → lazy(() => import('./components/WebRTCControls'))
+```
+
+Sekme değiştirildiğinde yalnızca ilgili modül yüklenir. Dashboard sekmesi açıkken diğer modüller hiç indirilmez.
+
+#### 2.2 React.memo Uygulaması
+
+| Bileşen | Memo? | Gerekçe |
+|---|---|---|
+| `PlatformHeader` | ✅ | Her tab geçişinde parent render'da yeniden mount olmasın |
+| `DashboardTab` | ✅ | `user` değişmediğinde sabit |
+| `CodeLabTab`, `LiveTab`, `WhiteboardTab`, `ProfileTab` | ✅ | Prop almıyor / seyrek değişiyor |
+| `LineNumbers` | ✅ | Kod değişmediğinde satır numaraları yeniden render olmasın |
+| `AchievementBadge` | ✅ | Rozet listesi nadiren değişir |
+| `XPBar` | ✅ | XP değeri nadiren değişir |
+| `ToggleSwitch`, `CircleBtn`, `ParticipantTile`, `AIBadge` | ✅ | WebRTC alt bileşenleri |
+| `ToolBtn`, `ColorPaletteCard` | ✅ | Whiteboard araç satırı |
+
+#### 2.3 useMemo Kullanımı
+
+- `DashboardTab` → `cards` dizisi prop'lar değişmediğinde yeniden oluşturulmaz
+- `PlatformHeader` → yok (statik nav, memoize gerekmez)
+- `GamificationBadges` → `earned` / `locked` filtreleri `earnedIds` değişmediğinde korunur
+- `CollaborativeWhiteboard` → `toolbarStyle` objesi; `isDrawing` her frame'de değiştiğinde stil nesnesi oluşturulmaz
+- `CodeSandbox` → `langMeta`, `lineCount` (satır sayısı)
+- `App.jsx` → `tabContent` `useMemo` ile aktif sekmeye göre hesaplanır; sekme değişmediğinde sabit kalır
+
+#### 2.4 useCallback Kullanımı
+
+- `App.jsx` → `handleTabChange`
+- `CodeSandbox` → `handleRun`, `handleClear`, `handleLangChange`, `handleKeyDown`, `syncScroll`
+- `CollaborativeWhiteboard` → `onPointerDown/Move/Up`, `undo`, `redo`, `clearBoard`, `commitText`, `saveSnapshot`, `restoreSnapshot`
+- `WebRTCControls` → `toggleMic`, `toggleCam`, `toggleScreen`, `toggleHand`, `toggleRecord`, `togglePanel`
+
+---
+
+### 3. Mobil Uyumluluk Düzeltmeleri (`index.css`)
+
+**Kural:** Masaüstü (≥640px) stili ve tüm inline `designTokens` yapısı değiştirilmedi. Yalnızca CSS `@media` ile ekleme yapıldı.
+
+| Breakpoint | Değişiklik |
+|---|---|
+| `< 640px` | Ana içerik padding'i daraltıldı (`1rem 0.75rem`) |
+| `< 640px` | Header padding'i daraltıldı |
+| `< 640px` | Tab label metinleri gizlendi (`.tab-label { display: none }`) — yalnızca ikon görünür |
+| `< 640px` | Dashboard kart grid tek sütuna indi |
+| `< 640px` | CodeSandbox split layout dikey (editor üstte, çıktı altta) |
+| `< 640px` | WebRTC video grid tek sütun |
+| `640–767px` | Ana padding `1.5rem 1rem`, sandbox min-height daraltıldı |
+| Tüm | Nav scroll çubuğu gizlendi (`scrollbar-width: none`) |
+| WebKit | `input`, `textarea`, `button` için `-webkit-appearance: none` (Safari uyumu) |
+| Firefox | `textarea` için `scrollbar-width: thin` |
+
+---
+
+### 4. Cross-Browser Uyumluluk
+
+- **Safari (WebKit):** `-webkit-appearance: none` ile özelleştirilmiş input/button görünümü korundu. `-webkit-overflow-scrolling: touch` whiteboard canvas kaydırmasında eklendi.
+- **Firefox:** `scrollbar-width` ve `-moz-appearance` düzeltmeleri.
+- **Tüm motorlar:** `touch-action: none` canvas'a eklendi; hem mouse hem touch olayları aynı handler'ı kullanır (`onTouchStart/Move/End` + `onMouseDown/Move/Up`).
+- **iOS Safari iframe:** `<iframe sandbox>` HTML önizlemesi `display: block; width: 100%` ile mobilde taşmaz.
+
+---
+
+### 5. Dosya ve Klasör Yapısı Değişiklikleri
+
+**Eklenen dosyalar:**
+```
+frontend/src/components/CodeSandbox.jsx           — İnteraktif kod editörü
+frontend/src/components/GamificationBadges.jsx    — XP / rozet sistemi
+frontend/src/components/CollaborativeWhiteboard.jsx — HTML5 Canvas tahta
+frontend/src/components/WebRTCControls.jsx        — Canlı ders kontrolü
+```
+
+**Güncellenen dosyalar:**
+```
+frontend/src/App.jsx          — Tam platform demo (sekme tabanlı navigasyon)
+frontend/src/components/index.js — Yeni 4 modül export edildi
+frontend/src/index.css        — Mobil breakpoint ve cross-browser düzeltmeleri
+```
+
+**Gereksiz veya dikkat çeken klasörler:**
+> `docs/` klasörü yalnızca `Guvenlik_ve_Test_Raporu.md` ve bir PDF içeriyor. Bu sprint'te bu klasöre hiçbir şey eklenmedi. Ekip, tüm belgelemeyi `projeakisi.md`'de tutmaya karar verdi; `docs/` klasörü ileride kaldırılabilir veya yalnızca statik varlıklar (PDF, sözleşme vb.) için korunabilir.
+
+---
+
+## WebRTC & Soket Sprinti
+
+**Tarih:** 2 Haziran 2026
+**Sorumlu:** Enes ALADAĞ
+**Kapsam:** Socket.io tabanlı gerçek zamanlı etkileşim, seminer (Guest Speaker) modülü, dayanıklı WebRTC sinyalleşme ve AI arka plan kaldırma
+
+---
+
+### 1. Socket.io Altyapısı
+
+Socket.io, `backend/socket/` altında modüler bir yapıda kuruldu ve HTTP sunucusuna (`server.js`) bağlandı.
+
+**Eklenen dosyalar:**
+```
+backend/socket/index.js                    — io başlatma, oda yaşam döngüsü, handler kaydı
+backend/socket/auth.js                     — JWT handshake kimlik doğrulama
+backend/socket/events.js                   — Merkezi olay adı sabitleri
+backend/socket/roomManager.js              — Bellek-içi oda/katılımcı durum yöneticisi
+backend/socket/handlers/whiteboardHandler.js — Beyaz tahta senkronizasyonu
+backend/socket/handlers/codeSandboxHandler.js — Kod düşürme (öğrenci→eğitmen)
+backend/socket/handlers/webrtcHandler.js   — WebRTC sinyalleşme yönlendirme
+backend/socket/handlers/seminarHandler.js  — Guest Speaker / seminer rol yönetimi
+```
+
+**Kimlik doğrulama:** Socket handshake'inde JWT token üç kaynaktan kabul edilir (`auth.token`, `Authorization` header, `query.token`). Token doğrulanınca `socket.user = { id, role }` set edilir; geçersiz/expired token bağlantıyı reddeder.
+
+**Olay sözleşmesi:** Backend `events.js` ile frontend `services/socketEvents.js` birebir aynı sabitleri paylaşır → yazım hatası kaynaklı kopukluk önlenir.
+
+---
+
+### 2. Gelişmiş Beyaz Tahta Senkronizasyonu
+
+**Backend (`whiteboardHandler.js`):**
+- `whiteboard:draw` / `whiteboard:draw-batch` — kalem/silgi çizgi parçalarını odaya yayar (`socket.to(roomId)` ile echo önlenir).
+- `whiteboard:shape` — çizgi, dikdörtgen, daire, metin şekilleri.
+- `whiteboard:clear` — tahtayı temizler (yalnızca yayın yetkisi olanlar).
+- `whiteboard:snapshot-sync` / `snapshot-request` — geç katılan kullanıcı, odanın güncel tuval görüntüsünü (dataURL) anında alır.
+- Seminer modunda yalnızca `host`/`guest_speaker` çizebilir; yetkisiz çizim `seminar:permission-denied` ile reddedilir.
+- Bellek koruması: op geçmişi 500 ile, snapshot 8MB ile sınırlandı.
+
+**Frontend (`hooks/useWhiteboardSync.js` + `CollaborativeWhiteboard.jsx`):**
+- Bileşene opsiyonel `roomId` prop'u eklendi. **`roomId` verilmezse bileşen tamamen offline/yerel çalışır — mevcut davranış korunur.**
+- Kalem hareketinde normalize edilmiş `{from, to, color, size, tool}` segmentleri yayınlanır; gelen segmentler uzak tuvale çizilir.
+- `onPointerUp`'ta tam tuval snapshot'ı (`image/webp`, 0.6 kalite) yayınlanarak geç katılanlar senkronlanır.
+- Dokunmatik cihaz güvenliği: şekil yayını `lastPt` ref'i ile yapılır (touchend'de `touches` boş olduğundan NaN koordinat önlenir).
+
+---
+
+### 3. Code Sandbox — Kod Düşürme
+
+**Backend (`codeSandboxHandler.js`):**
+- `code:update` — öğrencinin canlı yazımı yalnızca **host'un** socket'ine stream edilir (tüm odaya yayılmaz → gizlilik + gürültü önleme).
+- `code:submit` — öğrenci kodu teslim eder; host'a "yeni teslim" düşer, öğrenciye `code:received` onayı döner.
+- `code:feedback` — yalnızca host öğrenciye not/geri bildirim gönderebilir.
+- Kod boyutu 100 KB ile sınırlandı (DoS koruması).
+
+**Frontend (`CodeSandbox.jsx`):**
+- Opsiyonel `roomId` ve `streamToHost` prop'ları eklendi. `roomId` yoksa eski davranış aynen korunur.
+- 600 ms debounce ile canlı yazım host'a stream edilir.
+- "📤 Eğitmene Gönder" butonu yalnızca canlı oturumda görünür; teslim sonrası "✓ Gönderildi" geri bildirimi.
+- Eğitmen geri bildirimi (`code:feedback`) çıktı panelinde gösterilir.
+
+---
+
+### 4. Seminer Modülü ve Guest Speaker Rolü
+
+**`backend/models/LiveSession.js` genişletildi:**
+- `sessionType: 'lecture' | 'seminar'` alanı eklendi.
+- `hostId`, `guestSpeakerIds[]`, `activeSpeakerId` ve katılımcı alt şeması (`ParticipantSchema`) — yayın izinleri (`canPublishAudio/Video/ShareScreen`) ile.
+- `role` enum'una `host`, `guest_speaker`, `attendee` eklendi.
+- Yardımcı metotlar: `canPublish(userId)`, `resolveRole(userId)`.
+
+**Seminer mantığı (`seminarHandler.js` + `roomManager.js`):**
+- **Seminer modunda yalnızca `host` ve `guest_speaker` ses/video/ekran yayını yapabilir.** `attendee`'ler yalnızca izler.
+- `seminar:promote` — host bir katılımcıyı sahneye çıkarır (guest_speaker); rol değişikliği tüm odaya yayılır.
+- `seminar:demote` — konuşmacıyı izleyiciye indirir.
+- `seminar:request-stage` — attendee sahneye çıkmak için el kaldırır; talep yalnızca host'a düşer.
+- Oda konfigürasyonu DB'den `hydrateRoomConfig` ile yüklenir; DB erişilemezse güvenli şekilde `lecture` moduna düşer.
+
+---
+
+### 5. Dayanıklı WebRTC Sinyalleşme
+
+**Backend (`webrtcHandler.js`):**
+- `rtc:offer` / `rtc:answer` / `rtc:ice-candidate` mesajları `targetSocketId`/`targetUserId` ile **yalnızca hedef peer'a** yönlendirilir (gereksiz yayın yok).
+- Seminer modunda yalnızca yayın yetkisi olanlar `offer` başlatabilir.
+- Hedef peer çevrimdışıysa gönderene `rtc:peer-disconnected` döner → istemci yeniden müzakere deneyebilir.
+- `rtc:renegotiate` — ICE restart / yeniden bağlanma sonrası bağlantı tazeleme.
+
+**Kopmalara karşı dayanıklılık:**
+- `connectionStateRecovery` (2 dk pencere) ile kısa kopmalarda oturum state'i kurtarılır.
+- `pingInterval/pingTimeout` ile ölü bağlantı tespiti.
+- Disconnect anında katılımcı hemen silinmez, `disconnected` işaretlenir; reconnect penceresi dolarsa kalıcı çıkış uygulanır → kısa ağ kesintilerinde state korunur.
+
+**Frontend (`hooks/useWebRTC.js`):**
+- Her uzak peer için `RTCPeerConnection` yöneten mesh yöneticisi.
+- **Perfect Negotiation** deseni: "polite/impolite" peer ayrımı ile offer çakışması (glare) güvenli çözülür.
+- ICE `failed`/`disconnected` durumunda `restartIce()` + `rtc:renegotiate` ile otomatik kurtarma.
+- Unmount'ta tüm peer bağlantıları kapatılır (bellek sızıntısı önleme).
+
+---
+
+### 6. AI Arka Plan Kaldırma (Canvas / MediaStreamTrack)
+
+**`frontend/src/utils/backgroundProcessor.js` — `BackgroundProcessor` sınıfı:**
+
+Akış manipülasyon hattı:
+```
+ham video track → <video> → canvas (frame işleme) → captureStream() → yeni MediaStream track
+```
+
+- **Modlar:** `none`, `blur` (arka plan bulanıklaştırma), `remove` (düz renk/görsel ile değiştirme).
+- **Segmentasyon:** Dışarıdan ML `segmenter` (MediaPipe SelfieSegmentation / TensorFlow BodyPix) enjekte edilebilir. Model yoksa merkez-eliptik **heuristic maske** ile zarif geri düşüş yapılır.
+- `requestVideoFrameCallback` varsa onu kullanır (daha verimli), yoksa `requestAnimationFrame`.
+- Ses track'leri işlenmeden yeni akışa taşınır.
+- `stop()` tüm kaynakları (canvas, video, track) serbest bırakır.
+
+**Frontend entegrasyonu (`WebRTCControls.jsx`):**
+- Opsiyonel `localStream` ve `onProcessedStream` prop'ları eklendi.
+- AI panelindeki "Arka Plan Kaldırma" / "Bulanıklaştırma" toggle'ları, gerçek `localStream` verildiğinde `BackgroundProcessor`'ı başlatır/günceller; işlenmiş akış `onProcessedStream` ile dışarı verilir.
+- `localStream` verilmezse toggle'lar yalnızca UI olarak kalır (demo davranışı korunur).
+
+---
+
+### 7. Frontend Socket Servisi
+
+```
+frontend/src/services/socket.js        — Singleton socket.io-client (otomatik reconnect, exp. backoff)
+frontend/src/services/socketEvents.js  — Backend ile eşleşen olay sabitleri
+frontend/src/hooks/useSocket.js        — Oda katılımı + katılımcı/rol state yönetimi
+frontend/src/hooks/useWebRTC.js        — Dayanıklı WebRTC mesh + perfect negotiation
+frontend/src/hooks/useWhiteboardSync.js— Beyaz tahta gerçek zamanlı senkronizasyon
+```
+
+- `socket.io-client`: sınırsız yeniden bağlanma denemesi, 1s→5s exponential backoff, WebSocket + polling fallback.
+- JWT token `handshake.auth` ile gönderilir; `VITE_SOCKET_URL` env değişkeni ile sunucu adresi yapılandırılabilir (varsayılan `http://localhost:5000`).
+- Tüm hook'lar unmount'ta dinleyicileri temizler (bellek sızıntısı önleme).
+
+---
+
+### 8. Bağımlılıklar ve Kurulum
+
+**Eklenen paketler:**
+- Backend: `socket.io@^4.8.1`
+- Frontend: `socket.io-client@^4.8.1`
+
+Kurulum için `backend/` ve `frontend/` dizinlerinde `npm install` çalıştırılmalıdır.
+
+**Ölçekleme notu:** `roomManager` bellek-içi (tek sunucu) çalışır. Yatay ölçeklemede (çok örnekli) `@socket.io/redis-adapter` ile değiştirilmesi önerilir.
+
+**Geriye dönük uyumluluk:** Tüm yeni socket entegrasyonları **opsiyonel prop'larla** (`roomId`, `localStream`) eklendi. Bu prop'lar verilmediğinde bileşenler eskisi gibi offline/yerel çalışır; mevcut masaüstü arayüzü ve düzeni değişmez.
+
+---
+
+## DB, Güvenlik & CTF Sprinti
+
+**Tarih:** 2 Haziran 2026  
+**Kapsam:** Backend güvenlik sertleştirme, üretim loglama, MongoDB şema/indeks optimizasyonu, CTF laboratuvar API'leri, RSS teknik kaynak akışı ve backup/restore prosedürü
+
+---
+
+### 1. Güvenlik ve Loglama
+
+**Logger güncellemesi (`backend/utils/logger.js`):**
+- `winston` dosya transportları production uyumlu hale getirildi.
+- Hatalar `backend/logs/error.log` dosyasına yazılır.
+- Genel uygulama ve HTTP erişim logları `backend/logs/combined.log` dosyasına yazılır.
+- Log dosyaları için boyut ve dosya sayısı sınırı eklendi.
+- `logs` klasörü yoksa otomatik oluşturulur.
+- Morgan entegrasyonu korunarak `logger.stream` üzerinden `combined.log` içine HTTP log akışı devam eder.
+
+**Güvenlik middleware'leri (`backend/app.js`):**
+- `helmet` aktif bırakıldı; temel HTTP güvenlik header'ları korunur.
+- `express-rate-limit` global limit olarak tüm API'ye uygulanır.
+- Auth rotaları için ayrıca daha düşük eşikli rate-limit (`authLimiter`) korunur.
+- `express-mongo-sanitize` ile NoSQL injection riskleri azaltılır.
+
+**Global async hata yakalama:**
+- `backend/middleware/asyncHandler.js` eklendi.
+- Async route'larda `try/catch` tekrarını azaltır ve tüm rejected promise'leri global `errorHandler`'a gönderir.
+- `errorHandler.js` içine malformed JSON ve genel sunucu hataları için daha doğru hata eşlemesi eklendi; her genel hata artık yanlışlıkla `DB_UNEXPECTED` olarak sınıflandırılmaz.
+
+---
+
+### 2. MongoDB Şema ve Performans Güncellemeleri
+
+**User modeli (`backend/models/User.js`):**
+- Oyunlaştırma alanları eklendi:
+  - `gamification.points`
+  - `gamification.level`
+  - `gamification.badges[]`
+  - `gamification.completedChallenges[]`
+- `toSafeObject()` artık güvenli profil ve oyunlaştırma özetini döndürür.
+- İndeksler:
+  - `{ role: 1, createdAt: -1 }`
+  - `{ 'gamification.points': -1 }`
+  - `{ 'gamification.badges.key': 1 }`
+
+**Course modeli (`backend/models/Course.js`):**
+- `category` alanı eklendi: `programming`, `cybersecurity`, `design`, `data-science`, `business`, `language`, `general`
+- `level` alanı eklendi: `beginner`, `intermediate`, `advanced`
+- İndeksler:
+  - `{ teacherId: 1, isActive: 1, createdAt: -1 }`
+  - `{ category: 1, level: 1, isActive: 1 }`
+  - `{ title: 'text', description: 'text' }`
+
+**Lean sorgular:**
+- `GET /api/users` ve `GET /api/admin/users` sorguları `.lean()` ile optimize edildi.
+- `GET /api/courses` eklendi; kategori, seviye, öğretmen ve metin araması filtreleri `.lean()` + sayfalama ile çalışır.
+
+---
+
+### 3. Siber Güvenlik CTF Laboratuvarları
+
+**Yeni rota:** `backend/routes/ctf.js`
+
+Kontrollü ve izole CTF API uç noktaları eklendi. Bu uç noktalar gerçek dosya sistemine erişmez; tüm testler in-memory evaluator mantığıyla yapılır.
+
+**Endpoint'ler:**
+- `GET /api/ctf/challenges` — mevcut CTF görevlerini listeler.
+- `POST /api/ctf/challenges/:key/run` — öğrencinin payload'ını güvenli sandbox içinde değerlendirir.
+- `POST /api/ctf/challenges/:key/complete` — görevi başarıyla gösterirse kullanıcıya puan/rozet verir.
+
+**İlk görevler:**
+- `directory-traversal-101`: `../`, URL encoded traversal, mutlak path, `/etc/passwd` gibi denemeleri tespit eder ve engeller.
+- `jwt-tamper-detection`: izinsiz rol yükseltme denemelerini simüle eder.
+
+**Güvenlik notu:**
+- CTF API gerçek zafiyet açmaz; yalnızca saldırı payload'larını analiz eder.
+- Payload boyutu ve tamamlanan görevler kontrollü tutulur.
+- Başarılı CTF tamamlamaları `User.gamification` alanına işlenir.
+
+---
+
+### 4. Teknik RSS Akış Modülü
+
+**Yeni servis:** `backend/services/rssFetcher.js`  
+**Yeni rota:** `backend/routes/rss.js`
+
+Global teknik dokümantasyon ve güvenlik kaynakları için asenkron RSS fetch modülü eklendi.
+
+**Varsayılan kaynaklar:**
+- OWASP News
+- Mozilla Security Blog
+- Node.js Blog
+
+**Endpoint'ler:**
+- `GET /api/rss/feeds` — takip edilen RSS kaynaklarını listeler.
+- `GET /api/rss/latest?limit=10` — kaynakları paralel çeker ve son içerikleri döndürür.
+
+**Üretim güvenliği:**
+- Her feed için timeout uygulanır.
+- XML boyutu 2 MB ile sınırlandı.
+- Bir feed hata verirse tüm istek çökmez; ilgili feed hata alanıyla döner.
+- `fetch` Node yerleşik API'siyle kullanıldı, yeni XML bağımlılığı eklenmedi.
+
+---
+
+### 5. MongoDB Backup / Restore Prosedürü
+
+**Yeni scriptler:**
+```
+backend/scripts/mongo-backup.js
+backend/scripts/mongo-restore.js
+```
+
+**NPM komutları:**
+```
+npm run db:backup
+npm run db:restore -- --dir=./backups/mongo-backup-...
+```
+
+**Backup:**
+- `mongodump` kullanır.
+- Varsayılan çıktı: `backend/backups/mongo-backup-<timestamp>`
+- `--gzip` aktif.
+- `backup-meta.json` üretir.
+
+**Restore:**
+- `mongorestore` kullanır.
+- `--drop` ile mevcut koleksiyonları restore öncesi değiştirir.
+- Kullanım öncesi doğru backup klasörü `--dir` ile verilmelidir.
+
+**Güvenlik:**
+- `backend/backups/` `.gitignore` içine alındı.
+- `.env` içindeki `MONGO_URI` kullanılır; URI repoya yazılmaz.
+- MongoDB Database Tools kurulu olmalıdır.
+
+---
+
+### 6. Takım Görev Özeti
+
+- **Alaa:** MongoDB şema alanları, indeksler, backup/restore prosedürü ve üretim DB kontrol listesi.
+- **Zübeyir:** CTF laboratuvar senaryoları, Directory Traversal/JWT tamper test payload'ları ve güvenlik doğrulaması.
+- **Hüseyin Enes:** API tüketimi, RSS teknik kaynak akışının frontend'e taşınması ve oyunlaştırma alanlarının UI'da gösterimi.
+- **Muhammed Eren:** QA test senaryoları, rate-limit/errorHandler davranış doğrulaması, `GET /api/courses`, `GET /api/rss/latest` ve CTF endpoint entegrasyon testleri.
+
+**Test notu:** Shell ortamı bu sprint sırasında komutlara çıkış durumu döndürmediği için `npm test` doğrulaması araç üzerinden kesinleştirilemedi. Lokal doğrulama için `backend/` içinde `npm install` ve ardından `npm test` çalıştırılmalıdır.
+
+---
+
+## EduFlow UI Entegrasyon Sprinti
+
+**Referans:** `_eduflow_ref/` (EduFlow Canlı Ders mockup ekran görüntüleri)  
+**Hedef:** Udemy / BTK Akademi tarzı platform; mevcut design system korunarak EduFlow görsel dili uygulandı.
+
+### 1. Tema ve Kabuk
+
+| Dosya | Açıklama |
+|-------|----------|
+| `frontend/src/context/ThemeContext.jsx` | Koyu/açık EduFlow paleti; `localStorage` kalıcılığı |
+| `frontend/src/layouts/EduFlowShell.jsx` | Keşfet, Canlı Ders, CTF Labs, Kurslar, Profil navigasyonu |
+| `frontend/src/views/HomeView.jsx` | Landing hero + özellik kartları |
+| `frontend/src/index.css` | Yalnızca mobil EduFlow canlı ders düzenlemeleri |
+
+### 2. Canlı Ders Modülü
+
+| Dosya | Açıklama |
+|-------|----------|
+| `frontend/src/views/LiveSessionView.jsx` | Tam ekran canlı sınıf: slayt, tahta, video+kod split |
+| `frontend/src/components/eduflow/*` | TopBar, Sidebar, ParticipantStrip, ControlDock |
+
+**Socket entegrasyonu:** `roomId: react-101-live` — `CODE_UPDATE`, `CODE_SUBMIT`, whiteboard sync, `useSocket` unmount temizliği.
+
+### 3. CTF Labs Dashboard
+
+| Dosya | Açıklama |
+|-------|----------|
+| `frontend/src/views/CTFLabsView.jsx` | Grid layout CTF kartları + payload workspace |
+| `backend/models/CtfChallenge.js` | Lab ObjectId referans şeması |
+| `backend/routes/ctf.js` | `points`, `badges[]`, `completedLabs[]` güncellemesi |
+
+### 4. Gamification
+
+- Header (`EduFlowShell`) ve `ProfileView` içinde `XPBar` + rozet grid
+- `User` model: `points`, `badges: [String]`, `completedLabs: [ObjectId]`
+
+### 5. Yedekleme
+
+- `backend/scripts/backup.js` — `mongo-backup.js` sarmalayıcısı
+- `npm run db:backup`
+
+### 6. Takım Görev Özeti
+
+- **Alaa:** User şema, CtfChallenge, backup script
+- **Zübeyir:** CTF dashboard, payload test akışı
+- **Hüseyin Enes:** EduFlow shell, canlı ders layout, gamification UI
+- **Muhammed Eren:** Mod geçişleri, mobil QA, socket testleri
+
+**Lokal doğrulama:** `backend/npm run dev` + `frontend/npm run dev` → **Canlı Ders** → kontrol dock **Kod** / **Tahta**.
+
+### 7. Canlı Ders Tam Entegrasyon (Çalışır Durum)
+
+| Bileşen | Durum |
+|---------|--------|
+| `POST /api/auth/demo-session` | JWT üretir — socket auth için zorunlu |
+| `useLiveSession` hook | Medya, WebRTC, sohbet, anket, kod aynası, kontrol dock |
+| `chatHandler` / `pollHandler` / `presenceHandler` | Gerçek zamanlı sohbet, anket oylama, mic/cam/el durumu |
+| `LiveSidebar` | Socket ile senkron sohbet + katılımcılar + anket |
+| `ControlDock` | Mikrofon, kamera, ekran paylaşımı, mod geçişleri, AI panel |
+| `LiveVideoPanel` | WebRTC yerel/uzak video karo grid |
+| Kod sandbox | Öğrenci → host'a `CODE_UPDATE`; eğitmen `InstructorCodePanel` |
+
+**Test:** İki tarayıcı sekmesi — biri Eğitmen, biri Öğrenci → Kod modunda öğrenci yazınca eğitmen panelinde canlı görünür.
+
+---
+
+## Proje Tamamlama (Final)
+
+### Eklenen API'ler
+
+| Rota | Açıklama |
+|------|----------|
+| `GET /api/users/me` | Oturum açmış kullanıcı profili |
+| `PUT /api/users/me` | Profil güncelleme |
+| `GET /api/sessions` | Canlı oturum listesi |
+| `GET /api/sessions/room/:roomId` | Oda detayı |
+| `GET /api/assignments` | Ödev listesi |
+| `POST /api/assignments/:id/submit` | Ödev teslimi |
+| `POST /api/auth/demo-session` | Canlı ders geçici oturum (DB kullanıcı) |
+
+### Seed & Demo
+
+```bash
+cd backend && npm run db:seed
+```
+
+Demo hesaplar, 4 kurs, canlı oturum (`react-101-live`), 2 ödev oluşturulur.
+
+### Frontend Sayfaları
+
+| Sayfa | Dosya |
+|-------|-------|
+| Giriş / Kayıt | `LoginView.jsx`, `RegisterView.jsx` |
+| Kurs kataloğu (API) | `CoursesPage.jsx` |
+| Ödevler | `AssignmentsView.jsx` |
+| Canlı ders | `LiveSessionView.jsx` + `useLiveSession.js` |
+| Profil | `ProfileView.jsx` |
+
+### UI Sadeleştirme (Haziran 2026)
+
+CTF Labs ve RSS modülleri arayüzden kaldırıldı (navigasyon, routing, view dosyaları). Backend `/api/ctf` ve `/api/rss` rotaları kodda kalır; frontend artık tüketmiyor.
+
+### Çalıştırma Kontrol Listesi
+
+1. MongoDB ayakta
+2. `backend/.env` + `npm run db:seed` + `npm run dev`
+3. `frontend/.env` + `npm run dev`
+4. `student@demo.com` ile giriş → Ödevler, Canlı Ders test
+
+**Proje durumu:** MVP — auth, canlı ders, gamification, ödev teslimi, kurs kataloğu.
+

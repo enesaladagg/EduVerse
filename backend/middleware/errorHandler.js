@@ -28,7 +28,21 @@ const mapApplicationError = (error) => {
     });
   }
 
-  return classifyMongooseError(error);
+  if (error instanceof SyntaxError && error.status === 400 && 'body' in error) {
+    return new AppError('Malformed JSON request body.', 400, 'MALFORMED_JSON');
+  }
+
+  if (
+    error?.name?.startsWith('Mongo')
+    || error?.name?.startsWith('Mongoose')
+    || /database|mongo|mongoose|server selection|timeout/i.test(error?.message || '')
+  ) {
+    return classifyMongooseError(error);
+  }
+
+  return new AppError('Unexpected server error', error?.statusCode || 500, 'INTERNAL_SERVER_ERROR', {
+    originalMessage: error?.message,
+  });
 };
 
 const errorHandler = (error, req, res, next) => {
