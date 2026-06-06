@@ -57,11 +57,15 @@ const SessionTopBar = memo(function SessionTopBar({
           padding: 0,
         }}
       >
-        <span style={{ fontWeight: t.typography.fontWeight.bold, fontSize: t.typography.fontSize.lg, color: p.text }}>
-          EduFlow
-        </span>
-        <span style={{ fontWeight: t.typography.fontWeight.bold, fontSize: t.typography.fontSize.lg, color: p.accent }}>
-          Pro
+        <div style={{
+          width: 32, height: 32, borderRadius: 8,
+          background: '#00d4aa',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontWeight: 800, fontSize: 18, color: 'white'
+        }}>E</div>
+        <span style={{ fontWeight: 800, fontSize: 20, letterSpacing: '-0.5px' }}>
+          <span style={{ color: isDark ? '#fff' : '#1e293b' }}>Edu</span>
+          <span style={{ color: '#00d4aa' }}>Verse</span>
         </span>
       </button>
 

@@ -57,6 +57,32 @@ export function ThemeProvider({ children }) {
   }, [isDark]);
 
   const palette = useMemo(() => getEduFlowPalette(isDark), [isDark]);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    root.style.setProperty('--c-shell', palette.shell);
+    root.style.setProperty('--c-panel', palette.panel);
+    root.style.setProperty('--c-panelElevated', palette.panelElevated);
+    root.style.setProperty('--c-border', palette.border);
+    root.style.setProperty('--c-text', palette.text);
+    root.style.setProperty('--c-textMuted', palette.textMuted);
+    root.style.setProperty('--c-textSubtle', palette.textSubtle);
+    root.style.setProperty('--c-accent', palette.accent);
+    root.style.setProperty('--c-accentHover', palette.accentHover);
+    root.style.setProperty('--c-success', palette.success);
+    
+    // Convert hex accent to rgb for rgba() usage
+    try {
+      const hex = palette.accent;
+      if (hex.startsWith('#')) {
+        let r = parseInt(hex.slice(1, 3), 16);
+        let g = parseInt(hex.slice(3, 5), 16);
+        let b = parseInt(hex.slice(5, 7), 16);
+        root.style.setProperty('--c-accent-rgb', `${r}, ${g}, ${b}`);
+      }
+    } catch(e){}
+  }, [palette]);
+
   const toggleTheme = useCallback(() => setIsDark((d) => !d), []);
 
   const value = useMemo(
