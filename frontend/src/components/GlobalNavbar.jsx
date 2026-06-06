@@ -42,7 +42,7 @@ const NAV_ITEMS = [
   { id: 'messages', icon: MessageSquare, label: 'Mesajlar' },
   { id: 'certificates', icon: Award, label: 'Sertifikalar' },
   { id: 'profile', icon: GraduationCap, label: 'Profilim' },
-  { id: 'instructor', icon: Briefcase, label: 'Eğitmen Paneli' },
+  { id: 'instructor', icon: Briefcase, label: 'Eğitmen Paneli', auth: true, role: 'teacher' },
 ];
 
 const EXTRA_LINKS = [
@@ -412,8 +412,8 @@ export default function GlobalNavbar({ activePage, onNavigate }) {
                 onClick={() => onNavigate('login')}
                 style={{
                   padding: '10px 24px',
-                  borderRadius: 50,
-                  border: `1.5px solid ${isDark ? 'rgba(0,212,170,0.5)' : '#00d4aa'}`,
+                  borderRadius: 8,
+                  border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
                   background: 'transparent',
                   color: isDark ? '#fff' : '#1e293b',
                   fontWeight: 600,
@@ -428,7 +428,7 @@ export default function GlobalNavbar({ activePage, onNavigate }) {
                 onClick={() => onNavigate('register')}
                 style={{
                   padding: '10px 24px',
-                  borderRadius: 50,
+                  borderRadius: 8,
                   border: 'none',
                   background: '#00d4aa',
                   color: '#fff',
