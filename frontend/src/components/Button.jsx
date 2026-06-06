@@ -28,7 +28,7 @@ const Button = React.forwardRef(
     },
     ref
   ) => {
-    const { colors, spacing, typography, borderRadius, transitions } = designTokens;
+    const { colors, spacing, typography, borderRadius, transitions, shadows } = designTokens;
 
     // Variant styles
     const variantStyles = {

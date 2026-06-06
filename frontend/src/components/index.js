@@ -11,6 +11,12 @@ export { default as Alert } from './Alert';
 export { default as Avatar } from './Avatar';
 export { default as Modal } from './Modal';
 
+// New feature modules
+export { default as CodeSandbox } from './CodeSandbox';
+export { default as GamificationBadges, XPBar, ACHIEVEMENT_CATALOG } from './GamificationBadges';
+export { default as CollaborativeWhiteboard } from './CollaborativeWhiteboard';
+export { default as WebRTCControls } from './WebRTCControls';
+
 export { designTokens } from '../design-system/tokens';
 export { default as colors } from '../design-system/colors';
 export { default as typography } from '../design-system/typography';

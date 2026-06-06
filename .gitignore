@@ -144,3 +144,6 @@ security-report.json
 
 # Application log files
 backend/logs/
+
+# MongoDB local backups
+backend/backups/

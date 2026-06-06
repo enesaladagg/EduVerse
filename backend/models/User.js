@@ -26,13 +26,70 @@ const UserSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ['student', 'teacher', 'admin'],
+      enum: ['student', 'teacher', 'admin', 'parent'],
       required: true,
     },
+    educationLevel: {
+      type: String,
+      enum: ['preschool', 'primary', 'middle', 'high', 'university', 'adult'],
+      default: 'adult',
+    },
+    friends: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    friendRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    parentId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    childrenIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     profilePicture: { type: String },
+    points: { type: Number, default: 0, min: 0 },
+    badges: { type: [String], default: [] },
+    completedLabs: [{ type: mongoose.Schema.Types.ObjectId, ref: 'CtfChallenge' }],
+    gamification: {
+      points: { type: Number, default: 0, min: 0 },
+      level: { type: Number, default: 1, min: 1 },
+      badges: [
+        {
+          key: { type: String, required: true, trim: true },
+          title: { type: String, required: true, trim: true },
+          description: { type: String, trim: true },
+          earnedAt: { type: Date, default: Date.now },
+        },
+      ],
+      completedChallenges: [
+        {
+          challengeKey: { type: String, required: true, trim: true },
+          completedAt: { type: Date, default: Date.now },
+          score: { type: Number, default: 0, min: 0 },
+        },
+      ],
+    },
   },
   { timestamps: true }
 );
+
+UserSchema.index({ role: 1, createdAt: -1 });
+UserSchema.index({ points: -1 });
+UserSchema.index({ badges: 1 });
+UserSchema.index({ 'gamification.points': -1 });
+UserSchema.index({ 'gamification.badges.key': 1 });
+
+UserSchema.pre('save', function syncGamificationFields(next) {
+  if (this.gamification?.points != null && !this.isModified('points')) {
+    this.points = this.gamification.points;
+  }
+  if (this.isModified('points')) {
+    this.gamification = this.gamification || {};
+    this.gamification.points = this.points;
+  }
+  if (Array.isArray(this.badges) && this.badges.length) {
+    this.gamification = this.gamification || {};
+    const existingKeys = new Set((this.gamification.badges || []).map((b) => b.key));
+    this.badges.forEach((key) => {
+      if (!existingKeys.has(key)) {
+        this.gamification.badges.push({ key, title: key, description: '' });
+      }
+    });
+  }
+  return next();
+});
 
 UserSchema.pre('save', async function hashPassword(next) {
   if (!this.isModified('password')) return next();
@@ -51,6 +108,18 @@ UserSchema.methods.toSafeObject = function toSafeObject() {
     name: this.name,
     email: this.email,
     role: this.role,
+    educationLevel: this.educationLevel,
+    friends: this.friends,
+    childrenIds: this.childrenIds,
+    profilePicture: this.profilePicture,
+    points: this.points ?? this.gamification?.points ?? 0,
+    badges: this.badges?.length ? this.badges : (this.gamification?.badges || []).map((b) => b.key),
+    completedLabs: this.completedLabs || [],
+    gamification: {
+      points: this.points ?? this.gamification?.points ?? 0,
+      level: this.gamification?.level || 1,
+      badges: this.gamification?.badges || [],
+    },
     createdAt: this.createdAt,
   };
 };

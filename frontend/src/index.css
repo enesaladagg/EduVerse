@@ -1,68 +1,206 @@
+/* =========================================================
+   Base reset — masaüstü görünümü değiştirilmez
+   ========================================================= */
+*, *::before, *::after { box-sizing: border-box; }
+
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
+:root {
+  --bg-color: #f8fafc;
+  --text-color: #1e293b;
 }
-a:hover {
-  color: #535bf2;
+
+[data-theme='dark'] {
+  --bg-color: #0f1117;
+  --text-color: #e8edf5;
 }
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+#root { min-height: 100vh; }
+
+/* Platform butonlarının global button stillerini ezmesini önle */
+#root button { all: unset; cursor: pointer; }
+
+/* Kaydırılabilir nav scroll çubuğunu gizle (WebKit & Firefox) */
+nav { scrollbar-width: none; }
+nav::-webkit-scrollbar { display: none; }
+
+@keyframes eduflow-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+/* Canvas touch action — whiteboard için */
+canvas { touch-action: none; }
+
+/* =========================================================
+   SADECE MOBİL — sm breakpoint (< 640 px)
+   Masaüstü (≥ 640px) stilleri kesinlikle değiştirilmez.
+   ========================================================= */
+@media (max-width: 639px) {
+
+  /* EduFlow canlı ders — sidebar alta, sandbox dikey */
+  .eduflow-live-body {
+    flex-direction: column !important;
+  }
+
+  .eduflow-sidebar {
+    width: 100% !important;
+    min-width: unset !important;
+    max-height: 220px !important;
+    border-left: none !important;
+    border-top: 1px solid #2a2d3e;
+  }
+
+  .eduflow-sandbox-split {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: 1fr 1fr !important;
+  }
+
+  .eduflow-control-dock {
+    gap: 0.25rem !important;
+    padding: 0.5rem !important;
+  }
+
+  .eduflow-participant-strip {
+    display: none !important;
+  }
+
+  /* Ana içerik dolgusu daralt */
+  main {
+    padding: 1rem 0.75rem !important;
+  }
+
+  /* Header padding daralt */
+  header > div,
+  header > nav {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+
+  /* Tab label metinlerini gizle — sadece ikon kalsın */
+  .tab-label {
+    display: none;
+  }
+
+  /* Dashboard kart grid — tek sütun */
+  .dashboard-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Code sandbox: editör ve çıktıyı dikey diz */
+  .sandbox-editor-output {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: 1fr 1fr;
+    max-height: 600px !important;
+  }
+
+  /* WebRTC video grid: tek sütun */
+  .webrtc-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* WebRTC AI panel: tam genişlik, üstte göster */
+  .webrtc-root > div:last-child > div[style*="width: 240px"] {
+    width: 100% !important;
+    border-left: none !important;
+    border-top: 1px solid #374151;
+  }
+
+  /* Whiteboard araç çubuğu — kaydırılabilir */
+  .whiteboard-root > div[style*="flex-wrap: wrap"] {
+    overflow-x: auto;
+    flex-wrap: nowrap !important;
+  }
+
+  /* Modal genişliği — ekrandan taşmasın */
+  .modal { max-width: calc(100vw - 1.5rem) !important; }
+
+  /* Hero başlık boyutu */
+  h1[style*="fontSize"] {
+    font-size: 1.5rem !important;
+  }
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+/* =========================================================
+   Küçük tablet — md breakpoint (640px – 767px)
+   ========================================================= */
+@media (min-width: 640px) and (max-width: 767px) {
+
+  main {
+    padding: 1.5rem 1rem !important;
   }
-  a:hover {
-    color: #747bff;
+
+  .sandbox-editor-output {
+    min-height: 280px !important;
   }
-  button {
-    background-color: #f9f9f9;
+
+  .webrtc-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
   }
 }
+
+/* =========================================================
+   WebKit / Blink cross-browser düzeltmeleri
+   ========================================================= */
+
+/* Safari: input ve button native görünümünü sıfırla */
+@supports (-webkit-touch-callout: none) {
+  input, textarea, select, button {
+    -webkit-appearance: none;
+  }
+}
+
+/* Firefox: scrollbar tutarlılığı */
+@supports (-moz-appearance: none) {
+  textarea { scrollbar-width: thin; }
+}
+
+/* iframe sandbox — HTML önizleme için */
+iframe[sandbox] {
+  display: block;
+  width: 100%;
+}
+
+/* Course Detail View Responsiveness */
+.course-detail-layout {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 40px;
+  align-items: start;
+}
+@media (max-width: 1024px) {
+  .course-detail-layout {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 32px;
+  }
+}
+
+.what-you-learn-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+@media (max-width: 640px) {
+  .what-you-learn-grid {
+    grid-template-columns: 1fr;
+  }
+}
+

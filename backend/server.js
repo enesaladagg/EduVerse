@@ -4,8 +4,12 @@ const app = require('./app');
 const env = require('./config/env');
 const logger = require('./utils/logger');
 const { connectDatabase, disconnectDatabase } = require('./config/db');
+const { initSocket } = require('./socket');
 
 const server = http.createServer(app);
+
+// Socket.io'yu HTTP sunucusuna bağla (WebRTC sinyalleşme + canlı etkileşim)
+const io = initSocket(server);
 
 const startServer = async () => {
   try {
@@ -28,6 +32,11 @@ const startServer = async () => {
 
 const shutdown = async (signal) => {
   logger.warn('Shutdown signal received', { signal });
+
+  // Önce yeni soket bağlantılarını kapat, mevcut olanları sonlandır
+  io.close(() => {
+    logger.info('Socket.io server closed');
+  });
 
   server.close(async () => {
     try {

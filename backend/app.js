@@ -5,28 +5,33 @@ const morgan = require('morgan');
 const mongoSanitize = require('express-mongo-sanitize');
 const { rateLimit } = require('express-rate-limit');
 const logger = require('./utils/logger');
+const AppError = require('./utils/AppError');
 
 const healthRoutes = require('./routes/health');
 const usersRoutes = require('./routes/users');
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
+const coursesRoutes = require('./routes/courses');
+const ctfRoutes = require('./routes/ctf');
+const rssRoutes = require('./routes/rss');
+const sessionsRoutes = require('./routes/sessions');
+const assignmentsRoutes = require('./routes/assignments');
+const socialRoutes = require('./routes/social');
+const plannerRoutes = require('./routes/planner');
 const { notFoundHandler, errorHandler } = require('./middleware/errorHandler');
+const { isOriginAllowed } = require('./utils/corsOrigins');
 
 const app = express();
 
 app.use(helmet());
 
-const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:5173')
-  .split(',')
-  .map((o) => o.trim());
-
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (isOriginAllowed(origin)) {
         callback(null, true);
       } else {
-        callback(new Error('Not allowed by CORS'));
+        callback(new AppError('Not allowed by CORS policy.', 403, 'CORS_FORBIDDEN'));
       }
     },
     credentials: true,
@@ -64,6 +69,13 @@ app.use('/api', healthRoutes);
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api', usersRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api', coursesRoutes);
+app.use('/api', ctfRoutes);
+app.use('/api', rssRoutes);
+app.use('/api', sessionsRoutes);
+app.use('/api', assignmentsRoutes);
+app.use('/api/social', socialRoutes);
+app.use('/api/planner', plannerRoutes);
 
 app.get('/', (req, res) => {
   return res.json({
