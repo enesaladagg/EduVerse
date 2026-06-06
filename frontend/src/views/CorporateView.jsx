@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import GlobalNavbar from '../components/GlobalNavbar';
 import { Badge, Card, SectionHead } from '../components/PageBlocks';
+import { BarChart, Lock, Target, UserCheck, Link as LinkIcon, PhoneCall, Building, Star, Check, Mail, Phone, MapPin, CheckCircle } from 'lucide-react';
 
 const ENTERPRISE_PLANS = [
   {
@@ -18,7 +19,7 @@ const ENTERPRISE_PLANS = [
   },
 ];
 
-const ENTERPRISE_LOGOS = ["🏦 Garanti BBVA", "🛒 Trendyol", "🚚 Getir", "📱 Turkcell", "🏭 Ford Otosan", "💼 Deloitte", "🏢 Siemens", "🛡️ STM"];
+const ENTERPRISE_LOGOS = ["Garanti BBVA", "Trendyol", "Getir", "Turkcell", "Ford Otosan", "Deloitte", "Siemens", "STM"];
 
 const ENTERPRISE_STATS = [
   { v: "500+", l: "Kurumsal Müşteri" },
@@ -28,12 +29,12 @@ const ENTERPRISE_STATS = [
 ];
 
 const ENTERPRISE_FEATURES = [
-  { icon: "📊", title: "Gelişmiş Analitik", desc: "Çalışan bazlı ilerleme, departman karşılaştırması ve ROI raporları", color: "#10b981" },
-  { icon: "🔐", title: "SSO & Güvenlik", desc: "SAML, LDAP, Azure AD entegrasyonu ve kurumsal güvenlik standartları", color: "#6366f1" },
-  { icon: "🎯", title: "Özel Müfredat", desc: "Şirketinize özel eğitim yolları ve içerik oluşturma desteği", color: "#f59e0b" },
-  { icon: "👨‍🏫", title: "Dedike Eğitmen", desc: "Ekibinize atanmış uzman eğitmenlerle birebir destek", color: "#f43f5e" },
-  { icon: "🔗", title: "LMS Entegrasyonu", desc: "Mevcut LMS'inize sorunsuz entegrasyon (SCORM, xAPI)", color: "#06b6d4" },
-  { icon: "📞", title: "7/24 Destek", desc: "Öncelikli destek hattı ve dedike müşteri temsilcisi", color: "#8b5cf6" },
+  { icon: <BarChart size={32} />, title: "Gelişmiş Analitik", desc: "Çalışan bazlı ilerleme, departman karşılaştırması ve ROI raporları", color: "#10b981" },
+  { icon: <Lock size={32} />, title: "SSO & Güvenlik", desc: "SAML, LDAP, Azure AD entegrasyonu ve kurumsal güvenlik standartları", color: "#6366f1" },
+  { icon: <Target size={32} />, title: "Özel Müfredat", desc: "Şirketinize özel eğitim yolları ve içerik oluşturma desteği", color: "#f59e0b" },
+  { icon: <UserCheck size={32} />, title: "Dedike Eğitmen", desc: "Ekibinize atanmış uzman eğitmenlerle birebir destek", color: "#f43f5e" },
+  { icon: <LinkIcon size={32} />, title: "LMS Entegrasyonu", desc: "Mevcut LMS'inize sorunsuz entegrasyon (SCORM, xAPI)", color: "#06b6d4" },
+  { icon: <PhoneCall size={32} />, title: "7/24 Destek", desc: "Öncelikli destek hattı ve dedike müşteri temsilcisi", color: "#8b5cf6" },
 ];
 
 export default function CorporateView({ onNavigate }) {
@@ -80,7 +81,7 @@ export default function CorporateView({ onNavigate }) {
             <div style={{ position: "absolute", top: -60, left: "30%", width: 300, height: 300, borderRadius: "50%", background: "#6366f1", filter: "blur(150px)", opacity: .1 }} />
             <div style={{ position: "absolute", bottom: -40, right: "20%", width: 200, height: 200, borderRadius: "50%", background: C.primary, filter: "blur(120px)", opacity: .1 }} />
             <div style={{ position: "relative", zIndex: 2 }}>
-              <Badge color="#f59e0b" filled>🏢 Kurumsal Çözümler</Badge>
+              <Badge color="#f59e0b" filled><span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Building size={14}/> Kurumsal Çözümler</span></Badge>
               <h1 style={{ fontFamily: C.font, fontSize: 44, fontWeight: 900, color: "#f8fafc", marginTop: 24, marginBottom: 16 }}>
                 Ekibinizi Geleceğe<br /><span style={{ color: C.primary }}>Hazırlayın</span>
               </h1>
@@ -121,7 +122,9 @@ export default function CorporateView({ onNavigate }) {
                   border: plan.popular ? `2px solid ${plan.color}` : `1px solid ${C.border}`,
                 }} C={C}>
                   {plan.popular && (
-                    <div style={{ background: plan.color, color: "#fff", textAlign: "center", padding: "8px", fontSize: 13, fontWeight: 800 }}>⭐ En Popüler Seçim</div>
+                    <div style={{ background: plan.color, color: "#fff", textAlign: "center", padding: "8px", fontSize: 13, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                      <Star size={14} fill="currentColor" /> En Popüler Seçim
+                    </div>
                   )}
                   <div style={{ padding: 32 }}>
                     <h3 style={{ fontFamily: C.font, fontSize: 22, fontWeight: 900, color: C.heading, marginBottom: 12 }}>{plan.name}</h3>
@@ -132,7 +135,7 @@ export default function CorporateView({ onNavigate }) {
                     <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 32 }}>
                       {plan.features.map((f, j) => (
                         <div key={j} style={{ display: "flex", alignItems: "flex-start", gap: 10, fontSize: 15, color: C.body, fontWeight: 500 }}>
-                          <span style={{ color: plan.color, fontSize: 16, marginTop: 2, flexShrink: 0, fontWeight: 800 }}>✓</span>
+                          <span style={{ color: plan.color, marginTop: 2, flexShrink: 0 }}><Check size={18} strokeWidth={3} /></span>
                           <span>{f}</span>
                         </div>
                       ))}
@@ -154,7 +157,7 @@ export default function CorporateView({ onNavigate }) {
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(340px,1fr))", gap: 24, marginBottom: 60 }}>
               {ENTERPRISE_FEATURES.map((feature, i) => (
                 <Card key={i} hover={false} style={{ padding: 24 }} C={C}>
-                  <div style={{ width: 60, height: 60, borderRadius: 16, background: `${feature.color}15`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32, marginBottom: 20 }}>{feature.icon}</div>
+                  <div style={{ width: 60, height: 60, borderRadius: 16, background: `${feature.color}15`, color: feature.color, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20 }}>{feature.icon}</div>
                   <h4 style={{ fontFamily: C.font, fontSize: 18, fontWeight: 800, color: C.heading, marginBottom: 10 }}>{feature.title}</h4>
                   <p style={{ fontSize: 15, color: C.muted, lineHeight: 1.6 }}>{feature.desc}</p>
                 </Card>
@@ -170,13 +173,13 @@ export default function CorporateView({ onNavigate }) {
                   <p style={{ fontSize: 16, color: C.muted, lineHeight: 1.6, marginBottom: 32 }}>Kurumunuza özel çözümlerimiz hakkında detaylı bilgi almak, demo planlamak veya fiyat teklifi istemek için formu doldurabilirsiniz. Uzmanlarımız en kısa sürede sizinle iletişime geçecektir.</p>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 16, color: C.heading, fontWeight: 600 }}>
-                      <span style={{ fontSize: 24 }}>✉️</span> kurumsal@eduverse.com
+                      <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, background: C.pageBg, borderRadius: 8 }}><Mail size={18} color={C.primary} /></span> kurumsal@eduverse.com
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 16, color: C.heading, fontWeight: 600 }}>
-                      <span style={{ fontSize: 24 }}>📞</span> +90 (850) 123 45 67
+                      <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, background: C.pageBg, borderRadius: 8 }}><Phone size={18} color={C.primary} /></span> +90 (850) 123 45 67
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 16, color: C.heading, fontWeight: 600 }}>
-                      <span style={{ fontSize: 24 }}>📍</span> Levent, Şişli / İstanbul
+                      <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, background: C.pageBg, borderRadius: 8 }}><MapPin size={18} color={C.primary} /></span> Levent, Şişli / İstanbul
                     </div>
                   </div>
                 </div>
@@ -184,7 +187,7 @@ export default function CorporateView({ onNavigate }) {
                 <div>
                   {submitted ? (
                     <div style={{ background: C.primaryDim, padding: 40, borderRadius: 20, border: `2px solid ${C.primaryBorder}`, textAlign: 'center' }}>
-                      <div style={{ fontSize: 48, marginBottom: 16 }}>✅</div>
+                      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}><CheckCircle size={48} color={C.primary} /></div>
                       <h3 style={{ fontSize: 24, fontWeight: 800, color: C.primary, marginBottom: 8 }}>Talebiniz Alındı</h3>
                       <p style={{ fontSize: 16, color: C.heading }}>Ekibimiz en kısa sürede <strong>{formData.email}</strong> adresi üzerinden sizinle iletişime geçecektir.</p>
                     </div>

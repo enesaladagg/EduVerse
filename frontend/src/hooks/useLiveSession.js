@@ -46,6 +46,8 @@ export function useLiveSession({ user, viewRole, onLeave }) {
   const [screenStream, setScreenStream] = useState(null);
   const [studentCode, setStudentCode] = useState(null);
   const processorRef = useRef(null);
+  const mediaRecorderRef = useRef(null);
+  const recordedChunksRef = useRef([]);
 
   const displayName = user?.name || 'Demo Kullanıcı';
   const apiRole = viewRole === 'teacher' ? 'teacher' : 'student';
@@ -214,8 +216,59 @@ export function useLiveSession({ user, viewRole, onLeave }) {
   const toggleMic = useCallback(() => setMic((v) => !v), []);
   const toggleCam = useCallback(() => setCam((v) => !v), []);
   const toggleHand = useCallback(() => setHand((v) => !v), []);
-  const toggleRecord = useCallback(() => setRecording((v) => !v), []);
   const toggleAiPanel = useCallback(() => setShowAiPanel((v) => !v), []);
+
+  const toggleRecord = useCallback(() => {
+    if (recording) {
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+        mediaRecorderRef.current.stop();
+      }
+      setRecording(false);
+    } else {
+      const streamToRecord = screenStream || localStream;
+      if (!streamToRecord) {
+         alert("Kaydedilecek bir akış bulunamadı. Lütfen önce ekran paylaşımını veya kameranızı açın.");
+         return;
+      }
+      try {
+        recordedChunksRef.current = [];
+        let options = { mimeType: 'video/webm; codecs=vp9' };
+        if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+          options = { mimeType: 'video/webm' };
+        }
+        const mediaRecorder = new MediaRecorder(streamToRecord, options);
+
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data && e.data.size > 0) {
+            recordedChunksRef.current.push(e.data);
+          }
+        };
+
+        mediaRecorder.onstop = () => {
+          const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.style.display = 'none';
+          a.href = url;
+          a.download = `ders_kayit_${new Date().getTime()}.webm`;
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(() => {
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+          }, 100);
+          recordedChunksRef.current = [];
+        };
+
+        mediaRecorder.start();
+        mediaRecorderRef.current = mediaRecorder;
+        setRecording(true);
+      } catch (e) {
+        console.error("Kayıt başlatılamadı:", e);
+        alert("Tarayıcınız video kaydını desteklemiyor olabilir.");
+      }
+    }
+  }, [recording, screenStream, localStream]);
 
   const toggleScreen = useCallback(async () => {
     if (screen) {
@@ -239,7 +292,7 @@ export function useLiveSession({ user, viewRole, onLeave }) {
   }, [screen, screenStream]);
 
   const handleModeChange = useCallback((mode) => {
-    if (['slide', 'whiteboard', 'sandbox'].includes(mode)) {
+    if (['slide', 'whiteboard', 'sandbox', 'video'].includes(mode)) {
       setActiveMode(mode);
     }
   }, []);
@@ -249,9 +302,9 @@ export function useLiveSession({ user, viewRole, onLeave }) {
       case 'mic': toggleMic(); break;
       case 'cam': toggleCam(); break;
       case 'share': toggleScreen(); break;
-      case 'whiteboard': setActiveMode('whiteboard'); break;
-      case 'sandbox': setActiveMode('sandbox'); break;
-      case 'slide': setActiveMode('slide'); break;
+      case 'whiteboard': setActiveMode(prev => prev === 'whiteboard' ? 'video' : 'whiteboard'); break;
+      case 'sandbox': setActiveMode(prev => prev === 'sandbox' ? 'video' : 'sandbox'); break;
+      case 'slide': setActiveMode(prev => prev === 'slide' ? 'video' : 'slide'); break;
       case 'reactions': toggleHand(); break;
       case 'record': toggleRecord(); break;
       case 'ai': toggleAiPanel(); break;

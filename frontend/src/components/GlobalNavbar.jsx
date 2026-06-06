@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 import {
   Home,
   GraduationCap,
@@ -12,7 +13,25 @@ import {
   Sun,
   Briefcase,
   Menu,
-  Award
+  Award,
+  ShoppingBag,
+  Bell,
+  Trash2,
+  Search,
+  Compass,
+  Trophy,
+  Brain,
+  Flame,
+  FileText,
+  ChevronDown,
+  Check,
+  Zap,
+  Users,
+  ShieldCheck,
+  Map,
+  User,
+  Settings,
+  LogOut
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -37,9 +56,24 @@ const EXTRA_LINKS = [
 export default function GlobalNavbar({ activePage, onNavigate }) {
   const { isDark, toggleTheme } = useTheme();
   const { user, isAuthenticated, logout } = useAuth();
+  const { cartItems, openCart } = useCart();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showNotifs, setShowNotifs] = useState(false);
+  const [showAllNotifs, setShowAllNotifs] = useState(false);
+  const [notifications, setNotifications] = useState([
+    { id: 1, title: 'EduBot', desc: 'Sana yeni bir mesaj gönderdi.', time: '2 dk önce', type: 'msg' },
+    { id: 2, title: 'React 101', desc: 'Yeni modül yayında: "Hooks Derinlemesine"', time: '1 saat önce', type: 'course' },
+    { id: 3, title: 'Ahmet Yılmaz', desc: 'Sana arkadaşlık isteği gönderdi.', time: 'Dün', type: 'friend' },
+    { id: 4, title: 'Sistem', desc: 'Haftalık hedefine ulaştın!', time: '2 gün önce', type: 'system' },
+    { id: 5, title: 'Elif Kaya', desc: 'Seni "Frontend Bootcamp" grubuna ekledi.', time: '3 gün önce', type: 'group' },
+    { id: 6, title: 'Canlı Ders', desc: 'Python OOP dersi 10 dakika içinde başlıyor.', time: '3 gün önce', type: 'live' }
+  ]);
   const menuRef = useRef(null);
+  const notifRef = useRef(null);
+  
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const profileRef = useRef(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50);
@@ -49,8 +83,13 @@ export default function GlobalNavbar({ activePage, onNavigate }) {
 
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (menuRef.current && !menuRef.current.contains(e.target)) {
-        setMenuOpen(false);
+      if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false);
+      if (notifRef.current && !notifRef.current.contains(e.target)) {
+        setShowNotifs(false);
+        setShowAllNotifs(false);
+      }
+      if (profileRef.current && !profileRef.current.contains(e.target)) {
+        setShowProfileMenu(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -63,6 +102,7 @@ export default function GlobalNavbar({ activePage, onNavigate }) {
 
   const visibleNavItems = NAV_ITEMS.filter(item => {
     if (item.auth && !isAuthenticated) return false;
+    if (user?.role === 'admin') return true;
     if (item.role && user?.role !== item.role) return false;
     return true;
   });
@@ -294,7 +334,7 @@ export default function GlobalNavbar({ activePage, onNavigate }) {
               <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
                 {[
                   { id: 'h-paths', label: 'Yol Haritaları' },
-                  { id: 'certificates', label: 'Sertifikalar' },
+                  { id: 'h-community', label: 'Topluluk' },
                   { id: 'h-corporate', label: 'Kurumsal' }
                 ].map((link, idx) => {
                   const isActive = activePage === link.id;
@@ -336,7 +376,6 @@ export default function GlobalNavbar({ activePage, onNavigate }) {
                     </button>
                   );
                 })}
-                {/* Separator before right actions if needed visually, or just remove since we moved it to center */}
                 <div style={{ width: 1, height: 24, background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)', marginLeft: 16 }} />
               </div>
             )}
@@ -347,6 +386,111 @@ export default function GlobalNavbar({ activePage, onNavigate }) {
         {/* RIGHT ACTIONS */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           
+          <button
+            onClick={openCart}
+            style={{
+              position: 'relative',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              width: 36, height: 36, borderRadius: '50%',
+              border: 'none',
+              background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
+              color: isDark ? '#fff' : '#1e293b',
+              cursor: 'pointer',
+              transition: 'background 0.2s'
+            }}
+          >
+            <ShoppingBag size={18} />
+            {cartItems.length > 0 && (
+              <span style={{
+                position: 'absolute', top: -2, right: -2,
+                background: '#ef4444', color: '#fff', fontSize: 10, fontWeight: 700, fontFamily: '"Inter", sans-serif',
+                width: 16, height: 16, borderRadius: '50%',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                border: `2px solid ${isDark ? '#0a1628' : '#ffffff'}`,
+              }}>
+                {cartItems.length}
+              </span>
+            )}
+          </button>
+
+          {/* Notifications */}
+          {isAuthenticated && (
+            <div style={{ position: 'relative' }} ref={notifRef}>
+              <button
+                onClick={() => { 
+                  setShowNotifs(!showNotifs); 
+                  if (showNotifs) setShowAllNotifs(false); 
+                }}
+                style={{
+                  position: 'relative',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  width: 36, height: 36, borderRadius: '50%',
+                  border: 'none',
+                  background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
+                  color: isDark ? '#fff' : '#1e293b',
+                  cursor: 'pointer',
+                  transition: 'background 0.2s'
+                }}
+              >
+                <Bell size={18} />
+                {notifications.length > 0 && (
+                  <span style={{
+                    position: 'absolute', top: -2, right: -2,
+                    background: '#ef4444', color: '#fff', fontSize: 10, fontWeight: 700, fontFamily: '"Inter", sans-serif',
+                    width: 16, height: 16, borderRadius: '50%',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    border: `2px solid ${isDark ? '#0a1628' : '#ffffff'}`,
+                  }}>
+                    {notifications.length}
+                  </span>
+                )}
+              </button>
+
+              {showNotifs && (
+                <div style={{
+                  position: 'absolute', top: '100%', right: 0, marginTop: 12,
+                  width: 320, background: isDark ? '#0f172a' : '#fff',
+                  borderRadius: 16, padding: 16,
+                  boxShadow: isDark ? '0 10px 40px rgba(0,0,0,0.5)' : '0 10px 40px rgba(0,0,0,0.08)',
+                  border: `1px solid ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'}`,
+                  animation: 'slideDownFade 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                  zIndex: 1000
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                    <button 
+                      onClick={() => setNotifications([])}
+                      style={{ background: 'transparent', border: 'none', color: '#ef4444', fontSize: 12, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
+                    >
+                      <Trash2 size={14} /> Temizle
+                    </button>
+                    <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: isDark ? '#fff' : '#1e293b' }}>Bildirimler</h3>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxHeight: showAllNotifs ? 360 : undefined, overflowY: showAllNotifs ? 'auto' : 'hidden', paddingRight: showAllNotifs ? 4 : 0 }}>
+                    {notifications.length === 0 ? (
+                      <div style={{ textAlign: 'center', color: isDark ? '#94a3b8' : '#64748b', fontSize: 14, padding: '20px 0' }}>Hiç bildiriminiz yok.</div>
+                    ) : (
+                      (showAllNotifs ? notifications : notifications.slice(0, 3)).map((n, i) => (
+                        <div key={n.id || i} style={{ display: 'flex', gap: 12, padding: 8, borderRadius: 12, background: isDark ? 'rgba(255,255,255,0.02)' : '#f8fafc', cursor: 'pointer' }}>
+                          <div style={{ width: 40, height: 40, borderRadius: '50%', background: n.type === 'msg' ? '#3b82f6' : n.type === 'course' ? '#10b981' : '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 14, flexShrink: 0 }}>
+                            {n.title.charAt(0)}
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontSize: 14, fontWeight: 700, color: isDark ? '#fff' : '#1e293b' }}>{n.title}</div>
+                            <div style={{ fontSize: 12, color: isDark ? '#94a3b8' : '#64748b', marginTop: 2 }}>{n.desc}</div>
+                            <div style={{ fontSize: 10, color: isDark ? '#64748b' : '#94a3b8', marginTop: 4 }}>{n.time}</div>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                  {!showAllNotifs && notifications.length > 3 && (
+                    <button onClick={() => setShowAllNotifs(true)} style={{ width: '100%', marginTop: 16, background: 'transparent', border: 'none', color: '#00d4aa', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>Tümünü Gör ({notifications.length})</button>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
           <button
             onClick={toggleTheme}
             style={{
@@ -400,30 +544,58 @@ export default function GlobalNavbar({ activePage, onNavigate }) {
               </button>
             </div>
           ) : (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div style={{
-                width: 36, height: 36, borderRadius: '50%',
-                background: '#00d4aa',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#fff', fontWeight: 700, fontSize: 14,
-              }}>
-                {user?.avatarInitials || '?'}
-              </div>
-              <button
-                onClick={logout}
+            <div style={{ position: 'relative' }} ref={profileRef}>
+              <div 
+                onClick={() => setShowProfileMenu(!showProfileMenu)}
                 style={{
-                  padding: '8px 16px',
-                  borderRadius: 50,
-                  border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
-                  background: 'transparent',
-                  color: isDark ? '#8899b4' : '#64748b',
-                  fontWeight: 600,
-                  fontSize: 13,
-                  cursor: 'pointer'
+                  display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer',
+                  padding: '4px 12px 4px 4px', borderRadius: 50,
+                  background: isDark ? (showProfileMenu ? 'rgba(255,255,255,0.1)' : 'transparent') : (showProfileMenu ? 'rgba(0,0,0,0.05)' : 'transparent'),
+                  transition: 'background 0.2s', border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`
                 }}
               >
-                Çıkış
-              </button>
+                <div style={{
+                  width: 32, height: 32, borderRadius: '50%',
+                  background: '#00d4aa',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: '#fff', fontWeight: 700, fontSize: 13,
+                  overflow: 'hidden'
+                }}>
+                  {user?.avatar ? (
+                    <img src={user.avatar} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    user?.avatarInitials || '?'
+                  )}
+                </div>
+                <ChevronDown size={14} color={isDark ? '#cbd5e1' : '#64748b'} style={{ transform: showProfileMenu ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s' }} />
+              </div>
+
+              {showProfileMenu && (
+                <div style={{
+                  position: 'absolute', top: '100%', right: 0, marginTop: 12,
+                  width: 240, background: isDark ? '#0f172a' : '#fff',
+                  borderRadius: 16, padding: 8,
+                  boxShadow: isDark ? '0 10px 40px rgba(0,0,0,0.5)' : '0 10px 40px rgba(0,0,0,0.08)',
+                  border: `1px solid ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'}`,
+                  animation: 'slideDownFade 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                  zIndex: 1000
+                }}>
+                  <div style={{ padding: '12px 16px', borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'}`, marginBottom: 8 }}>
+                    <div style={{ fontWeight: 800, color: isDark ? '#fff' : '#1e293b', fontSize: 15, marginBottom: 2 }}>{user?.name || 'Kullanıcı'}</div>
+                    <div style={{ fontSize: 13, color: isDark ? '#94a3b8' : '#64748b' }}>{user?.role === 'instructor' ? 'Eğitmen' : 'Öğrenci'} • Seviye {user?.level || 1}</div>
+                  </div>
+                  
+                  <button onClick={() => { onNavigate('profile'); setShowProfileMenu(false); }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '10px 16px', background: 'transparent', border: 'none', color: isDark ? '#cbd5e1' : '#334155', fontSize: 14, fontWeight: 600, cursor: 'pointer', borderRadius: 8, transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                    <User size={16} /> Profilim
+                  </button>
+                  <button onClick={() => { setShowProfileMenu(false); }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '10px 16px', background: 'transparent', border: 'none', color: isDark ? '#cbd5e1' : '#334155', fontSize: 14, fontWeight: 600, cursor: 'pointer', borderRadius: 8, transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                    <Settings size={16} /> Hesap Ayarları
+                  </button>
+                  <button onClick={() => { logout(); setShowProfileMenu(false); }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '10px 16px', marginTop: 4, background: 'transparent', border: 'none', color: '#ef4444', fontSize: 14, fontWeight: 600, cursor: 'pointer', borderRadius: 8, transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(239, 68, 68, 0.1)' : 'rgba(239, 68, 68, 0.1)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                    <LogOut size={16} /> Çıkış Yap
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>

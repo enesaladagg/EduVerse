@@ -1,6 +1,7 @@
 import React, { memo, useState, useRef, useEffect } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import Badge from '../Badge';
+import { Mic, MicOff, Video, VideoOff, Hand, Smile } from 'lucide-react';
 
 function formatTime(at) {
   return new Date(at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
@@ -25,7 +26,10 @@ const LiveSidebar = memo(function LiveSidebar({
   const { palette: p, tokens: t } = useTheme();
   const [tab, setTab] = useState('chat');
   const [input, setInput] = useState('');
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const chatEndRef = useRef(null);
+  
+  const EMOJIS = ['😀', '😂', '😍', '😎', '😭', '😡', '👍', '🙏', '🎉', '🔥', '❤️', '💯', '🤔', '🙌', '✨', '🚀'];
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -57,7 +61,7 @@ const LiveSidebar = memo(function LiveSidebar({
         height: '100%',
       }}
     >
-      <div style={{ display: 'flex', borderBottom: `1px solid ${p.border}` }}>
+      <div style={{ display: 'flex', padding: t.spacing[3], gap: '8px', background: p.panelElevated, borderBottom: `1px solid ${p.border}` }}>
         {tabs.map(({ id, label }) => (
           <button
             key={id}
@@ -65,14 +69,16 @@ const LiveSidebar = memo(function LiveSidebar({
             onClick={() => setTab(id)}
             style={{
               flex: 1,
-              padding: `${t.spacing[3]} ${t.spacing[2]}`,
+              padding: '10px',
+              borderRadius: '12px',
               border: 'none',
-              borderBottom: tab === id ? `2px solid ${p.accent}` : '2px solid transparent',
-              background: 'transparent',
-              color: tab === id ? p.accent : p.textMuted,
-              fontSize: t.typography.fontSize.sm,
-              fontWeight: tab === id ? t.typography.fontWeight.semibold : t.typography.fontWeight.normal,
+              background: tab === id ? p.accent : 'transparent',
+              color: tab === id ? '#fff' : p.textMuted,
+              fontSize: '13px',
+              fontWeight: tab === id ? 700 : 600,
               cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              boxShadow: tab === id ? '0 4px 12px rgba(0,212,170,0.3)' : 'none',
             }}
           >
             {label}
@@ -154,9 +160,11 @@ const LiveSidebar = memo(function LiveSidebar({
                   {p_.role === 'guest_speaker' && <Badge variant="warning" size="sm">Konuk Konuşmacı</Badge>}
                   {p_.role === 'host' && <Badge variant="primary" size="sm">Eğitmen</Badge>}
                 </div>
-                <span style={{ fontSize: '14px' }}>
-                  {p_.mic ? '🎤' : '🔇'} {p_.cam ? '📹' : '📷'} {p_.hand ? '✋' : ''}
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: p.textMuted }}>
+                  {p_.mic ? <Mic size={16} color="#10b981" /> : <MicOff size={16} color="#ef4444" />}
+                  {p_.cam ? <Video size={16} color="#10b981" /> : <VideoOff size={16} color="#ef4444" />}
+                  {p_.hand && <Hand size={16} color="#f59e0b" />}
+                </div>
               </div>
             ))}
           </div>
@@ -241,23 +249,43 @@ const LiveSidebar = memo(function LiveSidebar({
           borderTop: `1px solid ${p.border}`,
           display: 'flex',
           gap: t.spacing[2],
+          position: 'relative'
         }}>
-          <input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-            placeholder="Mesaj yazın..."
-            style={{
-              flex: 1,
-              padding: `${t.spacing[2]} ${t.spacing[3]}`,
-              borderRadius: t.borderRadius.full,
-              border: `1px solid ${p.border}`,
-              background: p.panelElevated,
-              color: p.text,
-              fontSize: t.typography.fontSize.sm,
-              outline: 'none',
-            }}
-          />
+          {showEmojiPicker && (
+            <div style={{
+              position: 'absolute', bottom: '100%', left: t.spacing[3], marginBottom: t.spacing[2],
+              background: p.panelElevated, border: `1px solid ${p.border}`, borderRadius: t.borderRadius.lg,
+              padding: t.spacing[2], display: 'flex', flexWrap: 'wrap', gap: '4px', width: '220px',
+              boxShadow: t.shadows.md, zIndex: 10
+            }}>
+              {EMOJIS.map(emoji => (
+                <button key={emoji} onClick={() => { setInput(prev => prev + emoji); setShowEmojiPicker(false); }} style={{ background: 'transparent', border: 'none', fontSize: '20px', cursor: 'pointer', padding: '4px', borderRadius: '4px', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(128,128,128,0.1)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>{emoji}</button>
+              ))}
+            </div>
+          )}
+          <div style={{ position: 'relative', flex: 1, display: 'flex', alignItems: 'center' }}>
+            <button type="button" onClick={() => setShowEmojiPicker(!showEmojiPicker)} style={{ position: 'absolute', left: 12, background: 'transparent', border: 'none', display: 'flex', alignItems: 'center', cursor: 'pointer', color: p.textMuted, padding: 0 }}>
+              <Smile size={18} />
+            </button>
+            <input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') { handleSend(); setShowEmojiPicker(false); } }}
+              placeholder="Mesaj yazın..."
+              style={{
+                flex: 1,
+                padding: `${t.spacing[2]} ${t.spacing[3]} ${t.spacing[2]} 38px`,
+                borderRadius: t.borderRadius.full,
+                border: `1px solid ${p.border}`,
+                background: p.panelElevated,
+                color: p.text,
+                fontSize: t.typography.fontSize.sm,
+                outline: 'none',
+                width: '100%',
+                boxSizing: 'border-box'
+              }}
+            />
+          </div>
           <button
             type="button"
             onClick={handleSend}

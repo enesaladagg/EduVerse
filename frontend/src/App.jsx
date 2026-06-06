@@ -9,6 +9,9 @@ import InstructorDashboardView from './views/InstructorDashboardView';
 import LoginView from './views/LoginView';
 import RegisterView from './views/RegisterView';
 import AssignmentsView from './views/AssignmentsView';
+import { CartProvider } from './context/CartContext';
+import CartDrawer from './components/CartDrawer';
+import CheckoutView from './views/CheckoutView';
 import CoursesPage from './views/CoursesPage';
 import GamesView from './views/GamesView';
 import CourseDetailView from './views/CourseDetailView';
@@ -18,6 +21,8 @@ import CertificatesView from './views/CertificatesView';
 import RoadmapsView from './views/RoadmapsView';
 import CommunityView from './views/CommunityView';
 import CorporateView from './views/CorporateView';
+import PlannerPage from './views/PlannerPage';
+import MessagingPage from './views/MessagingPage';
 
 const GUEST_USER = {
   name: 'Misafir',
@@ -43,9 +48,10 @@ function AppContent() {
     case 'courses': content = <CoursesPage onNavigate={navigate} />; break;
     case 'games': content = <GamesView onNavigate={navigate} />; break;
     case 'course-detail': content = <CourseDetailView onNavigate={navigate} />; break;
+    case 'checkout': content = <CheckoutView onNavigate={navigate} />; break;
     case 'assignments': content = <AssignmentsView />; break;
-    case 'calendar': content = <ComingSoonView title="Takvim & Plan" description="Kişisel öğrenme takviminiz ve planlama araçlarınız çok yakında burada olacak." />; break;
-    case 'messages': content = <ComingSoonView title="Mesajlar" description="Eğitmenler ve diğer öğrencilerle iletişime geçebileceğiniz mesajlaşma modülü yapım aşamasında." />; break;
+    case 'calendar': content = <PlannerPage />; break;
+    case 'messages': content = <MessagingPage />; break;
     case 'certificates': content = <CertificatesView onNavigate={navigate} />; break;
     case 'h-paths': content = <RoadmapsView onNavigate={navigate} />; break;
     case 'h-community': content = <CommunityView onNavigate={navigate} />; break;
@@ -84,6 +90,7 @@ function AppContent() {
         )}
       </div>
       {page !== 'login' && page !== 'register' && page !== 'live' && <PomodoroTimer />}
+      <CartDrawer onNavigate={navigate} />
     </>
   );
 }
@@ -92,7 +99,9 @@ export default function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <AppContent />
+        <CartProvider>
+          <AppContent />
+        </CartProvider>
       </AuthProvider>
     </ThemeProvider>
   );

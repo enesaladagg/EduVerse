@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import GlobalNavbar from '../components/GlobalNavbar';
 import { Badge, Card, Tag } from '../components/PageBlocks';
+import { Rocket, BarChart, Settings, Smartphone, Map, Users, Star, Lock, Clock, BookOpen } from 'lucide-react';
 
 const ROADMAPS = [
   {
-    id: "fullstack", title: "Full Stack Developer", icon: "🚀", color: "#10b981", desc: "Frontend'den backend'e, veritabanından deployment'a tam yol haritası.",
+    id: "fullstack", title: "Full Stack Developer", icon: <Rocket size={32} />, color: "#10b981", desc: "Frontend'den backend'e, veritabanından deployment'a tam yol haritası.",
     duration: "6 ay", courses: 12, hours: 180, enrolled: 18450, rating: 4.9,
     skills: ["HTML/CSS", "JavaScript", "React", "Node.js", "MongoDB", "PostgreSQL", "Docker", "AWS"],
     steps: [
@@ -18,7 +19,7 @@ const ROADMAPS = [
     ]
   },
   {
-    id: "datascience", title: "Data Scientist", icon: "📊", color: "#6366f1", desc: "Veri analizinden makine öğrenmesine kapsamlı kariyer yolu.",
+    id: "datascience", title: "Data Scientist", icon: <BarChart size={32} />, color: "#6366f1", desc: "Veri analizinden makine öğrenmesine kapsamlı kariyer yolu.",
     duration: "8 ay", courses: 10, hours: 220, enrolled: 12300, rating: 4.8,
     skills: ["Python", "Pandas", "NumPy", "SQL", "TensorFlow", "Tableau", "Statistics", "ML"],
     steps: [
@@ -30,7 +31,7 @@ const ROADMAPS = [
     ]
   },
   {
-    id: "devops", title: "DevOps Engineer", icon: "⚙️", color: "#06b6d4", desc: "CI/CD, konteynerizasyon ve bulut altyapı uzmanlığı.",
+    id: "devops", title: "DevOps Engineer", icon: <Settings size={32} />, color: "#06b6d4", desc: "CI/CD, konteynerizasyon ve bulut altyapı uzmanlığı.",
     duration: "5 ay", courses: 8, hours: 140, enrolled: 7650, rating: 4.7,
     skills: ["Linux", "Docker", "Kubernetes", "Terraform", "AWS", "Jenkins", "Prometheus", "Git"],
     steps: [
@@ -42,7 +43,7 @@ const ROADMAPS = [
     ]
   },
   {
-    id: "mobile", title: "Mobil Geliştirici", icon: "📱", color: "#8b5cf6", desc: "Flutter ve React Native ile cross-platform uygulama geliştirme.",
+    id: "mobile", title: "Mobil Geliştirici", icon: <Smartphone size={32} />, color: "#8b5cf6", desc: "Flutter ve React Native ile cross-platform uygulama geliştirme.",
     duration: "5 ay", courses: 7, hours: 130, enrolled: 9200, rating: 4.8,
     skills: ["Dart", "Flutter", "React Native", "Firebase", "REST API", "State Management"],
     steps: [
@@ -89,7 +90,10 @@ export default function RoadmapsView({ onNavigate }) {
           }}>
             <div style={{ position: "absolute", bottom: -30, right: 60, width: 200, height: 200, borderRadius: "50%", background: "#6366f1", filter: "blur(120px)", opacity: .1 }} />
             <div style={{ position: "relative", zIndex: 2 }}>
-              <h1 style={{ fontFamily: C.font, fontSize: 36, fontWeight: 900, color: "#f8fafc", marginBottom: 12 }}>🗺️ Kariyer Yol Haritaları</h1>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                <Map size={36} color="#f8fafc" />
+                <h1 style={{ fontFamily: C.font, fontSize: 36, fontWeight: 900, color: "#f8fafc", margin: 0 }}>Kariyer Yol Haritaları</h1>
+              </div>
               <p style={{ fontSize: 16, color: "#94a3b8", maxWidth: 560, lineHeight: 1.6 }}>Hedef mesleğini seç, adım adım ilerle. Her yol haritası sektör uzmanlarıyla birlikte tasarlandı ve gerçek iş ilanlarından türetildi.</p>
             </div>
           </div>
@@ -105,7 +109,9 @@ export default function RoadmapsView({ onNavigate }) {
                       <div>
                         <h3 style={{ fontFamily: C.font, fontSize: 20, fontWeight: 800, color: C.heading }}>{rmItem.title}</h3>
                         <div style={{ display: "flex", gap: 10, fontSize: 13, color: C.muted, marginTop: 4, fontWeight: 500 }}>
-                          <span>⏱ {rmItem.duration}</span><span style={{opacity: 0.5}}>|</span><span>{rmItem.courses} kurs</span>
+                          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Clock size={14} /> {rmItem.duration}</span>
+                          <span style={{opacity: 0.5}}>|</span>
+                          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><BookOpen size={14} /> {rmItem.courses} kurs</span>
                         </div>
                       </div>
                     </div>
@@ -115,8 +121,8 @@ export default function RoadmapsView({ onNavigate }) {
                     </div>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 16, borderTop: `1px solid ${C.border}` }}>
                       <div style={{ display: "flex", gap: 16, fontSize: 14, color: C.muted, fontWeight: 600 }}>
-                        <span style={{display: 'flex', alignItems: 'center', gap: 6}}>👨‍🎓 {rmItem.enrolled.toLocaleString("tr-TR")}</span>
-                        <span style={{display: 'flex', alignItems: 'center', gap: 6}}>⭐ {rmItem.rating}</span>
+                        <span style={{display: 'flex', alignItems: 'center', gap: 6}}><Users size={16} /> {rmItem.enrolled.toLocaleString("tr-TR")}</span>
+                        <span style={{display: 'flex', alignItems: 'center', gap: 6}}><Star size={16} fill="currentColor" color={C.gold || '#f59e0b'} /> {rmItem.rating}</span>
                       </div>
                       <button style={{ padding: "10px 20px", borderRadius: 12, border: "none", background: rmItem.color, color: "#fff", fontFamily: C.font, fontSize: 14, fontWeight: 700, cursor: "pointer", transition: 'transform 0.2s' }} onMouseEnter={e=>e.currentTarget.style.transform='scale(1.05)'} onMouseLeave={e=>e.currentTarget.style.transform='scale(1)'}>İncele →</button>
                     </div>
@@ -166,7 +172,7 @@ export default function RoadmapsView({ onNavigate }) {
                                   <h4 style={{ fontFamily: C.font, fontSize: 18, fontWeight: 800, color: C.heading }}>{step.title}</h4>
                                   {done && <Badge color={C.primary}>✓ Tamamlandı</Badge>}
                                   {current && <Badge color={rm.color} filled>Devam Ediyor</Badge>}
-                                  {step.status === "locked" && <Badge color={C.faint}>🔒 Kilitli</Badge>}
+                                  {step.status === "locked" && <Badge color={C.faint}><span style={{display: 'flex', alignItems: 'center', gap: 4}}><Lock size={12}/> Kilitli</span></Badge>}
                                 </div>
                                 <p style={{ fontSize: 14, color: C.muted, lineHeight: 1.5 }}>{step.sub}</p>
                               </div>
@@ -191,11 +197,11 @@ export default function RoadmapsView({ onNavigate }) {
 
                 <div style={{ position: "sticky", top: 100 }}>
                   <Card hover={false} style={{ padding: 24, marginBottom: 24 }} C={C}>
-                    <h4 style={{ fontFamily: C.font, fontSize: 16, fontWeight: 800, color: C.heading, marginBottom: 20 }}>📋 Yol Haritası Bilgileri</h4>
+                    <h4 style={{ fontFamily: C.font, fontSize: 16, fontWeight: 800, color: C.heading, marginBottom: 20, display: 'flex', alignItems: 'center', gap: 8 }}><BookOpen size={18} /> Yol Haritası Bilgileri</h4>
                     {[
                       { l: "Süre", v: rm.duration }, { l: "Toplam Kurs", v: rm.courses },
                       { l: "Toplam Saat", v: `${rm.hours} saat` }, { l: "Kayıtlı", v: rm.enrolled.toLocaleString("tr-TR") },
-                      { l: "Puan", v: `⭐ ${rm.rating}` },
+                      { l: "Puan", v: <span style={{display: 'flex', alignItems: 'center', gap: 4}}><Star size={14} fill="#f59e0b" color="#f59e0b"/> {rm.rating}</span> },
                     ].map((r, i) => (
                       <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "12px 0", borderBottom: i < 4 ? `1px solid ${C.border}` : "none", fontSize: 14 }}>
                         <span style={{ color: C.muted, fontWeight: 500 }}>{r.l}</span>
@@ -204,7 +210,7 @@ export default function RoadmapsView({ onNavigate }) {
                     ))}
                   </Card>
                   <Card hover={false} style={{ padding: 24 }} C={C}>
-                    <h4 style={{ fontFamily: C.font, fontSize: 16, fontWeight: 800, color: C.heading, marginBottom: 16 }}>🛠 Kazanacağın Beceriler</h4>
+                    <h4 style={{ fontFamily: C.font, fontSize: 16, fontWeight: 800, color: C.heading, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}><Settings size={18} /> Kazanacağın Beceriler</h4>
                     <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                       {rm.skills.map(s => <Tag key={s} color={rm.color}>{s}</Tag>)}
                     </div>

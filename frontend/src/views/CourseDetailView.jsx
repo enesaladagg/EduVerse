@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { C, font, mono, COURSE_DETAIL, Stars, Badge, SectionTitle } from '../components/EduVerseShared';
 import { Code2, Play, Clock, FileText, Smartphone, Infinity as InfinityIcon, Award, MessageCircle, Download, Users, Star, Library } from 'lucide-react';
+import { useCart } from '../context/CartContext';
 
 export default function CourseDetailView({ onNavigate }) {
   const d = COURSE_DETAIL;
   const [expandedSection, setExpandedSection] = useState(0);
+  const { addToCart } = useCart();
 
   return (
     <div style={{ fontFamily: "'DM Sans', 'Outfit', sans-serif", background: C.bg, color: C.text, minHeight: '100vh' }}>
@@ -39,8 +41,34 @@ export default function CourseDetailView({ onNavigate }) {
                 </div>
                 <div style={{ fontSize: 13, color: C.warm, marginBottom: 20, display: 'flex', alignItems: 'center', gap: 6 }}><Clock size={14} /> Bu fiyat 2 gün sonra sona eriyor!</div>
 
-                <button style={{ width: "100%", padding: "16px", borderRadius: 14, border: "none", background: C.accent, color: "white", fontFamily: font, fontSize: 16, fontWeight: 700, cursor: "pointer", marginBottom: 10, transition: "all 0.3s", textAlign: "center" }}>Hemen Satın Al</button>
-                <button style={{ width: "100%", padding: "14px", borderRadius: 14, border: `2px solid ${C.accent}`, background: "transparent", color: C.accent, fontFamily: font, fontSize: 15, fontWeight: 600, cursor: "pointer", marginBottom: 20, transition: "all 0.3s", textAlign: "center", boxSizing: "border-box" }}>Sepete Ekle</button>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 20 }}>
+                  <button 
+                    onClick={() => { addToCart(d); onNavigate('checkout'); }}
+                    style={{ 
+                      margin: 0, height: "56px", boxSizing: "border-box", borderRadius: 14, border: "none", 
+                      background: C.accent, color: "white", fontFamily: font, fontSize: 16, fontWeight: 700, 
+                      cursor: "pointer", transition: "all 0.3s", textAlign: "center",
+                      boxShadow: '0 8px 24px rgba(0,212,170,0.25)'
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+                    onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+                  >
+                    Hemen Satın Al
+                  </button>
+                  <button 
+                    onClick={() => addToCart(d)}
+                    style={{ 
+                      margin: 0, height: "56px", boxSizing: "border-box", borderRadius: 14, 
+                      border: `2px solid ${C.accent}`, background: "transparent", color: C.accent, 
+                      fontFamily: font, fontSize: 15, fontWeight: 600, cursor: "pointer", 
+                      transition: "all 0.3s", textAlign: "center" 
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.background = `${C.accent}15`}
+                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                  >
+                    Sepete Ekle
+                  </button>
+                </div>
 
                 <div style={{ fontSize: 12, color: C.textDim, textAlign: "center", marginBottom: 24 }}>30 gün koşulsuz iade garantisi</div>
 

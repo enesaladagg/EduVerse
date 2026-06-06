@@ -175,13 +175,15 @@ const InstructorCodePanel = memo(function InstructorCodePanel({ studentCode }) {
 
 const LiveSessionView = memo(function LiveSessionView({ user, onNavigateHome }) {
   const { palette: p, tokens: t } = useTheme();
-  const [viewRole, setViewRole] = useState('teacher');
+  const [viewRole, setViewRole] = useState(user?.role === 'teacher' || user?.role === 'admin' ? 'teacher' : 'student');
 
   const session = useLiveSession({
     user,
     viewRole,
     onLeave: onNavigateHome,
   });
+
+  const [showEndModal, setShowEndModal] = useState(false);
 
   const [mountedModes, setMountedModes] = useState(new Set(['slide']));
 
@@ -238,9 +240,14 @@ const LiveSessionView = memo(function LiveSessionView({ user, onNavigateHome }) 
         {/* SLIDE MODE */}
         <div style={{
           display: session.activeMode === 'slide' ? 'flex' : 'none',
-          flex: 1, width: '100%', height: '100%', minHeight: 0, transition: 'opacity 0.2s'
+          flex: 1, width: '100%', height: '100%', minHeight: 0, transition: 'opacity 0.2s', position: 'relative'
         }}>
           <SlideStage screenStream={session.screenStream} />
+          {isVideoActive && (
+            <div style={{ position: 'absolute', bottom: 20, right: 20, width: 240, height: 160, borderRadius: 16, overflow: 'hidden', boxShadow: '0 8px 32px rgba(0,0,0,0.3)', border: `1px solid ${p.border}` }}>
+              <LiveVideoPanel localStream={session.localStream} remoteStreams={session.remoteStreams} participants={session.participants} selfId={session.self?.userId} compact onExpand={() => session.handleModeChange('video')} />
+            </div>
+          )}
           <div style={{ display: session.showAiPanel ? 'block' : 'none' }}>
             <LiveAiPanel
               open={session.showAiPanel}
@@ -252,6 +259,22 @@ const LiveSessionView = memo(function LiveSessionView({ user, onNavigateHome }) 
               aiNoise={session.aiNoise}
               setAiNoise={session.setAiNoise}
             />
+          </div>
+        </div>
+
+        {/* VIDEO MODE */}
+        <div style={{
+          display: session.activeMode === 'video' ? 'flex' : 'none',
+          flex: 1, width: '100%', height: '100%', padding: t.spacing[4], transition: 'opacity 0.2s'
+        }}>
+          <div style={{ flex: 1, borderRadius: t.borderRadius.xl, overflow: 'hidden', border: `1px solid ${p.border}`, background: p.panelElevated, position: 'relative' }}>
+             <LiveVideoPanel 
+               localStream={session.localStream} 
+               remoteStreams={session.remoteStreams} 
+               participants={session.participants} 
+               selfId={session.self?.userId} 
+               onMinimize={() => session.handleModeChange('slide')} 
+             />
           </div>
         </div>
 
@@ -270,7 +293,7 @@ const LiveSessionView = memo(function LiveSessionView({ user, onNavigateHome }) 
               <div style={{ padding: t.spacing[2], fontSize: t.typography.fontSize.xs, color: p.textMuted, borderBottom: `1px solid ${p.border}` }}>
                 Canlı video
               </div>
-              <LiveVideoPanel localStream={session.localStream} remoteStreams={session.remoteStreams} participants={session.participants} selfId={session.self?.userId} compact />
+              <LiveVideoPanel localStream={session.localStream} remoteStreams={session.remoteStreams} participants={session.participants} selfId={session.self?.userId} compact onExpand={() => session.handleModeChange('video')} />
             </div>
           )}
           {mountedModes.has('whiteboard') && (
@@ -300,7 +323,7 @@ const LiveSessionView = memo(function LiveSessionView({ user, onNavigateHome }) 
               <div style={{ padding: t.spacing[2], fontSize: t.typography.fontSize.xs, color: p.textMuted, borderBottom: `1px solid ${p.border}` }}>
                 Canlı video
               </div>
-              <LiveVideoPanel localStream={session.localStream} remoteStreams={session.remoteStreams} participants={session.participants} selfId={session.self?.userId} compact />
+              <LiveVideoPanel localStream={session.localStream} remoteStreams={session.remoteStreams} participants={session.participants} selfId={session.self?.userId} compact onExpand={() => session.handleModeChange('video')} />
             </div>
           )}
           {mountedModes.has('sandbox') && (
@@ -352,6 +375,7 @@ const LiveSessionView = memo(function LiveSessionView({ user, onNavigateHome }) 
         user={user}
         connected={session.connected}
         onNavigateHome={onNavigateHome}
+        recording={session.recording}
       />
 
       {session.connectError && (
@@ -394,8 +418,61 @@ const LiveSessionView = memo(function LiveSessionView({ user, onNavigateHome }) 
         viewRole={viewRole}
         connected={session.connected}
         onAction={session.handleDockAction}
-        onEndSession={session.endSession}
+        onEndSession={() => setShowEndModal(true)}
       />
+
+      {showEndModal && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 9999,
+          background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center'
+        }}>
+          <div style={{
+            background: p.panel, border: `1px solid ${p.border}`, borderRadius: t.borderRadius.xl,
+            padding: t.spacing[6], maxWidth: 400, width: '90%',
+            boxShadow: '0 24px 48px rgba(0,0,0,0.4)',
+            textAlign: 'center'
+          }}>
+            <div style={{
+              width: 64, height: 64, borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px',
+            }}>
+              <span style={{ fontSize: 28 }}>⚠️</span>
+            </div>
+            <h3 style={{ fontSize: 20, fontWeight: 700, color: p.text, marginBottom: 12 }}>Dersi Bitir</h3>
+            <p style={{ color: p.textMuted, fontSize: 15, marginBottom: 24, lineHeight: 1.5 }}>
+              Bu dersi herkes için bitirmek istediğinize emin misiniz? Tüm öğrenciler oturumdan çıkarılacaktır.
+            </p>
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+              <button 
+                onClick={() => setShowEndModal(false)}
+                style={{
+                  flex: 1, padding: '12px', borderRadius: 12, background: p.panelElevated,
+                  color: p.text, border: `1px solid ${p.border}`, fontWeight: 600, cursor: 'pointer',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'}
+                onMouseLeave={e => e.currentTarget.style.background = p.panelElevated}
+              >
+                İptal
+              </button>
+              <button 
+                onClick={() => { setShowEndModal(false); session.endSession(); }}
+                style={{
+                  flex: 1, padding: '12px', borderRadius: 12, background: '#ef4444',
+                  color: '#fff', border: 'none', fontWeight: 600, cursor: 'pointer',
+                  boxShadow: '0 4px 12px rgba(239, 68, 68, 0.3)',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+                onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+              >
+                Evet, Bitir
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 });

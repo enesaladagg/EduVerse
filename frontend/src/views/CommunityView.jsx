@@ -2,30 +2,31 @@ import React, { useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import GlobalNavbar from '../components/GlobalNavbar';
 import { Badge, Card, Tag } from '../components/PageBlocks';
+import { Globe, Flame, Sparkles, HelpCircle, MessageSquare, Eye, Heart, Trophy, Users, Calendar, Clock, Code2, Atom, Brain, Target, Wrench, Mic, Medal } from 'lucide-react';
 
 const FORUM_TOPICS = [
-  { title: "React 19'daki yeni Server Components nasıl çalışıyor?", author: "Burak K.", avatar: "👨‍💻", replies: 24, views: 1840, likes: 67, time: "2 saat önce", tags: ["React", "Frontend"], hot: true },
-  { title: "Python ile Web Scraping: BeautifulSoup vs Scrapy karşılaştırması", author: "Merve T.", avatar: "👩‍💻", replies: 18, views: 1230, likes: 45, time: "5 saat önce", tags: ["Python", "Veri"], hot: false },
-  { title: "Junior Developer olarak ilk iş görüşmesinde neler sorulur?", author: "Can Ö.", avatar: "👨‍🎓", replies: 42, views: 3450, likes: 128, time: "1 gün önce", tags: ["Kariyer", "İpucu"], hot: true },
-  { title: "MongoDB vs PostgreSQL: Hangi projeye hangisi uygun?", author: "Selin A.", avatar: "👩‍🔬", replies: 31, views: 2100, likes: 76, time: "1 gün önce", tags: ["Veritabanı", "Backend"], hot: false },
-  { title: "Docker öğrenmeye nereden başlamalıyım?", author: "Emre K.", avatar: "🧑‍💼", replies: 15, views: 890, likes: 34, time: "2 gün önce", tags: ["DevOps", "Docker"], hot: false },
-  { title: "Freelance yazılımcı olarak nasıl müşteri bulunur?", author: "Ayşe D.", avatar: "👩‍🎨", replies: 56, views: 4200, likes: 189, time: "3 gün önce", tags: ["Kariyer", "Freelance"], hot: true },
+  { title: "React 19'daki yeni Server Components nasıl çalışıyor?", author: "Burak K.", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Burak&backgroundColor=b6e3f4", replies: 24, views: 1840, likes: 67, time: "2 saat önce", tags: ["React", "Frontend"], hot: true },
+  { title: "Python ile Web Scraping: BeautifulSoup vs Scrapy karşılaştırması", author: "Merve T.", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Merve&backgroundColor=c0aede", replies: 18, views: 1230, likes: 45, time: "5 saat önce", tags: ["Python", "Veri"], hot: false },
+  { title: "Junior Developer olarak ilk iş görüşmesinde neler sorulur?", author: "Can Ö.", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Can&backgroundColor=d1d4f9", replies: 42, views: 3450, likes: 128, time: "1 gün önce", tags: ["Kariyer", "İpucu"], hot: true },
+  { title: "MongoDB vs PostgreSQL: Hangi projeye hangisi uygun?", author: "Selin A.", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Selin&backgroundColor=ffdfbf", replies: 31, views: 2100, likes: 76, time: "1 gün önce", tags: ["Veritabanı", "Backend"], hot: false },
+  { title: "Docker öğrenmeye nereden başlamalıyım?", author: "Emre K.", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Emre&backgroundColor=b6e3f4", replies: 15, views: 890, likes: 34, time: "2 gün önce", tags: ["DevOps", "Docker"], hot: false },
+  { title: "Freelance yazılımcı olarak nasıl müşteri bulunur?", author: "Ayşe D.", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Ayse&backgroundColor=c0aede", replies: 56, views: 4200, likes: 189, time: "3 gün önce", tags: ["Kariyer", "Freelance"], hot: true },
 ];
 
 const LEADERBOARD = [
-  { rank: 1, name: "Burak Korkmaz", xp: 28450, streak: 42, level: 38, avatar: "👨‍💻", badge: "🥇" },
-  { rank: 2, name: "Merve Toprak", xp: 26800, streak: 35, level: 36, avatar: "👩‍💻", badge: "🥈" },
-  { rank: 3, name: "Can Özdemir", xp: 24100, streak: 28, level: 34, avatar: "👨‍🎓", badge: "🥉" },
-  { rank: 4, name: "Selin Aydın", xp: 22650, streak: 21, level: 32, avatar: "👩‍🔬", badge: "" },
-  { rank: 5, name: "Emre Kılıç", xp: 21200, streak: 18, level: 31, avatar: "🧑‍💼", badge: "" },
-  { rank: 6, name: "Elif Yılmaz", xp: 12450, streak: 14, level: 24, avatar: "👩‍💻", badge: "← Sen", isMe: true },
+  { rank: 1, name: "Burak Korkmaz", xp: 28450, streak: 42, level: 38, avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Burak&backgroundColor=b6e3f4", badge: <Medal size={20} color="#fbbf24" fill="#f59e0b" /> },
+  { rank: 2, name: "Merve Toprak", xp: 26800, streak: 35, level: 36, avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Merve&backgroundColor=c0aede", badge: <Medal size={20} color="#94a3b8" fill="#cbd5e1" /> },
+  { rank: 3, name: "Can Özdemir", xp: 24100, streak: 28, level: 34, avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Can&backgroundColor=d1d4f9", badge: <Medal size={20} color="#b45309" fill="#d97706" /> },
+  { rank: 4, name: "Selin Aydın", xp: 22650, streak: 21, level: 32, avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Selin&backgroundColor=ffdfbf", badge: "" },
+  { rank: 5, name: "Emre Kılıç", xp: 21200, streak: 18, level: 31, avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Emre&backgroundColor=b6e3f4", badge: "" },
+  { rank: 6, name: "Elif Yılmaz", xp: 12450, streak: 14, level: 24, avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Elif&backgroundColor=c0aede", badge: "← Sen", isMe: true },
 ];
 
 const STUDY_GROUPS = [
-  { name: "Python Çalışma Grubu", members: 156, active: 12, icon: "🐍", color: "#10b981", nextSession: "Bugün 20:00" },
-  { name: "React Projeler", members: 98, active: 8, icon: "⚛️", color: "#6366f1", nextSession: "Yarın 19:00" },
-  { name: "Algoritma Kulübü", members: 234, active: 18, icon: "🧩", color: "#f59e0b", nextSession: "Çarşamba 21:00" },
-  { name: "Kariyer Mentorluk", members: 312, active: 24, icon: "🎯", color: "#f43f5e", nextSession: "Cuma 18:00" },
+  { name: "Python Çalışma Grubu", members: 156, active: 12, icon: <Code2 size={24} />, color: "#10b981", nextSession: "Bugün 20:00" },
+  { name: "React Projeler", members: 98, active: 8, icon: <Atom size={24} />, color: "#6366f1", nextSession: "Yarın 19:00" },
+  { name: "Algoritma Kulübü", members: 234, active: 18, icon: <Brain size={24} />, color: "#f59e0b", nextSession: "Çarşamba 21:00" },
+  { name: "Kariyer Mentorluk", members: 312, active: 24, icon: <Target size={24} />, color: "#f43f5e", nextSession: "Cuma 18:00" },
 ];
 
 const EVENTS = [
@@ -72,7 +73,10 @@ export default function CommunityView({ onNavigate }) {
             <div style={{ position: "absolute", top: -40, left: "40%", width: 250, height: 250, borderRadius: "50%", background: C.gold, filter: "blur(140px)", opacity: .08 }} />
             <div style={{ position: "relative", zIndex: 2, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 20 }}>
               <div>
-                <h1 style={{ fontFamily: C.font, fontSize: 36, fontWeight: 900, color: "#f8fafc", marginBottom: 12 }}>🌐 Topluluk</h1>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                  <Globe size={36} color="#f8fafc" />
+                  <h1 style={{ fontFamily: C.font, fontSize: 36, fontWeight: 900, color: "#f8fafc", margin: 0 }}>Topluluk</h1>
+                </div>
                 <p style={{ fontSize: 16, color: "#94a3b8", maxWidth: 480, lineHeight: 1.6 }}>Soru sor, paylaş, birlikte öğren. 50.000+ aktif üyeyle Türkiye'nin en büyük teknoloji öğrenme topluluğu.</p>
               </div>
               <div style={{ display: "flex", gap: 24, textAlign: "center" }}>
@@ -90,12 +94,19 @@ export default function CommunityView({ onNavigate }) {
             
             <div className="fade-in-up">
               <div style={{ display: "flex", gap: 4, marginBottom: 24, background: C.white, borderRadius: 12, padding: 4, border: `1px solid ${C.border}`, width: "fit-content", boxShadow: C.shadow }}>
-                {[{ k: "hot", l: "🔥 Gündem" }, { k: "new", l: "✨ Yeni" }, { k: "unanswered", l: "❓ Cevaplanmamış" }].map(t => (
+                {[
+                  { k: "hot", l: "Gündem", icon: <Flame size={16} /> }, 
+                  { k: "new", l: "Yeni", icon: <Sparkles size={16} /> }, 
+                  { k: "unanswered", l: "Cevaplanmamış", icon: <HelpCircle size={16} /> }
+                ].map(t => (
                   <button key={t.k} onClick={() => setForumTab(t.k)} style={{
                     padding: "10px 20px", borderRadius: 10, border: "none", cursor: "pointer", fontFamily: C.font,
                     fontSize: 14, fontWeight: forumTab === t.k ? 700 : 600, transition: 'all 0.2s',
                     background: forumTab === t.k ? C.primaryDim : "transparent", color: forumTab === t.k ? C.primary : C.muted,
-                  }}>{t.l}</button>
+                    display: 'flex', alignItems: 'center', gap: 6
+                  }}>
+                    {t.icon} {t.l}
+                  </button>
                 ))}
               </div>
 
@@ -103,11 +114,13 @@ export default function CommunityView({ onNavigate }) {
                 {FORUM_TOPICS.map((topic, i) => (
                   <Card key={i} style={{ padding: 24 }} C={C}>
                     <div style={{ display: "flex", gap: 16 }}>
-                      <div style={{ width: 52, height: 52, borderRadius: 16, background: C.pageBg, border: `1px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, flexShrink: 0 }}>{topic.avatar}</div>
+                      <div style={{ width: 52, height: 52, borderRadius: 16, background: C.pageBg, border: `1px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, flexShrink: 0, overflow: 'hidden' }}>
+                        <img src={topic.avatar} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
                           <h4 style={{ fontFamily: C.font, fontSize: 16, fontWeight: 800, color: C.heading, flex: 1, lineHeight: 1.4 }}>{topic.title}</h4>
-                          {topic.hot && <Badge color={C.rose}>🔥 Gündem</Badge>}
+                          {topic.hot && <Badge color={C.rose}><span style={{display: 'flex', alignItems: 'center', gap: 4}}><Flame size={12}/> Gündem</span></Badge>}
                         </div>
                         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
                           <span style={{ fontSize: 14, color: C.muted, fontWeight: 600 }}>{topic.author}</span>
@@ -118,9 +131,9 @@ export default function CommunityView({ onNavigate }) {
                             {topic.tags.map(t => <Tag key={t} color={C.primary}>{t}</Tag>)}
                           </div>
                           <div style={{ display: "flex", gap: 16, fontSize: 14, color: C.muted, fontWeight: 500 }}>
-                            <span style={{display: 'flex', alignItems: 'center', gap: 6}}>💬 {topic.replies}</span>
-                            <span style={{display: 'flex', alignItems: 'center', gap: 6}}>👁 {topic.views.toLocaleString("tr-TR")}</span>
-                            <span style={{display: 'flex', alignItems: 'center', gap: 6}}>❤️ {topic.likes}</span>
+                            <span style={{display: 'flex', alignItems: 'center', gap: 6}}><MessageSquare size={16} /> {topic.replies}</span>
+                            <span style={{display: 'flex', alignItems: 'center', gap: 6}}><Eye size={16} /> {topic.views.toLocaleString("tr-TR")}</span>
+                            <span style={{display: 'flex', alignItems: 'center', gap: 6}}><Heart size={16} /> {topic.likes}</span>
                           </div>
                         </div>
                       </div>
@@ -139,7 +152,7 @@ export default function CommunityView({ onNavigate }) {
             <div className="fade-in-right" style={{ display: "flex", flexDirection: "column", gap: 24, position: "sticky", top: 100 }}>
               
               <Card hover={false} style={{ padding: 24 }} C={C}>
-                <h3 style={{ fontFamily: C.font, fontSize: 18, fontWeight: 900, color: C.heading, marginBottom: 20 }}>🏆 Liderlik Tablosu</h3>
+                <h3 style={{ fontFamily: C.font, fontSize: 18, fontWeight: 900, color: C.heading, marginBottom: 20, display: 'flex', alignItems: 'center', gap: 8 }}><Trophy size={20} color={C.gold} fill={C.gold} /> Liderlik Tablosu</h3>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                   {LEADERBOARD.map((u, i) => (
                     <div key={i} style={{
@@ -150,7 +163,9 @@ export default function CommunityView({ onNavigate }) {
                       <span style={{ fontFamily: C.mono, fontSize: 14, fontWeight: 900, color: i < 3 ? C.gold : C.faint, width: 24, textAlign: "center" }}>
                         {u.badge || `${u.rank}`}
                       </span>
-                      <span style={{ fontSize: 22 }}>{u.avatar}</span>
+                      <div style={{ width: 40, height: 40, borderRadius: '50%', overflow: 'hidden', border: `2px solid ${C.border}` }}>
+                        <img src={u.avatar} alt={u.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontSize: 14, fontWeight: u.isMe ? 800 : 700, color: u.isMe ? C.primary : C.heading, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                           {u.name} {u.isMe && <span style={{ fontSize: 12, color: C.primary }}>(Sen)</span>}
@@ -164,7 +179,7 @@ export default function CommunityView({ onNavigate }) {
               </Card>
 
               <Card hover={false} style={{ padding: 24 }} C={C}>
-                <h3 style={{ fontFamily: C.font, fontSize: 18, fontWeight: 900, color: C.heading, marginBottom: 16 }}>👥 Çalışma Grupları</h3>
+                <h3 style={{ fontFamily: C.font, fontSize: 18, fontWeight: 900, color: C.heading, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}><Users size={20} /> Çalışma Grupları</h3>
                 <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                   {STUDY_GROUPS.map((g, i) => (
                     <div key={i} style={{
@@ -173,7 +188,7 @@ export default function CommunityView({ onNavigate }) {
                     }}
                       onMouseEnter={e => e.currentTarget.style.borderColor = g.color + "60"}
                       onMouseLeave={e => e.currentTarget.style.borderColor = C.border}>
-                      <span style={{ fontSize: 24, background: `${g.color}15`, padding: 8, borderRadius: 12 }}>{g.icon}</span>
+                      <span style={{ background: `${g.color}15`, color: g.color, padding: 8, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{g.icon}</span>
                       <div style={{ flex: 1 }}>
                         <div style={{ fontSize: 14, fontWeight: 700, color: C.heading, marginBottom: 4 }}>{g.name}</div>
                         <div style={{ fontSize: 12, color: C.faint }}>{g.members} üye · {g.active} çevrimiçi</div>
@@ -185,7 +200,7 @@ export default function CommunityView({ onNavigate }) {
               </Card>
 
               <Card hover={false} style={{ padding: 24 }} C={C}>
-                <h3 style={{ fontFamily: C.font, fontSize: 18, fontWeight: 900, color: C.heading, marginBottom: 16 }}>📅 Yaklaşan Etkinlikler</h3>
+                <h3 style={{ fontFamily: C.font, fontSize: 18, fontWeight: 900, color: C.heading, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}><Calendar size={20} /> Yaklaşan Etkinlikler</h3>
                 <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                   {EVENTS.map((ev, i) => (
                     <div key={i} style={{ padding: 16, borderRadius: 16, background: C.pageBg, border: `1px solid ${C.border}`, borderLeft: `4px solid ${ev.color}` }}>
@@ -193,10 +208,16 @@ export default function CommunityView({ onNavigate }) {
                         <span style={{ fontSize: 15, fontWeight: 800, color: C.heading }}>{ev.title}</span>
                       </div>
                       <div style={{ display: "flex", gap: 12, alignItems: "center", fontSize: 13, color: C.muted, fontWeight: 500 }}>
-                        <span>📅 {ev.date}</span><span>🕐 {ev.time}</span>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Calendar size={14} /> {ev.date}</span>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Clock size={14} /> {ev.time}</span>
                       </div>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 12 }}>
-                        <Badge color={ev.color}>{ev.type === "workshop" ? "🛠 Workshop" : ev.type === "webinar" ? "🎙 Webinar" : "🏆 Hackathon"}</Badge>
+                        <Badge color={ev.color}>
+                          <span style={{display: 'flex', alignItems: 'center', gap: 4}}>
+                            {ev.type === "workshop" ? <Wrench size={12}/> : ev.type === "webinar" ? <Mic size={12}/> : <Trophy size={12}/>} 
+                            {ev.type === "workshop" ? "Workshop" : ev.type === "webinar" ? "Webinar" : "Hackathon"}
+                          </span>
+                        </Badge>
                         <span style={{ fontSize: 12, color: C.faint, fontWeight: 600 }}>{ev.spots} kota</span>
                       </div>
                     </div>

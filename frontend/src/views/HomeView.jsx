@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import GlobalNavbar from '../components/GlobalNavbar';
 import { useTheme } from '../context/ThemeContext';
+import { useCart } from '../context/CartContext';
 import {
   Code, LineChart, Palette, Smartphone, Cloud, Lock, Bot, TrendingUp,
   Terminal, Blocks, BrainCircuit, Layout, Server,
@@ -168,7 +169,8 @@ function AnimatedCounter({ target, suffix = "" }) {
 }
 
 export default function HomeView({ onNavigate }) {
-  const { isDark, toggleTheme } = useTheme();
+  const { isDark } = useTheme();
+  const { addToCart } = useCart();
   const COLORS = isDark ? DARK_COLORS : LIGHT_COLORS;
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -313,11 +315,8 @@ export default function HomeView({ onNavigate }) {
         .cat-card:hover { transform: translateY(-6px); border-color: var(--cat-color); box-shadow: 0 12px 40px rgba(0,0,0,0.3); }
         
         .cat-deck-container { width: 100%; padding: 20px 0 40px; display: flex; justify-content: center; }
-        .cat-deck { display: flex; flex-wrap: nowrap; justify-content: flex-start; gap: 12px; max-width: 1400px; margin: 0 auto; overflow-x: auto; padding-bottom: 20px; width: fit-content; }
-        .cat-deck::-webkit-scrollbar { height: 8px; }
-        .cat-deck::-webkit-scrollbar-track { background: ${COLORS.surface}; border-radius: 4px; }
-        .cat-deck::-webkit-scrollbar-thumb { background: ${COLORS.border}; border-radius: 4px; }
-        .cat-deck-card { box-sizing: border-box; width: 140px; height: 140px; flex-shrink: 0; background: ${COLORS.surface}; border: 2px solid ${COLORS.border}; border-radius: 20px; padding: 16px 8px; text-align: center; transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1); box-shadow: 0 4px 20px rgba(0,0,0,0.05); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+        .cat-deck { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; max-width: 1200px; margin: 0 auto; padding-bottom: 20px; width: 100%; }
+        .cat-deck-card { box-sizing: border-box; width: 160px; height: 150px; flex-shrink: 0; background: ${COLORS.surface}; border: 2px solid ${COLORS.border}; border-radius: 20px; padding: 16px 8px; text-align: center; transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1); box-shadow: 0 4px 20px rgba(0,0,0,0.05); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden; }
         .cat-deck-card:hover { width: 220px; border-color: var(--cat-color) !important; transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.12) !important; z-index: 20; }
         .cat-deck-card > .cat-content { transition: transform 0.4s ease; display: flex; flex-direction: column; align-items: center; width: 100%; }
         .cat-deck-card:hover > .cat-content { transform: translateY(-12px); }
@@ -654,7 +653,7 @@ export default function HomeView({ onNavigate }) {
               <div
                 key={index}
                 className="cat-deck-card"
-                style={{ "--cat-color": cat.color, width: '140px' }}
+                style={{ "--cat-color": cat.color, width: '160px' }}
                 onClick={() => setActiveCategory(activeCategory === cat.name ? null : cat.name)}
               >
                 <div className="cat-content">
@@ -699,22 +698,37 @@ export default function HomeView({ onNavigate }) {
         }}>
           {filteredCourses.map((course, i) => (
             <div key={course.id} className="course-card" style={{ animationDelay: `${i * 0.1}s` }} onClick={() => onNavigate && onNavigate('course-detail')}>
-              {/* Course image area */}
+              {/* Premium Course image area */}
               <div style={{
-                height: 180, background: `linear-gradient(135deg, ${COLORS.secondary}, ${COLORS.surfaceLight})`,
+                height: 180, 
+                background: isDark ? '#0f172a' : '#f8fafc',
                 display: "flex", alignItems: "center", justifyContent: "center",
-                position: "relative"
+                position: "relative", overflow: "hidden"
               }}>
-                <span style={{ animation: "float 4s ease-in-out infinite", color: course.tagColor }}>
-                  <course.image size={64} strokeWidth={1.2} />
-                </span>
+                <div style={{ position: 'absolute', top: '-30%', left: '-10%', width: '120%', height: '120%', background: `radial-gradient(circle at center, ${course.tagColor}40 0%, transparent 70%)`, filter: 'blur(30px)', opacity: 0.8 }} />
+                <div style={{ position: 'absolute', bottom: '-20%', right: '-20%', width: '100%', height: '100%', background: `radial-gradient(circle at center, ${COLORS.accent}30 0%, transparent 60%)`, filter: 'blur(30px)', opacity: 0.6 }} />
+                
+                <course.image size={140} color={course.tagColor} style={{ position: 'absolute', opacity: isDark ? 0.08 : 0.04, transform: 'rotate(-15deg) scale(1.2)' }} strokeWidth={1} />
+
+                <div style={{ 
+                  position: 'relative', zIndex: 2,
+                  width: '80px', height: '80px', borderRadius: '24px', 
+                  background: isDark ? 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 100%)' : 'linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.3) 100%)',
+                  backdropFilter: 'blur(16px)', border: `1px solid ${isDark ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.8)'}`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  boxShadow: `0 20px 40px -10px ${course.tagColor}40, inset 0 2px 4px rgba(255,255,255,0.3)`,
+                  animation: "float 4s ease-in-out infinite",
+                }}>
+                  <course.image size={40} color={course.tagColor} strokeWidth={2.5} style={{ filter: `drop-shadow(0 4px 6px ${course.tagColor}60)` }} />
+                </div>
+                
                 <span style={{
-                  position: "absolute", top: 12, left: 12,
+                  position: "absolute", top: 12, left: 12, zIndex: 3,
                   background: course.tagColor, color: "#000", padding: "4px 12px",
                   borderRadius: 8, fontSize: 11, fontWeight: 700, letterSpacing: "0.5px"
                 }}>{course.tag}</span>
                 <span style={{
-                  position: "absolute", top: 12, right: 12,
+                  position: "absolute", top: 12, right: 12, zIndex: 3,
                   background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)",
                   color: "white", padding: "4px 10px", borderRadius: 8,
                   fontSize: 11, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 4
@@ -734,12 +748,19 @@ export default function HomeView({ onNavigate }) {
                     <span style={{ fontSize: 22, fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color: COLORS.accent }}>₺{course.price}</span>
                     <span style={{ fontSize: 14, color: COLORS.textMuted, textDecoration: "line-through", marginLeft: 8 }}>₺{course.oldPrice}</span>
                   </div>
-                  <button style={{
-                    background: "rgba(0,212,170,0.1)", border: `1px solid ${COLORS.accent}`,
-                    color: COLORS.accent, padding: "8px 16px", borderRadius: 10,
-                    fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
-                    transition: "all 0.3s"
-                  }}>Sepete Ekle</button>
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); addToCart({...course, _id: course.id, priceStr: course.price}); }}
+                    style={{
+                      background: "rgba(0,212,170,0.1)", border: `1px solid ${COLORS.accent}`,
+                      color: COLORS.accent, padding: "8px 16px", borderRadius: 10,
+                      fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
+                      transition: "all 0.3s"
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.background = COLORS.accent; e.currentTarget.style.color = '#fff'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = "rgba(0,212,170,0.1)"; e.currentTarget.style.color = COLORS.accent; }}
+                  >
+                    Sepete Ekle
+                  </button>
                 </div>
               </div>
             </div>
