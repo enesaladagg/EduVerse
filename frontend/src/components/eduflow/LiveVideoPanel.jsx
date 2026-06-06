@@ -1,5 +1,6 @@
 import React, { memo, useRef, useEffect } from 'react';
 import { useTheme } from '../../context/ThemeContext';
+import { Maximize2, Minimize2 } from 'lucide-react';
 
 const AVATAR_COLORS = ['#3B82F6', '#8B5CF6', '#EC4899', '#F97316', '#22C55E', '#EAB308'];
 
@@ -29,6 +30,8 @@ const LiveVideoPanel = memo(function LiveVideoPanel({
   participants = [],
   selfId,
   compact = false,
+  onExpand,
+  onMinimize,
 }) {
   const { palette: p, tokens: t } = useTheme();
 
@@ -66,7 +69,20 @@ const LiveVideoPanel = memo(function LiveVideoPanel({
       height: '100%',
       minHeight: compact ? 160 : 220,
       padding: compact ? t.spacing[2] : t.spacing[3],
+      position: 'relative',
     }}>
+      {(onExpand || onMinimize) && (
+        <button
+          onClick={onExpand || onMinimize}
+          style={{
+            position: 'absolute', top: compact ? 16 : 24, right: compact ? 16 : 24, zIndex: 10,
+            background: 'rgba(0,0,0,0.5)', border: 'none', color: '#fff', padding: 6,
+            borderRadius: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center'
+          }}
+        >
+          {onExpand ? <Maximize2 size={16} /> : <Minimize2 size={16} />}
+        </button>
+      )}
       {tiles.map((tile) => (
         <div
           key={tile.id}

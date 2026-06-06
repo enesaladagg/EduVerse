@@ -3,7 +3,7 @@ import { useTheme } from '../context/ThemeContext';
 import Card from '../components/Card';
 import Badge from '../components/Badge';
 import api from '../services/api';
-import { Code, Shield, LineChart, Palette, Briefcase, Globe, BookOpen, Search, Filter, Star, Clock, User, Check, Smartphone, Cloud, ArrowRight, Play } from 'lucide-react';
+import { Code, Shield, LineChart, Palette, Briefcase, Globe, BookOpen, Search, Filter, Star, Clock, User, Check, Smartphone, Cloud, ArrowRight, Play, Heart } from 'lucide-react';
 
 const CATEGORY_ICONS = {
   programming: Code,
@@ -19,6 +19,16 @@ const CATEGORY_ICONS = {
   Mobil: Smartphone,
   Bulut: Cloud,
   'Yapay Zeka': LineChart,
+};
+
+const CATEGORY_COLORS = {
+  'Yazılım': { primary: '#3b82f6', secondary: '#8b5cf6' }, // Blue to Purple
+  'Veri Bilimi': { primary: '#10b981', secondary: '#059669' }, // Emerald
+  'Tasarım': { primary: '#f43f5e', secondary: '#ec4899' }, // Rose to Pink
+  'Siber Güvenlik': { primary: '#eab308', secondary: '#f97316' }, // Yellow to Orange
+  'Bulut': { primary: '#0ea5e9', secondary: '#3b82f6' }, // Sky Blue
+  'Mobil': { primary: '#8b5cf6', secondary: '#d946ef' }, // Purple to Fuchsia
+  'Yapay Zeka': { primary: '#6366f1', secondary: '#a855f7' } // Indigo to Purple
 };
 
 const DUMMY_COURSES = [
@@ -40,6 +50,7 @@ const FILTERS = {
 
 const CustomCheckbox = ({ label, checked, onChange, count, p, t }) => (
   <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', marginBottom: '12px', group: 'hover' }}>
+    <input type="checkbox" checked={checked} onChange={onChange} style={{ display: 'none' }} />
     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
       <div style={{
         width: '20px', height: '20px', borderRadius: '6px',
@@ -66,11 +77,19 @@ const CoursesPage = memo(function CoursesPage({ onNavigate }) {
   const [selectedLevels, setSelectedLevels] = useState([]);
   const [selectedPrices, setSelectedPrices] = useState([]);
 
+  const [wishlist, setWishlist] = useState([]);
+  const [sortBy, setSortBy] = useState('popular');
+
   const toggleFilter = (state, setState, val) => {
     setState(prev => prev.includes(val) ? prev.filter(x => x !== val) : [...prev, val]);
   };
 
-  const filteredCourses = courses.filter(c => {
+  const toggleWishlist = (id, e) => {
+    e.stopPropagation();
+    setWishlist(prev => prev.includes(id) ? prev.filter(w => w !== id) : [...prev, id]);
+  };
+
+  let result = courses.filter(c => {
     if (search && !c.title.toLowerCase().includes(search.toLowerCase())) return false;
     if (selectedCats.length && !selectedCats.includes(c.category)) return false;
     if (selectedLevels.length && !selectedLevels.includes(c.level)) return false;
@@ -82,6 +101,14 @@ const CoursesPage = memo(function CoursesPage({ onNavigate }) {
     }
     return true;
   });
+
+  const sorters = {
+    popular: (a,b) => b.students - a.students,
+    rating: (a,b) => b.rating - a.rating,
+    newest: (a,b) => b._id.localeCompare(a._id),
+  };
+  result.sort(sorters[sortBy] || sorters.popular);
+  const filteredCourses = result;
 
   return (
     <div style={{ maxWidth: 1400, margin: '0 auto', padding: '120px 4% 40px' }}>
@@ -141,10 +168,51 @@ const CoursesPage = memo(function CoursesPage({ onNavigate }) {
             ))}
           </div>
 
+          <div style={{ padding: '20px', borderRadius: '16px', background: p.background, border: `1px solid ${p.border}`, marginTop: '24px' }}>
+            <div style={{ fontSize: '13px', fontWeight: 700, color: p.textMuted, marginBottom: '12px', textTransform: 'uppercase' }}>Platform İstatistikleri</div>
+            {[
+              { l: "Toplam Kurs", v: courses.length },
+              { l: "Ücretsiz", v: courses.filter(c=>c.price==='Ücretsiz').length },
+              { l: "Ort. Puan", v: (courses.reduce((a,c)=>a+c.rating,0)/courses.length).toFixed(1) },
+            ].map((s,i) => (
+              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', fontSize: '14px' }}>
+                <span style={{ color: p.textMuted }}>{s.l}</span>
+                <span style={{ fontWeight: 700, color: p.text }}>{s.v}</span>
+              </div>
+            ))}
+          </div>
+
         </div>
 
         {/* Main Grid */}
         <div>
+          {/* Top Controls: Active Filters & Sort */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
+              {(selectedCats.length > 0 || selectedLevels.length > 0 || selectedPrices.length > 0) && (
+                <span style={{ fontSize: '14px', color: p.textMuted, fontWeight: 600, marginRight: '4px' }}>Aktif Filtreler:</span>
+              )}
+              {selectedCats.map(cat => (
+                <span key={cat} onClick={() => toggleFilter(selectedCats, setSelectedCats, cat)} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: `${p.accent}15`, color: p.accent, padding: '4px 10px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>{cat} ✕</span>
+              ))}
+              {selectedLevels.map(lvl => (
+                <span key={lvl} onClick={() => toggleFilter(selectedLevels, setSelectedLevels, lvl)} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: `${p.accent}15`, color: p.accent, padding: '4px 10px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>{lvl} ✕</span>
+              ))}
+              {selectedPrices.map(pr => (
+                <span key={pr} onClick={() => toggleFilter(selectedPrices, setSelectedPrices, pr)} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: `${p.accent}15`, color: p.accent, padding: '4px 10px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>{pr} ✕</span>
+              ))}
+            </div>
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <span style={{ fontSize: '14px', color: p.textMuted, fontWeight: 600 }}>Sırala:</span>
+              <select value={sortBy} onChange={e => setSortBy(e.target.value)} style={{ padding: '8px 16px', borderRadius: '10px', border: `1px solid ${p.border}`, background: p.panel, color: p.text, fontSize: '14px', outline: 'none', cursor: 'pointer' }}>
+                <option value="popular">En Popüler</option>
+                <option value="rating">En Yüksek Puan</option>
+                <option value="newest">En Yeni</option>
+              </select>
+            </div>
+          </div>
+
           {filteredCourses.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '80px 20px', background: p.panel, borderRadius: '24px', border: `1px dashed ${p.border}` }}>
               <Search size={48} color={p.textMuted} style={{ marginBottom: '16px', opacity: 0.5 }} />
@@ -155,6 +223,8 @@ const CoursesPage = memo(function CoursesPage({ onNavigate }) {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '24px' }}>
               {filteredCourses.map((c) => {
                 const Icon = CATEGORY_ICONS[c.category] || BookOpen;
+                const catColor = CATEGORY_COLORS[c.category] || { primary: p.accent, secondary: '#8b5cf6' };
+                
                 return (
                   <Card
                     key={c._id}
@@ -163,7 +233,7 @@ const CoursesPage = memo(function CoursesPage({ onNavigate }) {
                     interactive
                     onClick={() => onNavigate('course-detail')}
                     className="premium-course-card"
-                    style={{ background: p.panel, border: `1px solid ${p.border}`, cursor: 'pointer', padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}
+                    style={{ '--card-accent': catColor.primary, background: p.panel, border: `1px solid ${p.border}`, cursor: 'pointer', padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}
                   >
                     <style>
                       {`
@@ -172,30 +242,34 @@ const CoursesPage = memo(function CoursesPage({ onNavigate }) {
                         .premium-course-card .play-btn { opacity: 0; transform: scale(0.8); transition: all 0.3s ease; }
                         .premium-course-card:hover .play-btn { opacity: 1; transform: scale(1); }
                         .premium-course-card .card-action-btn { transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1); }
-                        .premium-course-card:hover .card-action-btn { background: var(--c-accent) !important; color: #fff !important; transform: translateX(4px); box-shadow: 0 4px 12px rgba(0,212,170,0.3); }
+                        .premium-course-card:hover .card-action-btn { background: var(--card-accent) !important; color: #fff !important; transform: translateX(4px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
                       `}
                     </style>
                     <div style={{ height: '170px', position: 'relative', overflow: 'hidden' }}>
-                      {/* Animated Background */}
+                      {/* Premium Animated Background */}
                       <div className="course-bg" style={{
                         position: 'absolute', inset: 0,
-                        background: `linear-gradient(135deg, ${p.accent}20 0%, ${isDark ? '#111827' : '#f1f5f9'} 100%)`,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        background: isDark ? '#0f172a' : '#f8fafc',
+                        overflow: 'hidden',
                       }}>
-                        {/* Decorative background grid/pattern could go here */}
-                        <Icon size={80} color={p.accent} style={{ opacity: 0.15, transform: 'rotate(-10deg) scale(1.2)' }} strokeWidth={1} />
+                        <div style={{ position: 'absolute', top: '-30%', left: '-10%', width: '120%', height: '120%', background: `radial-gradient(circle at center, ${catColor.primary}35 0%, transparent 70%)`, filter: 'blur(30px)', opacity: 0.9 }} />
+                        <div style={{ position: 'absolute', bottom: '-20%', right: '-20%', width: '100%', height: '100%', background: `radial-gradient(circle at center, ${catColor.secondary}30 0%, transparent 60%)`, filter: 'blur(30px)', opacity: 0.7 }} />
+                        
+                        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <Icon size={140} color={catColor.primary} style={{ opacity: isDark ? 0.06 : 0.04, transform: 'rotate(-15deg) scale(1.2)' }} strokeWidth={1} />
+                        </div>
                       </div>
                       
-                      {/* Foreground Center Icon */}
+                      {/* Foreground Premium 3D Center Icon */}
                       <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                          <div style={{ 
-                           width: '64px', height: '64px', borderRadius: '20px', 
-                           background: isDark ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.4)',
-                           backdropFilter: 'blur(8px)', border: `1px solid rgba(255,255,255,0.1)`,
+                           width: '72px', height: '72px', borderRadius: '24px', 
+                           background: isDark ? 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 100%)' : 'linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.3) 100%)',
+                           backdropFilter: 'blur(16px)', border: `1px solid ${isDark ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.8)'}`,
                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                           boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
+                           boxShadow: `0 20px 40px -10px ${catColor.primary}40, inset 0 2px 4px rgba(255,255,255,0.3)`,
                          }}>
-                           <Icon size={32} color={p.accent} strokeWidth={1.5} />
+                           <Icon size={36} color={catColor.primary} strokeWidth={2.5} style={{ filter: `drop-shadow(0 4px 6px ${catColor.primary}50)` }} />
                          </div>
                       </div>
 
@@ -204,16 +278,22 @@ const CoursesPage = memo(function CoursesPage({ onNavigate }) {
                         position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.3)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(2px)'
                       }}>
-                        <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: p.accent, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}>
+                        <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: catColor.primary, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}>
                           <Play size={20} fill="#fff" style={{ marginLeft: '4px' }} />
                         </div>
                       </div>
 
                       {c.tag && (
-                        <div style={{ position: 'absolute', top: '16px', left: '16px', background: p.accent, color: '#fff', fontSize: '11px', fontWeight: 800, padding: '6px 12px', borderRadius: '10px', letterSpacing: '0.5px', textTransform: 'uppercase', boxShadow: '0 4px 12px rgba(0,212,170,0.2)' }}>
+                        <div style={{ position: 'absolute', top: '16px', left: '16px', background: catColor.primary, color: '#fff', fontSize: '11px', fontWeight: 800, padding: '6px 12px', borderRadius: '10px', letterSpacing: '0.5px', textTransform: 'uppercase', boxShadow: `0 4px 12px ${catColor.primary}40` }}>
                           {c.tag}
                         </div>
                       )}
+                      
+                      <button 
+                        onClick={(e) => toggleWishlist(c._id, e)}
+                        style={{ position: 'absolute', top: '12px', right: '12px', background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(4px)', border: 'none', width: '32px', height: '32px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 10, boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
+                        <Heart size={16} fill={wishlist.includes(c._id) ? "#ef4444" : "transparent"} color={wishlist.includes(c._id) ? "#ef4444" : "#64748b"} />
+                      </button>
                       
                       <div style={{ position: 'absolute', bottom: '12px', right: '12px', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', fontSize: '12px', fontWeight: 600, padding: '4px 10px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: '0 4px 12px rgba(0,0,0,0.2)' }}>
                         <Clock size={12} strokeWidth={2.5} /> {c.hours}s
@@ -222,7 +302,7 @@ const CoursesPage = memo(function CoursesPage({ onNavigate }) {
                     
                     <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', flex: 1 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-                        <div style={{ background: `${p.accent}15`, color: p.accent, fontSize: '12px', fontWeight: 700, padding: '4px 10px', borderRadius: '8px' }}>{c.category}</div>
+                        <div style={{ background: `${catColor.primary}15`, color: catColor.primary, fontSize: '12px', fontWeight: 800, padding: '4px 10px', borderRadius: '8px' }}>{c.category}</div>
                         <span style={{ fontSize: '13px', color: p.textMuted, fontWeight: 600 }}>{c.level}</span>
                       </div>
                       
@@ -232,8 +312,8 @@ const CoursesPage = memo(function CoursesPage({ onNavigate }) {
                       
                       <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '20px', fontSize: '13px', color: p.textMuted, fontWeight: 500 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: `${p.accent}20`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <User size={12} color={p.accent} />
+                          <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: `${catColor.primary}20`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <User size={12} color={catColor.primary} />
                           </div>
                           {c.instructor}
                         </div>
@@ -244,11 +324,11 @@ const CoursesPage = memo(function CoursesPage({ onNavigate }) {
                       
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '16px', borderTop: `1px solid ${p.border}` }}>
                         <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-                          <span style={{ fontSize: '22px', fontWeight: 900, color: c.price === 'Ücretsiz' ? p.accent : p.text, letterSpacing: '-0.5px' }}>{c.price}</span>
+                          <span style={{ fontSize: '22px', fontWeight: 900, color: c.price === 'Ücretsiz' ? catColor.primary : p.text, letterSpacing: '-0.5px' }}>{c.price}</span>
                           {c.oldPrice && <span style={{ fontSize: '14px', color: p.textMuted, textDecoration: 'line-through', fontWeight: 500 }}>{c.oldPrice}</span>}
                         </div>
                         <button className="card-action-btn" style={{
-                          background: `${p.accent}15`, color: p.accent, border: 'none', borderRadius: '12px',
+                          background: `${catColor.primary}15`, color: catColor.primary, border: 'none', borderRadius: '12px',
                           width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center',
                           cursor: 'pointer'
                         }}>

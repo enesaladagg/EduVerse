@@ -121,7 +121,7 @@ export default function PomodoroTimer() {
   };
 
   const pct = activeTotal ? (timeLeft / activeTotal) : 0;
-  const r = 54;
+  const r = 68; // Artırıldı (Eski: 54)
   const circ = 2 * Math.PI * r;
   const strokeOffset = circ - (pct * circ);
 
@@ -155,14 +155,14 @@ export default function PomodoroTimer() {
       return (
         <div style={{
           fontSize: '34px', 
-          fontWeight: 700, 
+          fontWeight: 800, 
           color: primaryColor,
           fontFamily: "'Courier New', monospace",
-          letterSpacing: '2px',
-          background: `rgba(0,0,0,0.1)`,
-          padding: '4px 12px',
-          borderRadius: '8px',
-          border: `1px solid ${primaryColor}40`
+          letterSpacing: '1px',
+          background: 'transparent',
+          padding: '0',
+          borderRadius: '0',
+          border: 'none'
         }}>
           {formatTime(timeLeft)}
         </div>
@@ -292,6 +292,23 @@ export default function PomodoroTimer() {
           </div>
         </div>
 
+        {/* Animated SVG Ring + Time - HER ZAMAN GÖRÜNÜR (Canlı Önizleme) */}
+        <div style={{ position: 'relative', width: 150, height: 150, display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: isDragging ? 0 : 8 }}>
+          <svg width="150" height="150" style={{ position: 'absolute', transform: 'rotate(-90deg)' }}>
+            <circle cx="75" cy="75" r={r} fill="transparent" stroke={p.border} strokeWidth="6" />
+            <circle 
+              cx="75" cy="75" r={r} fill="transparent" 
+              stroke={primaryColor} 
+              strokeWidth="6" 
+              strokeDasharray={circ} 
+              strokeDashoffset={strokeOffset} 
+              strokeLinecap="round"
+              style={{ transition: isActive ? 'stroke-dashoffset 1s linear' : 'stroke-dashoffset 0.4s ease' }}
+            />
+          </svg>
+          {renderClockFace()}
+        </div>
+
         {showSettings ? (
           // Ayarlar Görünümü
           <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 16, animation: 'fadeIn 0.2s ease' }}>
@@ -350,25 +367,8 @@ export default function PomodoroTimer() {
             </button>
           </div>
         ) : (
-          // Ana Zamanlayıcı Görünümü
+          // Ana Zamanlayıcı Görünümü (Seçenekler ve Butonlar)
           <>
-            {/* Animated SVG Ring + Time */}
-            <div style={{ position: 'relative', width: 130, height: 130, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <svg width="130" height="130" style={{ position: 'absolute', transform: 'rotate(-90deg)' }}>
-                <circle cx="65" cy="65" r={r} fill="transparent" stroke={p.border} strokeWidth="6" />
-                <circle 
-                  cx="65" cy="65" r={r} fill="transparent" 
-                  stroke={primaryColor} 
-                  strokeWidth="6" 
-                  strokeDasharray={circ} 
-                  strokeDashoffset={strokeOffset} 
-                  strokeLinecap="round"
-                  style={{ transition: isActive ? 'stroke-dashoffset 1s linear' : 'stroke-dashoffset 0.4s ease' }}
-                />
-              </svg>
-              {renderClockFace()}
-            </div>
-
             {/* Options */}
             {!isActive && mode === 'focus' && (
               <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: t.spacing[3] }}>

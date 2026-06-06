@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useTheme } from "../context/ThemeContext";
+import { useAuth } from "../context/AuthContext";
 import GlobalNavbar from "../components/GlobalNavbar";
-import { User, Code2, Atom, Palette, Target, PartyPopper, Flame, MessageCircle, CircleDot, PlayCircle, Brain, Globe, ShieldCheck } from 'lucide-react';
+import { User, Code2, Atom, Palette, Target, PartyPopper, Flame, MessageCircle, CircleDot, PlayCircle, Brain, Globe, ShieldCheck, Calendar, BookOpen, Coffee, Activity, Camera, X, Upload } from 'lucide-react';
 
 /*
  ╔══════════════════════════════════════════════════════════════════╗
@@ -269,7 +270,9 @@ function FocusMode({ T }) {
   return (
     <div style={{ padding: 24, borderRadius: T.r3, background: active ? `linear-gradient(165deg, ${T.bg2}, rgba(14,240,178,0.03))` : T.gCard, border: `1px solid ${active ? T.b3 : T.b1}`, textAlign: "center", transition: "all 0.5s", position: "relative", overflow: "hidden" }}>
       {active && <Glow T={T} color={T.cyan} size={180} x="50%" y="30%" opacity={0.05} />}
-      <div style={{ fontFamily: T.display, fontSize: 14, fontWeight: 700, color: T.t2, marginBottom: 16, textTransform: "uppercase", letterSpacing: 1 }}>{mode === "focus" ? "🎯 Odaklanma Modu" : "☕ Mola"}</div>
+      <div style={{ fontFamily: T.display, fontSize: 14, fontWeight: 700, color: T.t2, marginBottom: 16, textTransform: "uppercase", letterSpacing: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+        {mode === "focus" ? <><Target size={16} /> ODAKLANMA MODU</> : <><Coffee size={16} /> MOLA</>}
+      </div>
       <ProgressRing T={T} value={pct} size={110} stroke={5} color={mode === "focus" ? T.cyan : T.amber}>
         <div style={{ fontFamily: T.mono, fontSize: 28, fontWeight: 800, color: T.t1, letterSpacing: 2 }}>{min}:{sec}</div>
       </ProgressRing>
@@ -281,36 +284,79 @@ function FocusMode({ T }) {
   );
 }
 
-export default function DashboardView() {
+export default function DashboardView({ user, onNavigate }) {
   const { isDark } = useTheme();
+  const { user: authUser, updateUser } = useAuth();
   const T = isDark ? T_DARK : T_LIGHT;
   const [activeCourse, setActiveCourse] = useState(0);
   const [mentorOpen, setMentorOpen] = useState(true);
+  
+  const [showAvatarPicker, setShowAvatarPicker] = useState(false);
+  const fileInputRef = useRef(null);
+
+  const PRESET_AVATARS = [
+    'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix&backgroundColor=b6e3f4',
+    'https://api.dicebear.com/7.x/avataaars/svg?seed=Aneka&backgroundColor=c0aede',
+    'https://api.dicebear.com/7.x/avataaars/svg?seed=Jocelyn&backgroundColor=d1d4f9',
+    'https://api.dicebear.com/7.x/avataaars/svg?seed=Nala&backgroundColor=ffdfbf'
+  ];
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      updateUser({ avatar: url });
+      setShowAvatarPicker(false);
+    }
+  };
 
   const goalsCompleted = DAILY_GOALS.filter(g => g.done).length;
   const goalsPct = (goalsCompleted / DAILY_GOALS.length) * 100;
 
   return (
     <div className="layout-container" style={{ minHeight: "100vh", background: T.bg0, color: T.t1, fontFamily: T.body, display: "flex", flexDirection: "column" }}>
-      <GlobalNavbar />
+      <GlobalNavbar onNavigate={onNavigate} />
 
       <main style={{ flex: 1, padding: "30px 5%", maxWidth: 1400, margin: "0 auto", width: "100%", marginTop: 80 }}>
         
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 32, flexWrap: "wrap", gap: 20 }}>
           <div>
-            <h1 style={{ fontFamily: T.display, fontSize: 32, fontWeight: 900, marginBottom: 8, letterSpacing: -0.5 }}>Tekrar Hoş Geldin, {USER.name} 👋</h1>
+            <h1 style={{ fontFamily: T.display, fontSize: 32, fontWeight: 900, marginBottom: 8, letterSpacing: -0.5 }}>Tekrar Hoş Geldin, {USER.name}</h1>
             <p style={{ color: T.t2, fontSize: 16 }}>Bugün harika şeyler öğrenmek için mükemmel bir gün!</p>
           </div>
           <div style={{ display: "flex", gap: 16 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 20px", borderRadius: T.r2, background: T.bg2, border: `1px solid ${T.b1}` }}>
-              <div style={{ fontSize: 24 }}>🔥</div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Flame size={26} color={T.amber} strokeWidth={2.5} />
+              </div>
               <div>
                 <div style={{ fontSize: 11, color: T.t3, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1 }}>Seri</div>
                 <div style={{ fontFamily: T.mono, fontSize: 18, fontWeight: 800, color: T.amber }}>{USER.streak} Gün</div>
               </div>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 16, padding: "12px 20px", borderRadius: T.r2, background: T.bg2, border: `1px solid ${T.b1}` }}>
-              <div style={{ width: 48, height: 48, borderRadius: 16, background: T.bg1, border: `1px solid ${T.b1}`, display: "flex", alignItems: "center", justifyContent: "center", color: T.t1 }}><User size={24} /></div>
+              <div 
+                onClick={() => setShowAvatarPicker(true)}
+                className="avatar-hover"
+                style={{ 
+                  width: 48, height: 48, borderRadius: 16, background: T.bg1, border: `1px solid ${T.b1}`, 
+                  display: "flex", alignItems: "center", justifyContent: "center", color: T.t1,
+                  cursor: "pointer", position: "relative", overflow: "hidden"
+                }}
+              >
+                <style>{`
+                  .avatar-hover::after { content: ''; position: absolute; inset: 0; background: rgba(0,0,0,0.5); opacity: 0; transition: opacity 0.2s; }
+                  .avatar-hover:hover::after { opacity: 1; }
+                  .avatar-hover:hover .camera-icon { opacity: 1; z-index: 2; }
+                  .camera-icon { position: absolute; color: white; opacity: 0; transition: opacity 0.2s; }
+                `}</style>
+                {authUser?.avatar ? (
+                  <img src={authUser.avatar} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                  <User size={24} />
+                )}
+                <Camera size={20} className="camera-icon" />
+              </div>
               <div>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
                   <span style={{ fontSize: 11, color: T.t3, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1 }}>Seviye {USER.level}</span>
@@ -364,21 +410,48 @@ export default function DashboardView() {
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
               <div style={{ borderRadius: T.r3, border: `1px solid ${T.b1}`, background: T.gCard, padding: 24, textAlign: "center" }}>
-                <h3 style={{ fontFamily: T.display, fontSize: 16, fontWeight: 800, marginBottom: 8 }}>🕸 Yetkinlik Radarı</h3>
+                <h3 style={{ fontFamily: T.display, fontSize: 16, fontWeight: 800, marginBottom: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}><Activity size={18} color={T.violet} /> Yetkinlik Radarı</h3>
                 <SkillRadar T={T} data={SKILL_DATA} size={220} />
               </div>
               <div style={{ borderRadius: T.r3, border: `1px solid ${T.b1}`, background: T.gCard, padding: 24 }}>
-                <h3 style={{ fontFamily: T.display, fontSize: 16, fontWeight: 800, marginBottom: 16 }}>📚 Tüm Kursların</h3>
-                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                  {COURSES.map((c, i) => (
-                    <div key={c.id} onClick={() => setActiveCourse(i)} className="card-hover" style={{ display: "flex", alignItems: "center", gap: 12, padding: 14, borderRadius: T.r2, background: activeCourse === i ? `${c.color}10` : T.bg3, border: `1px solid ${activeCourse === i ? `${c.color}30` : T.b1}`, cursor: "pointer" }}>
-                      <span style={{ fontSize: 24 }}>{c.icon}</span>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: 14, fontWeight: 600 }}>{c.title}</div>
-                        <div style={{ marginTop: 4 }}><Bar T={T} value={c.progress} max={100} color={c.color} h={4} /></div>
+                <h3 style={{ fontFamily: T.display, fontSize: 16, fontWeight: 800, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}><BookOpen size={18} color={T.cyan} /> Tüm Kursların</h3>
+                <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                  {COURSES.map((c, i) => {
+                    const isActive = activeCourse === i;
+                    return (
+                      <div key={c.id} onClick={() => setActiveCourse(i)} className="card-hover" style={{ 
+                        display: "flex", alignItems: "flex-start", gap: 16, padding: "16px", 
+                        borderRadius: "20px", 
+                        background: isActive ? `linear-gradient(145deg, ${T.bg2}, ${c.color}0a)` : T.bg3, 
+                        border: `1px solid ${isActive ? `${c.color}50` : T.b1}`, 
+                        cursor: "pointer", transition: 'all 0.3s cubic-bezier(0.4,0,0.2,1)',
+                        boxShadow: isActive ? `0 12px 32px ${c.color}15` : 'none',
+                        position: 'relative', overflow: 'hidden'
+                      }}>
+                        {isActive && <div style={{ position: 'absolute', top: 0, left: 0, width: 4, height: '100%', background: c.color }} />}
+                        <div style={{ 
+                          width: 48, height: 48, borderRadius: '14px', 
+                          background: `${c.color}15`, border: `1px solid ${c.color}30`,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                          flexShrink: 0
+                        }}>
+                          {c.icon}
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: 15, fontWeight: 800, color: isActive ? T.t1 : T.t2, marginBottom: 4, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {c.title}
+                          </div>
+                          <div style={{ fontSize: 12, color: T.t3, fontWeight: 600, marginBottom: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {c.currentModule}
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                            <div style={{ flex: 1 }}><Bar T={T} value={c.progress} max={100} color={c.color} h={6} /></div>
+                            <span style={{ fontSize: 12, fontFamily: T.mono, fontWeight: 800, color: c.color }}>{c.progress}%</span>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -388,7 +461,7 @@ export default function DashboardView() {
             <div style={{ borderRadius: T.r3, border: `1px solid ${T.b1}`, background: T.gCard, padding: 24, position: "relative", overflow: "hidden" }}>
               <Glow T={T} color={T.amber} size={150} x="80%" y="20%" opacity={0.04} />
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, position: "relative", zIndex: 2 }}>
-                <h3 style={{ fontFamily: T.display, fontSize: 16, fontWeight: 800 }}>🎯 Günlük Hedefler</h3>
+                <h3 style={{ fontFamily: T.display, fontSize: 16, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 8 }}><Target size={18} color={T.amber} /> Günlük Hedefler</h3>
                 <ProgressRing T={T} value={goalsPct} size={40} stroke={3} color={T.amber}>
                   <span style={{ fontFamily: T.mono, fontSize: 10, fontWeight: 800, color: T.amber }}>{goalsCompleted}/{DAILY_GOALS.length}</span>
                 </ProgressRing>
@@ -406,7 +479,7 @@ export default function DashboardView() {
             <FocusMode T={T} />
 
             <div style={{ borderRadius: T.r3, border: `1px solid ${T.b1}`, background: T.gCard, padding: 24 }}>
-              <h3 style={{ fontFamily: T.display, fontSize: 16, fontWeight: 800, marginBottom: 16 }}>📅 Bugünün Programı</h3>
+              <h3 style={{ fontFamily: T.display, fontSize: 16, fontWeight: 800, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}><Calendar size={18} color={T.violet} /> Bugünün Programı</h3>
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {SCHEDULE.map((s, i) => (
                   <div key={i} style={{ display: "flex", gap: 12 }}>
@@ -429,6 +502,69 @@ export default function DashboardView() {
           </div>
         </div>
       </main>
+
+      {/* Avatar Picker Modal */}
+      {showAvatarPicker && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
+          background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999
+        }}>
+          <div style={{
+            background: T.bg2, border: `1px solid ${T.b2}`, borderRadius: 24, padding: 32,
+            width: '90%', maxWidth: 400, boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
+            position: 'relative'
+          }}>
+            <button 
+              onClick={() => setShowAvatarPicker(false)}
+              style={{ position: 'absolute', top: 20, right: 20, background: 'transparent', border: 'none', color: T.t2, cursor: 'pointer' }}
+            >
+              <X size={20} />
+            </button>
+            <h2 style={{ fontFamily: T.display, fontSize: 20, fontWeight: 800, marginBottom: 24, color: T.t1 }}>Profil Fotoğrafını Değiştir</h2>
+            
+            <div style={{ marginBottom: 24 }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: T.t2, marginBottom: 12, textTransform: 'uppercase' }}>Standart Avatarlar</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+                {PRESET_AVATARS.map((url, i) => (
+                  <img 
+                    key={i} src={url} alt={`Preset ${i}`} 
+                    onClick={() => { updateUser({ avatar: url }); setShowAvatarPicker(false); }}
+                    style={{ 
+                      width: '100%', aspectRatio: '1/1', borderRadius: 16, cursor: 'pointer',
+                      border: authUser?.avatar === url ? `2px solid ${T.cyan}` : `2px solid transparent`,
+                      background: T.bg1, transition: 'all 0.2s', objectFit: 'cover'
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
+                    onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: T.t2, marginBottom: 12, textTransform: 'uppercase' }}>Özel Fotoğraf Yükle</div>
+              <button 
+                onClick={() => fileInputRef.current?.click()}
+                style={{ 
+                  width: '100%', padding: '16px', borderRadius: 16, border: `2px dashed ${T.b2}`,
+                  background: T.bg1, color: T.cyan, display: 'flex', flexDirection: 'column',
+                  alignItems: 'center', gap: 8, cursor: 'pointer', transition: 'all 0.2s'
+                }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = T.cyan; e.currentTarget.style.background = `${T.cyan}10`; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = T.b2; e.currentTarget.style.background = T.bg1; }}
+              >
+                <Upload size={24} />
+                <span style={{ fontSize: 14, fontWeight: 600 }}>Bilgisayardan Seç</span>
+              </button>
+              <input 
+                type="file" ref={fileInputRef} onChange={handleFileUpload} accept="image/*" 
+                style={{ display: 'none' }} 
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
