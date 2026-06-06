@@ -160,7 +160,7 @@ export default function GlobalNavbar({ activePage, onNavigate }) {
         {/* CENTER CONTENT */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 32, flex: 1 }}>
           
-          {/* Menu Dropdown */}
+          {/* Menu Dropdown for Extra Links */}
           <div 
             ref={menuRef} 
             style={{ position: 'relative' }}
@@ -192,146 +192,96 @@ export default function GlobalNavbar({ activePage, onNavigate }) {
               <div style={{ position: 'absolute', top: '100%', left: 0, paddingTop: 12, zIndex: 1000 }}>
                 <div style={{
                   boxSizing: 'border-box',
-                  width: 250, background: isDark ? '#0f172a' : '#f8fafc',
+                  width: 200, background: isDark ? '#0f172a' : '#f8fafc',
                   borderRadius: 16, padding: 8,
                   boxShadow: isDark ? '0 10px 40px rgba(0,0,0,0.5)' : '0 10px 40px rgba(0,0,0,0.08)',
                   border: `1px solid ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'}`,
                   display: 'flex', flexDirection: 'column', gap: 4,
                   animation: 'slideDownFade 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
                 }}>
-                {visibleNavItems.map(({ id, icon: Icon, label }) => {
-                  const isActive = activePage === id;
-                  return (
+                  {EXTRA_LINKS.map(link => (
                     <button
-                      key={id}
-                      onClick={() => { onNavigate(id); setMenuOpen(false); }}
+                      key={link.id}
+                      onClick={() => {
+                        onNavigate(link.id);
+                        setMenuOpen(false);
+                      }}
                       style={{
                         boxSizing: 'border-box',
-                        display: 'flex', alignItems: 'center', gap: 14,
-                        width: '100%', padding: '12px 16px', borderRadius: 10,
-                        border: 'none', cursor: 'pointer', textAlign: 'left',
-                        background: isActive ? 'rgba(0,212,170,0.1)' : 'transparent',
-                        color: isActive ? '#00d4aa' : (isDark ? '#cbd5e1' : '#334155'),
-                        fontWeight: isActive ? 600 : 500, fontSize: 14,
-                        transition: 'all 0.2s',
-                        position: 'relative',
-                        overflow: 'hidden'
+                        display: 'flex', alignItems: 'center', gap: 12,
+                        width: '100%', padding: '10px 16px',
+                        background: 'transparent', border: 'none', cursor: 'pointer',
+                        color: isDark ? '#cbd5e1' : '#64748b',
+                        fontSize: 14, fontWeight: 500, textAlign: 'left',
+                        borderRadius: 8, transition: 'all 0.2s'
                       }}
                       onMouseEnter={(e) => {
-                        if (!isActive) {
-                          e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)';
-                          e.currentTarget.style.color = isDark ? '#fff' : '#0f172a';
-                        }
+                        e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
+                        e.currentTarget.style.color = '#00d4aa';
                       }}
                       onMouseLeave={(e) => {
-                        if (!isActive) {
-                          e.currentTarget.style.background = 'transparent';
-                          e.currentTarget.style.color = isDark ? '#cbd5e1' : '#334155';
-                        }
+                        e.currentTarget.style.background = 'transparent';
+                        e.currentTarget.style.color = isDark ? '#cbd5e1' : '#64748b';
                       }}
                     >
-                      <Icon size={20} strokeWidth={isActive ? 2.5 : 2} style={{ color: isActive ? '#00d4aa' : (isDark ? '#94a3b8' : '#64748b'), zIndex: 2 }} />
-                      <span style={{ zIndex: 2 }}>{label}</span>
-                      
-                      {/* Splatter effect for active item (like in screenshot) */}
-                      {isActive && (
-                        <div style={{
-                          position: 'absolute', top: -10, left: 10, width: 40, height: 40,
-                          background: 'radial-gradient(circle, rgba(0,212,170,0.3) 0%, transparent 70%)',
-                          borderRadius: '50%', filter: 'blur(4px)', zIndex: 1
-                        }} />
-                      )}
+                      {link.label}
                     </button>
-                  );
-                })}
-
-                <div style={{ height: 1, background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)', margin: '8px 0' }} />
-
-                {EXTRA_LINKS.map(link => (
-                  <button
-                    key={link.id}
-                    onClick={() => {
-                      onNavigate(link.id);
-                      setMenuOpen(false);
-                    }}
-                    style={{
-                      boxSizing: 'border-box',
-                      display: 'flex', alignItems: 'center', gap: 12,
-                      width: '100%', padding: '10px 16px',
-                      background: 'transparent', border: 'none', cursor: 'pointer',
-                      color: isDark ? '#cbd5e1' : '#64748b',
-                      fontSize: 14, fontWeight: 500, textAlign: 'left',
-                      borderRadius: 8, transition: 'all 0.2s'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
-                      e.currentTarget.style.color = '#00d4aa';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = 'transparent';
-                      e.currentTarget.style.color = isDark ? '#cbd5e1' : '#64748b';
-                    }}
-                  >
-                    {link.label}
-                  </button>
-                ))}
+                  ))}
                 </div>
               </div>
             )}
           </div>
 
-          {/* Horizontal Links */}
-          <div className="desktop-nav-links" style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-            {visibleNavItems.map(({ id, icon: Icon, label }) => {
-              const isActive = activePage === id;
-              return (
-                <button
-                  key={id}
-                  onClick={() => onNavigate(id)}
-                  style={{
-                    background: 'transparent',
-                    border: 'none', cursor: 'pointer',
-                    color: isActive ? '#00d4aa' : (isDark ? '#cbd5e1' : '#64748b'),
-                    fontSize: 14, fontWeight: isActive ? 600 : 500,
-                    transition: 'all 0.2s',
-                    padding: '8px 4px',
-                    whiteSpace: 'nowrap',
-                    position: 'relative'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isActive) {
-                      e.currentTarget.style.color = '#00d4aa';
-                      const underline = e.currentTarget.querySelector('.nav-underline');
-                      if (underline) underline.style.width = '100%';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isActive) {
-                      e.currentTarget.style.color = isDark ? '#cbd5e1' : '#64748b';
-                      const underline = e.currentTarget.querySelector('.nav-underline');
-                      if (underline) underline.style.width = '0%';
-                    }
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <Icon size={18} strokeWidth={isActive ? 2.5 : 2} />
-                    {label}
-                  </div>
-                  <div 
-                    className="nav-underline"
-                    style={{
-                      position: 'absolute', bottom: 4, left: '50%', transform: 'translateX(-50%)', height: 2,
-                      background: '#00d4aa', transition: 'width 0.3s ease',
-                      width: isActive ? '100%' : '0%'
-                    }}
-                  />
-                </button>
-              );
-            })}
-
-
-          </div>
-
+          {/* TABS */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {visibleNavItems.map(({ id, icon: Icon, label }) => {
+            const isActive = activePage === id;
+            return (
+              <button
+                key={id}
+                onClick={() => onNavigate(id)}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 4,
+                  padding: '8px 16px',
+                  height: 80,
+                  border: 'none',
+                  background: 'transparent',
+                  cursor: 'pointer',
+                  position: 'relative',
+                  color: isActive ? '#00d4aa' : (isDark ? '#8899b4' : '#64748b'),
+                  transition: 'color 0.2s',
+                }}
+              >
+                <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
+                <span style={{ 
+                  fontSize: 12, 
+                  fontWeight: isActive ? 600 : 500,
+                  whiteSpace: 'nowrap'
+                }}>
+                  {label}
+                </span>
+                
+                {/* Active Indicator */}
+                {isActive && (
+                  <div style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 16,
+                    right: 16,
+                    height: 3,
+                    background: '#00d4aa',
+                    borderTopLeftRadius: 3,
+                    borderTopRightRadius: 3
+                  }} />
+                )}
+              </button>
+            );
+          })}
+        </div>
         </div>
 
         {/* RIGHT ACTIONS */}
