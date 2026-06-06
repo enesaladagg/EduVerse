@@ -329,56 +329,7 @@ export default function GlobalNavbar({ activePage, onNavigate }) {
               );
             })}
 
-            {/* Unauthenticated extra links next to main nav */}
-            {!isAuthenticated && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                {[
-                  { id: 'h-paths', label: 'Yol Haritaları' },
-                  { id: 'h-community', label: 'Topluluk' },
-                  { id: 'h-corporate', label: 'Kurumsal' }
-                ].map((link, idx) => {
-                  const isActive = activePage === link.id;
-                  return (
-                    <button
-                      key={idx}
-                      onClick={() => onNavigate(link.id)}
-                      style={{
-                        background: 'transparent', border: 'none', cursor: 'pointer',
-                        color: isActive ? '#00d4aa' : (isDark ? '#cbd5e1' : '#64748b'), 
-                        fontSize: 14, fontWeight: isActive ? 600 : 500,
-                        padding: '8px 4px', transition: 'all 0.2s',
-                        whiteSpace: 'nowrap', position: 'relative'
-                      }}
-                      onMouseEnter={(e) => {
-                        if (!isActive) {
-                          e.currentTarget.style.color = '#00d4aa';
-                          const underline = e.currentTarget.querySelector('.nav-underline-extra');
-                          if (underline) underline.style.width = '100%';
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        if (!isActive) {
-                          e.currentTarget.style.color = isDark ? '#cbd5e1' : '#64748b';
-                          const underline = e.currentTarget.querySelector('.nav-underline-extra');
-                          if (underline) underline.style.width = '0%';
-                        }
-                      }}
-                    >
-                      {link.label}
-                      <div 
-                        className="nav-underline-extra"
-                        style={{
-                          position: 'absolute', bottom: 4, left: '50%', transform: 'translateX(-50%)', height: 2,
-                          background: '#00d4aa', transition: 'width 0.3s ease',
-                          width: isActive ? '100%' : '0%'
-                        }}
-                      />
-                    </button>
-                  );
-                })}
-                <div style={{ width: 1, height: 24, background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)', marginLeft: 16 }} />
-              </div>
-            )}
+
           </div>
 
         </div>
