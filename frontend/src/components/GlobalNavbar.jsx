@@ -38,11 +38,11 @@ const NAV_ITEMS = [
   { id: 'home', icon: Home, label: 'Ana Sayfa' },
   { id: 'courses', icon: BookOpen, label: 'Kurslar' },
   { id: 'live', icon: MonitorPlay, label: 'Canlı Dersler' },
-  { id: 'calendar', icon: Calendar, label: 'Takvim & Plan', auth: true },
-  { id: 'messages', icon: MessageSquare, label: 'Mesajlar', auth: true },
-  { id: 'certificates', icon: Award, label: 'Sertifikalar', auth: true },
-  { id: 'profile', icon: GraduationCap, label: 'Profilim', auth: true, role: 'student' },
-  { id: 'instructor', icon: Briefcase, label: 'Eğitmen Paneli', auth: true, role: 'teacher' },
+  { id: 'calendar', icon: Calendar, label: 'Takvim & Plan' },
+  { id: 'messages', icon: MessageSquare, label: 'Mesajlar' },
+  { id: 'certificates', icon: Award, label: 'Sertifikalar' },
+  { id: 'profile', icon: GraduationCap, label: 'Profilim' },
+  { id: 'instructor', icon: Briefcase, label: 'Eğitmen Paneli' },
 ];
 
 const EXTRA_LINKS = [
