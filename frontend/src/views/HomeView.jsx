@@ -9,7 +9,7 @@ import {
   Users, BookOpen, GraduationCap, Star,
   User, Briefcase, Play, Video, Award, Globe, Clock
 } from 'lucide-react';
-import '../hero.css';
+import '../design-system/hero.css';
 
 const DARK_COLORS = {
   primary: "#0a1628",
