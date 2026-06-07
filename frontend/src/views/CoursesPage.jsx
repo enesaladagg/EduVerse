@@ -203,13 +203,44 @@ const CoursesPage = memo(function CoursesPage({ onNavigate }) {
               ))}
             </div>
             
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{ fontSize: '14px', color: p.textMuted, fontWeight: 600 }}>Sırala:</span>
-              <select value={sortBy} onChange={e => setSortBy(e.target.value)} style={{ padding: '8px 16px', borderRadius: '10px', border: `1px solid ${p.border}`, background: p.panel, color: p.text, fontSize: '14px', outline: 'none', cursor: 'pointer' }}>
-                <option value="popular">En Popüler</option>
-                <option value="rating">En Yüksek Puan</option>
-                <option value="newest">En Yeni</option>
-              </select>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '14px', color: p.textMuted, fontWeight: 600, marginRight: '8px' }}>Sırala:</span>
+              {[
+                { value: 'popular', label: 'Popüler' },
+                { value: 'newest', label: 'En Yeni' },
+                { value: 'rating', label: 'En Yüksek Puan' }
+              ].map(opt => (
+                <button
+                  key={opt.value}
+                  onClick={() => setSortBy(opt.value)}
+                  style={{
+                    background: sortBy === opt.value ? p.accent : (isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'),
+                    color: sortBy === opt.value ? '#fff' : p.textMuted,
+                    border: `1px solid ${sortBy === opt.value ? p.accent : (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)')}`,
+                    padding: '8px 16px',
+                    borderRadius: '20px',
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    boxShadow: sortBy === opt.value ? `0 4px 12px ${p.accent}40` : 'none'
+                  }}
+                  onMouseEnter={e => {
+                    if (sortBy !== opt.value) {
+                      e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
+                      e.currentTarget.style.color = p.text;
+                    }
+                  }}
+                  onMouseLeave={e => {
+                    if (sortBy !== opt.value) {
+                      e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)';
+                      e.currentTarget.style.color = p.textMuted;
+                    }
+                  }}
+                >
+                  {opt.label}
+                </button>
+              ))}
             </div>
           </div>
 

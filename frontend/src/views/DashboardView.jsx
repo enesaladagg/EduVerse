@@ -313,6 +313,20 @@ export default function DashboardView({ user, onNavigate }) {
   const goalsCompleted = DAILY_GOALS.filter(g => g.done).length;
   const goalsPct = (goalsCompleted / DAILY_GOALS.length) * 100;
 
+  const displayCourses = useMemo(() => {
+    const pc = authUser?.purchasedCourses;
+    if (!pc || pc.length === 0) return [];
+    return pc.map(c => ({
+      ...c,
+      progress: c.progress || 0,
+      icon: c.icon || <Code2 size={24} color={c.color || T.cyan} />,
+      color: c.color || T.cyan,
+      currentModule: c.currentModule || "Başlangıç Modülü",
+      lastAccess: c.lastAccess || "şimdi",
+      instructor: c.instructor?.name || c.instructor || "EduVerse Eğitmeni"
+    }));
+  }, [authUser, T]);
+
   return (
     <div className="layout-container" style={{ minHeight: "100vh", background: T.bg0, color: T.t1, fontFamily: T.body, display: "flex", flexDirection: "column" }}>
       <GlobalNavbar onNavigate={onNavigate} />
@@ -372,89 +386,108 @@ export default function DashboardView({ user, onNavigate }) {
           <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
             <AIMentor T={T} expanded={mentorOpen} onToggle={() => setMentorOpen(!mentorOpen)} />
 
-            <div>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-                <h2 style={{ fontFamily: T.display, fontSize: 18, fontWeight: 800 }}>Devam Eden Kurslar</h2>
-                <div style={{ display: "flex", gap: 4 }}>
-                  {COURSES.map((c, i) => <Chip T={T} key={c.id} active={activeCourse === i} color={c.color} onClick={() => setActiveCourse(i)}>{c.icon} {c.title.split(" ")[0]}</Chip>)}
+            {displayCourses.length === 0 ? (
+              <div style={{ padding: 40, borderRadius: T.r3, border: `1px dashed ${T.b2}`, background: T.bg3, textAlign: 'center' }}>
+                <div style={{ width: 80, height: 80, borderRadius: '50%', background: T.b1, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+                  <Code2 size={40} color={T.cyan} />
                 </div>
+                <h3 style={{ fontFamily: T.display, fontSize: 24, fontWeight: 800, marginBottom: 12 }}>Henüz Hiç Kurs Almadın!</h3>
+                <p style={{ color: T.t2, fontSize: 16, maxWidth: 400, margin: '0 auto 32px', lineHeight: 1.6 }}>Yeni yetenekler keşfetmek ve kariyerine değer katmak için kurslarımızı inceleyebilirsin.</p>
+                <button 
+                  onClick={() => onNavigate('courses')}
+                  style={{ padding: '14px 32px', borderRadius: 14, border: 'none', background: T.gCyan, color: '#000', fontFamily: T.display, fontSize: 16, fontWeight: 800, cursor: 'pointer', boxShadow: `0 8px 24px ${T.cyanGlow}` }}
+                >
+                  Kurslara Göz At
+                </button>
               </div>
-
-              {(() => {
-                const c = COURSES[activeCourse];
-                return (
-                  <div className="card-hover" style={{ borderRadius: T.r3, border: `1px solid ${T.b2}`, background: `linear-gradient(165deg, ${T.bg2} 0%, ${c.color}06 100%)`, overflow: "hidden", position: "relative" }}>
-                    <Glow T={T} color={c.color} size={250} x="90%" y="20%" opacity={0.06} />
-                    <div style={{ padding: 28, position: "relative", zIndex: 2 }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
-                        <div style={{ flex: 1 }}>
-                          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-                            <span style={{ fontSize: 32 }}>{c.icon}</span>
-                            <div>
-                              <h3 style={{ fontFamily: T.display, fontSize: 20, fontWeight: 800 }}>{c.title}</h3>
-                              <span style={{ fontSize: 13, color: T.t3 }}>{c.instructor} · Son erişim: {c.lastAccess}</span>
-                            </div>
-                          </div>
-                        </div>
-                        <ProgressRing T={T} value={c.progress} size={72} stroke={5} color={c.color}>
-                          <span style={{ fontFamily: T.mono, fontSize: 16, fontWeight: 800, color: c.color }}>{c.progress}%</span>
-                        </ProgressRing>
-                      </div>
-                      <Bar T={T} value={c.progress} max={100} color={c.color} h={8} />
-                      <button style={{ width: "100%", marginTop: 24, padding: 16, borderRadius: T.r2, border: "none", background: c.color, color: "#000", fontFamily: T.display, fontSize: 15, fontWeight: 800, cursor: "pointer", transition: "all 0.3s" }}>▶ Derse Devam Et</button>
+            ) : (
+              <>
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+                    <h2 style={{ fontFamily: T.display, fontSize: 18, fontWeight: 800 }}>Devam Eden Kurslar</h2>
+                    <div style={{ display: "flex", gap: 4 }}>
+                      {displayCourses.map((c, i) => <Chip T={T} key={c.id || i} active={activeCourse === i} color={c.color} onClick={() => setActiveCourse(i)}>{c.icon} {c.title.split(" ")[0]}</Chip>)}
                     </div>
                   </div>
-                );
-              })()}
-            </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
-              <div style={{ borderRadius: T.r3, border: `1px solid ${T.b1}`, background: T.gCard, padding: 24, textAlign: "center" }}>
-                <h3 style={{ fontFamily: T.display, fontSize: 16, fontWeight: 800, marginBottom: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}><Activity size={18} color={T.violet} /> Yetkinlik Radarı</h3>
-                <SkillRadar T={T} data={SKILL_DATA} size={220} />
-              </div>
-              <div style={{ borderRadius: T.r3, border: `1px solid ${T.b1}`, background: T.gCard, padding: 24 }}>
-                <h3 style={{ fontFamily: T.display, fontSize: 16, fontWeight: 800, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}><BookOpen size={18} color={T.cyan} /> Tüm Kursların</h3>
-                <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                  {COURSES.map((c, i) => {
-                    const isActive = activeCourse === i;
+                  {(() => {
+                    const c = displayCourses[activeCourse];
+                    if (!c) return null;
                     return (
-                      <div key={c.id} onClick={() => setActiveCourse(i)} className="card-hover" style={{ 
-                        display: "flex", alignItems: "flex-start", gap: 16, padding: "16px", 
-                        borderRadius: "20px", 
-                        background: isActive ? `linear-gradient(145deg, ${T.bg2}, ${c.color}0a)` : T.bg3, 
-                        border: `1px solid ${isActive ? `${c.color}50` : T.b1}`, 
-                        cursor: "pointer", transition: 'all 0.3s cubic-bezier(0.4,0,0.2,1)',
-                        boxShadow: isActive ? `0 12px 32px ${c.color}15` : 'none',
-                        position: 'relative', overflow: 'hidden'
-                      }}>
-                        {isActive && <div style={{ position: 'absolute', top: 0, left: 0, width: 4, height: '100%', background: c.color }} />}
-                        <div style={{ 
-                          width: 48, height: 48, borderRadius: '14px', 
-                          background: `${c.color}15`, border: `1px solid ${c.color}30`,
-                          display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                          flexShrink: 0
-                        }}>
-                          {c.icon}
-                        </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: 15, fontWeight: 800, color: isActive ? T.t1 : T.t2, marginBottom: 4, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                            {c.title}
+                      <div className="card-hover" style={{ borderRadius: T.r3, border: `1px solid ${T.b2}`, background: `linear-gradient(165deg, ${T.bg2} 0%, ${c.color}06 100%)`, overflow: "hidden", position: "relative" }}>
+                        <Glow T={T} color={c.color} size={250} x="90%" y="20%" opacity={0.06} />
+                        <div style={{ padding: 28, position: "relative", zIndex: 2 }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+                                <span style={{ fontSize: 32 }}>{c.icon}</span>
+                                <div>
+                                  <h3 style={{ fontFamily: T.display, fontSize: 20, fontWeight: 800 }}>{c.title}</h3>
+                                  <span style={{ fontSize: 13, color: T.t3 }}>{c.instructor} · Son erişim: {c.lastAccess}</span>
+                                </div>
+                              </div>
+                            </div>
+                            <ProgressRing T={T} value={c.progress} size={72} stroke={5} color={c.color}>
+                              <span style={{ fontFamily: T.mono, fontSize: 16, fontWeight: 800, color: c.color }}>{c.progress}%</span>
+                            </ProgressRing>
                           </div>
-                          <div style={{ fontSize: 12, color: T.t3, fontWeight: 600, marginBottom: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                            {c.currentModule}
-                          </div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                            <div style={{ flex: 1 }}><Bar T={T} value={c.progress} max={100} color={c.color} h={6} /></div>
-                            <span style={{ fontSize: 12, fontFamily: T.mono, fontWeight: 800, color: c.color }}>{c.progress}%</span>
-                          </div>
+                          <Bar T={T} value={c.progress} max={100} color={c.color} h={8} />
+                          <button style={{ width: "100%", marginTop: 24, padding: 16, borderRadius: T.r2, border: "none", background: c.color, color: "#000", fontFamily: T.display, fontSize: 15, fontWeight: 800, cursor: "pointer", transition: "all 0.3s" }}>▶ Derse Devam Et</button>
                         </div>
                       </div>
                     );
-                  })}
+                  })()}
                 </div>
-              </div>
-            </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+                  <div style={{ borderRadius: T.r3, border: `1px solid ${T.b1}`, background: T.gCard, padding: 24, textAlign: "center" }}>
+                    <h3 style={{ fontFamily: T.display, fontSize: 16, fontWeight: 800, marginBottom: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}><Activity size={18} color={T.violet} /> Yetkinlik Radarı</h3>
+                    <SkillRadar T={T} data={SKILL_DATA} size={220} />
+                  </div>
+                  <div style={{ borderRadius: T.r3, border: `1px solid ${T.b1}`, background: T.gCard, padding: 24 }}>
+                    <h3 style={{ fontFamily: T.display, fontSize: 16, fontWeight: 800, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}><BookOpen size={18} color={T.cyan} /> Tüm Kursların</h3>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 16, maxHeight: 300, overflowY: 'auto', paddingRight: 8 }}>
+                      {displayCourses.map((c, i) => {
+                        const isActive = activeCourse === i;
+                        return (
+                          <div key={c.id || i} onClick={() => setActiveCourse(i)} className="card-hover" style={{ 
+                            display: "flex", alignItems: "flex-start", gap: 16, padding: "16px", 
+                            borderRadius: "20px", 
+                            background: isActive ? `linear-gradient(145deg, ${T.bg2}, ${c.color}0a)` : T.bg3, 
+                            border: `1px solid ${isActive ? `${c.color}50` : T.b1}`, 
+                            cursor: "pointer", transition: 'all 0.3s cubic-bezier(0.4,0,0.2,1)',
+                            boxShadow: isActive ? `0 12px 32px ${c.color}15` : 'none',
+                            position: 'relative', overflow: 'hidden'
+                          }}>
+                            {isActive && <div style={{ position: 'absolute', top: 0, left: 0, width: 4, height: '100%', background: c.color }} />}
+                            <div style={{ 
+                              width: 48, height: 48, borderRadius: '14px', 
+                              background: `${c.color}15`, border: `1px solid ${c.color}30`,
+                              display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                              flexShrink: 0
+                            }}>
+                              {c.icon}
+                            </div>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ fontSize: 15, fontWeight: 800, color: isActive ? T.t1 : T.t2, marginBottom: 4, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {c.title}
+                              </div>
+                              <div style={{ fontSize: 12, color: T.t3, fontWeight: 600, marginBottom: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {c.currentModule}
+                              </div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                <div style={{ flex: 1 }}><Bar T={T} value={c.progress} max={100} color={c.color} h={6} /></div>
+                                <span style={{ fontSize: 12, fontFamily: T.mono, fontWeight: 800, color: c.color }}>{c.progress}%</span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 20, position: "sticky", top: 80 }}>

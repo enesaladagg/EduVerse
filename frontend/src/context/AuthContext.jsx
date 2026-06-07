@@ -17,6 +17,7 @@ function mapUser(data) {
     earnedIds: data.badges || [],
     avatarInitials: data.name?.split(' ').map((p) => p[0]).join('').slice(0, 2).toUpperCase(),
     demo: data.demo,
+    purchasedCourses: data.purchasedCourses || [],
   };
 }
 
@@ -78,7 +79,7 @@ export function AuthProvider({ children }) {
       return { success: true };
     } catch (err) {
       console.warn("Backend'e ulaşılamadı. Demo kullanıcı olarak giriş yapılıyor.");
-      const mockData = { id: "123", name: "Enes Aladağ", email, role: "student", points: 250 };
+      const mockData = { id: "123", name: "Enes Aladağ", email, role: "student", points: 250, purchasedCourses: [] };
       applySession("mock-token-123", mockData);
       return { success: true };
     }
@@ -95,7 +96,26 @@ export function AuthProvider({ children }) {
   }, [applySession]);
 
   const updateUser = useCallback((patch) => {
-    setUser((prev) => (prev ? { ...prev, ...patch } : prev));
+    setUser((prev) => {
+      const updated = prev ? { ...prev, ...patch } : prev;
+      if (updated) localStorage.setItem('user', JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
+  const purchaseCourses = useCallback((courses) => {
+    setUser((prev) => {
+      if (!prev) return prev;
+      const existingIds = new Set((prev.purchasedCourses || []).map(c => c._id || c.id));
+      const newCourses = courses.filter(c => !existingIds.has(c._id || c.id)).map(c => ({
+        ...c,
+        progress: 0,
+        purchasedAt: new Date().toISOString()
+      }));
+      const updated = { ...prev, purchasedCourses: [...(prev.purchasedCourses || []), ...newCourses] };
+      localStorage.setItem('user', JSON.stringify(updated));
+      return updated;
+    });
   }, []);
 
   if (loading) {
@@ -115,6 +135,7 @@ export function AuthProvider({ children }) {
       logout,
       refreshProfile,
       updateUser,
+      purchaseCourses,
     }}>
       {children}
     </AuthContext.Provider>

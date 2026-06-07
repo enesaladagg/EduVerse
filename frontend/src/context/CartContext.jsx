@@ -4,8 +4,13 @@ const CartContext = createContext();
 
 export function CartProvider({ children }) {
   const [cartItems, setCartItems] = useState(() => {
-    const saved = localStorage.getItem('eduverse_cart');
-    return saved ? JSON.parse(saved) : [];
+    try {
+      const saved = localStorage.getItem('eduverse_cart');
+      const parsed = saved ? JSON.parse(saved) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
   });
   const [isCartOpen, setIsCartOpen] = useState(false);
 
@@ -15,9 +20,15 @@ export function CartProvider({ children }) {
 
   const addToCart = (course) => {
     setCartItems(prev => {
-      // Prevent duplicates
-      if (prev.find(item => item._id === course._id)) return prev;
-      return [...prev, course];
+      const safePrev = Array.isArray(prev) ? prev : [];
+      const courseId = course._id || course.id || course.title;
+      if (safePrev.find(item => (item._id || item.id || item.title) === courseId)) return safePrev;
+      
+      const safeCourse = { ...course, _id: courseId };
+      if (typeof safeCourse.instructor === 'object') {
+        safeCourse.instructor = safeCourse.instructor?.name || "EduVerse Eğitmeni";
+      }
+      return [...safePrev, safeCourse];
     });
     setIsCartOpen(true);
   };
