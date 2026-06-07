@@ -340,25 +340,25 @@ export default function GlobalNavbar({ activePage, onNavigate }) {
         </div>
         </div>
 
-        {/* RIGHT ACTIONS */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          {/* Gamification Indicator */}
-          <button
-            onClick={() => onNavigate('games')}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 6,
-              height: 36, padding: '0 12px', borderRadius: 18,
-              border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
-              background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
-              color: isDark ? '#fff' : '#1e293b',
-              cursor: 'pointer', transition: 'all 0.2s', fontWeight: 700, fontSize: 13
-            }}
-          >
-            <Flame size={16} fill="#f59e0b" color="#f59e0b" />
-            <span>{user?.streak || 1}</span>
-            <div style={{ width: 1, height: 16, background: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)' }} />
-            <span style={{ color: '#00d4aa' }}>Lvl {user?.level || 1}</span>
-          </button>
+          {isAuthenticated && (
+            <button
+              onClick={() => onNavigate('games')}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                height: 36, padding: '0 12px', borderRadius: 18,
+                border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
+                background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
+                color: isDark ? '#fff' : '#1e293b',
+                cursor: 'pointer', transition: 'all 0.2s', fontWeight: 700, fontSize: 13
+              }}
+            >
+              <Flame size={16} fill="#f59e0b" color="#f59e0b" />
+              <span>{user?.streak || 1}</span>
+              <div style={{ width: 1, height: 16, background: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)' }} />
+              <span style={{ color: '#00d4aa' }}>Lvl {user?.level || 1}</span>
+            </button>
+          )}
           
           <button
             onClick={openCart}
@@ -387,81 +387,82 @@ export default function GlobalNavbar({ activePage, onNavigate }) {
             )}
           </button>
 
-          {/* Notifications */}
-          <div style={{ position: 'relative' }} ref={notifRef}>
-              <button
-                onClick={() => { 
-                  setShowNotifs(!showNotifs); 
-                  if (showNotifs) setShowAllNotifs(false); 
-                }}
-                style={{
-                  position: 'relative',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  width: 36, height: 36, borderRadius: '50%',
-                  border: 'none',
-                  background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
-                  color: isDark ? '#fff' : '#1e293b',
-                  cursor: 'pointer',
-                  transition: 'background 0.2s'
-                }}
-              >
-                <Bell size={18} />
-                {notifications.length > 0 && (
-                  <span style={{
-                    position: 'absolute', top: -2, right: -2,
-                    background: '#ef4444', color: '#fff', fontSize: 10, fontWeight: 700, fontFamily: '"Inter", sans-serif',
-                    width: 16, height: 16, borderRadius: '50%',
+          {isAuthenticated && (
+            <div style={{ position: 'relative' }} ref={notifRef}>
+                <button
+                  onClick={() => { 
+                    setShowNotifs(!showNotifs); 
+                    if (showNotifs) setShowAllNotifs(false); 
+                  }}
+                  style={{
+                    position: 'relative',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    border: `2px solid ${isDark ? '#0a1628' : '#ffffff'}`,
-                  }}>
-                    {notifications.length}
-                  </span>
-                )}
-              </button>
+                    width: 36, height: 36, borderRadius: '50%',
+                    border: 'none',
+                    background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
+                    color: isDark ? '#fff' : '#1e293b',
+                    cursor: 'pointer',
+                    transition: 'background 0.2s'
+                  }}
+                >
+                  <Bell size={18} />
+                  {notifications.length > 0 && (
+                    <span style={{
+                      position: 'absolute', top: -2, right: -2,
+                      background: '#ef4444', color: '#fff', fontSize: 10, fontWeight: 700, fontFamily: '"Inter", sans-serif',
+                      width: 16, height: 16, borderRadius: '50%',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      border: `2px solid ${isDark ? '#0a1628' : '#ffffff'}`,
+                    }}>
+                      {notifications.length}
+                    </span>
+                  )}
+                </button>
 
-              {showNotifs && (
-                <div style={{
-                  position: 'absolute', top: '100%', right: 0, marginTop: 12,
-                  width: 320, background: isDark ? '#0f172a' : '#fff',
-                  borderRadius: 16, padding: 16,
-                  boxShadow: isDark ? '0 10px 40px rgba(0,0,0,0.5)' : '0 10px 40px rgba(0,0,0,0.08)',
-                  border: `1px solid ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'}`,
-                  animation: 'slideDownFade 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-                  zIndex: 1000
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                    <button 
-                      onClick={() => setNotifications([])}
-                      style={{ background: 'transparent', border: 'none', color: '#ef4444', fontSize: 12, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
-                    >
-                      <Trash2 size={14} /> Temizle
-                    </button>
-                    <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: isDark ? '#fff' : '#1e293b' }}>Bildirimler</h3>
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxHeight: showAllNotifs ? 360 : undefined, overflowY: showAllNotifs ? 'auto' : 'hidden', paddingRight: showAllNotifs ? 4 : 0 }}>
-                    {notifications.length === 0 ? (
-                      <div style={{ textAlign: 'center', color: isDark ? '#94a3b8' : '#64748b', fontSize: 14, padding: '20px 0' }}>Hiç bildiriminiz yok.</div>
-                    ) : (
-                      (showAllNotifs ? notifications : notifications.slice(0, 3)).map((n, i) => (
-                        <div key={n.id || i} style={{ display: 'flex', gap: 12, padding: 8, borderRadius: 12, background: isDark ? 'rgba(255,255,255,0.02)' : '#f8fafc', cursor: 'pointer' }}>
-                          <div style={{ width: 40, height: 40, borderRadius: '50%', background: n.type === 'msg' ? '#3b82f6' : n.type === 'course' ? '#10b981' : '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 14, flexShrink: 0 }}>
-                            {n.title.charAt(0)}
+                {showNotifs && (
+                  <div style={{
+                    position: 'absolute', top: '100%', right: 0, marginTop: 12,
+                    width: 320, background: isDark ? '#0f172a' : '#fff',
+                    borderRadius: 16, padding: 16,
+                    boxShadow: isDark ? '0 10px 40px rgba(0,0,0,0.5)' : '0 10px 40px rgba(0,0,0,0.08)',
+                    border: `1px solid ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'}`,
+                    animation: 'slideDownFade 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                    zIndex: 1000
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                      <button 
+                        onClick={() => setNotifications([])}
+                        style={{ background: 'transparent', border: 'none', color: '#ef4444', fontSize: 12, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
+                      >
+                        <Trash2 size={14} /> Temizle
+                      </button>
+                      <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: isDark ? '#fff' : '#1e293b' }}>Bildirimler</h3>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxHeight: showAllNotifs ? 360 : undefined, overflowY: showAllNotifs ? 'auto' : 'hidden', paddingRight: showAllNotifs ? 4 : 0 }}>
+                      {notifications.length === 0 ? (
+                        <div style={{ textAlign: 'center', color: isDark ? '#94a3b8' : '#64748b', fontSize: 14, padding: '20px 0' }}>Hiç bildiriminiz yok.</div>
+                      ) : (
+                        (showAllNotifs ? notifications : notifications.slice(0, 3)).map((n, i) => (
+                          <div key={n.id || i} style={{ display: 'flex', gap: 12, padding: 8, borderRadius: 12, background: isDark ? 'rgba(255,255,255,0.02)' : '#f8fafc', cursor: 'pointer' }}>
+                            <div style={{ width: 40, height: 40, borderRadius: '50%', background: n.type === 'msg' ? '#3b82f6' : n.type === 'course' ? '#10b981' : '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 14, flexShrink: 0 }}>
+                              {n.title.charAt(0)}
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontSize: 14, fontWeight: 700, color: isDark ? '#fff' : '#1e293b' }}>{n.title}</div>
+                              <div style={{ fontSize: 12, color: isDark ? '#94a3b8' : '#64748b', marginTop: 2 }}>{n.desc}</div>
+                              <div style={{ fontSize: 10, color: isDark ? '#64748b' : '#94a3b8', marginTop: 4 }}>{n.time}</div>
+                            </div>
                           </div>
-                          <div style={{ flex: 1 }}>
-                            <div style={{ fontSize: 14, fontWeight: 700, color: isDark ? '#fff' : '#1e293b' }}>{n.title}</div>
-                            <div style={{ fontSize: 12, color: isDark ? '#94a3b8' : '#64748b', marginTop: 2 }}>{n.desc}</div>
-                            <div style={{ fontSize: 10, color: isDark ? '#64748b' : '#94a3b8', marginTop: 4 }}>{n.time}</div>
-                          </div>
-                        </div>
-                      ))
+                        ))
+                      )}
+                    </div>
+                    {!showAllNotifs && notifications.length > 3 && (
+                      <button onClick={() => setShowAllNotifs(true)} style={{ width: '100%', marginTop: 16, background: 'transparent', border: 'none', color: '#00d4aa', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>Tümünü Gör ({notifications.length})</button>
                     )}
                   </div>
-                  {!showAllNotifs && notifications.length > 3 && (
-                    <button onClick={() => setShowAllNotifs(true)} style={{ width: '100%', marginTop: 16, background: 'transparent', border: 'none', color: '#00d4aa', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>Tümünü Gör ({notifications.length})</button>
-                  )}
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+          )}
 
           <button
             onClick={toggleTheme}

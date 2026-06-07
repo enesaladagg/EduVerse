@@ -1,9 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
-import { Trophy, Star, Target, Flame, ChevronRight, CheckCircle2, Lock } from 'lucide-react';
-import Card from '../components/Card';
-import Badge from '../components/Badge';
+import { Trophy, Star, Target, Flame, CheckCircle2, Lock, Sparkles, TrendingUp, Zap, ChevronRight, Medal } from 'lucide-react';
 
 const BADGES_DB = [
   { id: 'first_step', name: 'İlk Adım', desc: 'Platforma kayıt oldun ve ilk adımını attın.', icon: '🎯', color: '#3b82f6', req: 'Kayıt Olmak' },
@@ -18,14 +16,18 @@ const MOCK_LEADERBOARD = [
   { id: 1, name: 'Ayşe Yılmaz', xp: 2450, avatar: 'A', isCurrentUser: false },
   { id: 2, name: 'Mehmet Demir', xp: 2120, avatar: 'M', isCurrentUser: false },
   { id: 3, name: 'Zeynep Kaya', xp: 1980, avatar: 'Z', isCurrentUser: false },
-  { id: '123', name: 'Sen', xp: 0, avatar: 'S', isCurrentUser: true }, // Will be updated dynamically
+  { id: '123', name: 'Sen', xp: 0, avatar: 'S', isCurrentUser: true },
   { id: 5, name: 'Can Özgür', xp: 850, avatar: 'C', isCurrentUser: false },
 ];
 
 export default function GamesView() {
-  const { palette: p, tokens: t } = useTheme();
+  const { palette: p, isDark } = useTheme();
   const { user, addXP, unlockBadge } = useAuth();
-  const [activeTab, setActiveTab] = useState('overview');
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const currentXP = user?.xp || 0;
   const currentLevel = user?.level || 1;
@@ -33,7 +35,6 @@ export default function GamesView() {
   const nextLevelXP = currentLevel * 500;
   const xpProgress = Math.min(100, (currentXP / nextLevelXP) * 100);
 
-  // Update leaderboard with real user data
   const sortedLeaderboard = [...MOCK_LEADERBOARD].map(item => {
     if (item.isCurrentUser) {
       return { ...item, name: user?.name || 'Sen', xp: currentXP, avatar: user?.avatarInitials || 'S' };
@@ -44,261 +45,256 @@ export default function GamesView() {
   const handleTestGamification = () => {
     addXP(150);
     unlockBadge('first_step');
-    if (currentXP + 150 >= 1000) {
-      unlockBadge('expert');
-    }
+    if (currentXP + 150 >= 1000) unlockBadge('expert');
   };
 
+  // SVG Circular Progress
+  const circleRadius = 40;
+  const circleCircumference = 2 * Math.PI * circleRadius;
+  const strokeDashoffset = circleCircumference - (xpProgress / 100) * circleCircumference;
+
   return (
-    <div style={{ maxWidth: 1200, margin: '0 auto', padding: t.spacing[6] }}>
+    <div style={{ 
+      maxWidth: 1280, 
+      margin: '0 auto', 
+      padding: '120px 24px 80px', 
+      minHeight: '85vh',
+      fontFamily: '"Inter", sans-serif',
+      opacity: mounted ? 1 : 0,
+      transform: mounted ? 'translateY(0)' : 'translateY(20px)',
+      transition: 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
+      boxSizing: 'border-box'
+    }}>
       
-      {/* ─── HEADER & PROFILE BANNER ─── */}
-      <div style={{
-        background: `linear-gradient(135deg, ${p.accent}15, ${p.panel})`,
-        borderRadius: t.borderRadius['2xl'],
-        padding: t.spacing[8],
-        marginBottom: t.spacing[8],
-        border: `1px solid ${p.border}`,
-        display: 'flex',
-        flexWrap: 'wrap',
-        gap: t.spacing[8],
-        alignItems: 'center',
-        position: 'relative',
-        overflow: 'hidden'
-      }}>
-        {/* Decorative Background Elements */}
-        <div style={{ position: 'absolute', top: -50, right: -50, width: 200, height: 200, background: p.accent, opacity: 0.05, filter: 'blur(50px)', borderRadius: '50%' }}></div>
-        <div style={{ position: 'absolute', bottom: -50, left: '20%', width: 150, height: 150, background: '#3b82f6', opacity: 0.05, filter: 'blur(40px)', borderRadius: '50%' }}></div>
-
-        {/* Avatar & Basic Info */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: t.spacing[6], zIndex: 1 }}>
-          <div style={{ 
-            width: 96, height: 96, 
-            borderRadius: '50%', 
-            background: `linear-gradient(135deg, ${p.accent}, #3b82f6)`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '2rem', fontWeight: 800, color: '#fff',
-            boxShadow: `0 8px 24px ${p.accent}40`,
-            border: `4px solid ${p.background}`
-          }}>
-            {user?.avatarInitials || '👤'}
-          </div>
-          <div>
-            <h1 style={{ margin: 0, color: p.text, fontSize: t.typography.fontSize['3xl'], fontWeight: 800 }}>
-              {user?.name || 'Öğrenci'}
-            </h1>
-            <div style={{ display: 'flex', alignItems: 'center', gap: t.spacing[3], marginTop: t.spacing[2] }}>
-              <Badge style={{ background: `${p.accent}20`, color: p.accent, border: 'none', padding: '4px 12px', fontSize: 14 }}>
-                Seviye {currentLevel}
-              </Badge>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#f59e0b', fontWeight: 700, fontSize: 15, background: 'rgba(245, 158, 11, 0.1)', padding: '4px 12px', borderRadius: 50 }}>
-                <Flame size={18} fill="#f59e0b" /> {currentStreak} Gün Seri
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* XP Bar */}
-        <div style={{ flex: 1, minWidth: 300, zIndex: 1, background: p.panelElevated, padding: t.spacing[5], borderRadius: t.borderRadius.xl, border: `1px solid ${p.border}` }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: t.spacing[2], fontWeight: 700 }}>
-            <span style={{ color: p.text }}>Sonraki Seviyeye İlerleme</span>
-            <span style={{ color: p.accent }}>{currentXP} / {nextLevelXP} XP</span>
-          </div>
-          <div style={{ height: 12, background: p.background, borderRadius: 10, overflow: 'hidden' }}>
-            <div style={{ 
-              height: '100%', 
-              width: `${xpProgress}%`, 
-              background: `linear-gradient(90deg, ${p.accent}, #3b82f6)`,
-              borderRadius: 10,
-              transition: 'width 1s cubic-bezier(0.4, 0, 0.2, 1)'
-            }}></div>
-          </div>
-          <p style={{ margin: `${t.spacing[2]} 0 0`, fontSize: 13, color: p.textMuted }}>
-            {nextLevelXP - currentXP} XP daha kazanarak Seviye {currentLevel + 1}'e ulaşabilirsin!
-          </p>
-        </div>
-      </div>
-
-      {/* ─── TABS ─── */}
-      <div style={{ display: 'flex', gap: t.spacing[2], marginBottom: t.spacing[6], borderBottom: `1px solid ${p.border}`, paddingBottom: t.spacing[2] }}>
-        {[
-          { id: 'overview', label: 'Özet & Görevler', icon: Target },
-          { id: 'badges', label: 'Rozetlerim', icon: Star },
-          { id: 'leaderboard', label: 'Liderlik Tablosu', icon: Trophy }
-        ].map(tab => {
-          const active = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 8,
-                padding: '12px 24px',
-                background: active ? p.panelElevated : 'transparent',
-                border: 'none',
-                borderRadius: t.borderRadius.lg,
-                color: active ? p.accent : p.textMuted,
-                fontWeight: active ? 700 : 600,
-                fontSize: 15,
-                cursor: 'pointer',
-                transition: 'all 0.2s'
-              }}
-            >
-              <tab.icon size={18} /> {tab.label}
-            </button>
-          )
-        })}
-      </div>
-
-      {/* ─── TAB CONTENT ─── */}
-      
-      {/* 1. ÖZET VE GÖREVLER */}
-      {activeTab === 'overview' && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: t.spacing[8] }}>
-          <div>
-            <h2 style={{ fontSize: 20, color: p.text, marginBottom: t.spacing[4], display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Target size={24} color={p.accent} /> Günlük Hedefler
-            </h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: t.spacing[3] }}>
-              {[
-                { title: 'Güne Merhaba', desc: 'Platforma giriş yap.', xp: 20, done: true },
-                { title: 'Derse Dönüş', desc: 'Kayıtlı olduğun bir kurstan 1 video izle.', xp: 50, done: false },
-                { title: 'Meraklı', desc: 'Forumda bir soru sor veya cevapla.', xp: 40, done: false }
-              ].map((task, i) => (
-                <Card key={i} style={{ display: 'flex', alignItems: 'center', gap: t.spacing[4], padding: t.spacing[4], background: task.done ? `${p.accent}0A` : p.panel }}>
-                  <div style={{ width: 48, height: 48, borderRadius: '50%', background: task.done ? p.accent : p.background, display: 'flex', alignItems: 'center', justifyContent: 'center', color: task.done ? '#fff' : p.textMuted }}>
-                    {task.done ? <CheckCircle2 size={24} /> : <div style={{ width: 12, height: 12, borderRadius: '50%', border: `2px solid ${p.textMuted}` }}></div>}
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <h4 style={{ margin: 0, color: p.text, fontSize: 16 }}>{task.title}</h4>
-                    <p style={{ margin: 0, color: p.textMuted, fontSize: 13, marginTop: 2 }}>{task.desc}</p>
-                  </div>
-                  <div style={{ fontWeight: 800, color: task.done ? p.accent : p.textMuted }}>
-                    +{task.xp} XP
-                  </div>
-                </Card>
-              ))}
-            </div>
-
-            {/* Test Button for Simulation */}
-            <div style={{ marginTop: t.spacing[6], padding: t.spacing[4], background: p.panelElevated, borderRadius: t.borderRadius.lg, border: `1px dashed ${p.accent}` }}>
-              <h4 style={{ margin: '0 0 12px 0', color: p.text }}>🛠️ Demo Araçları</h4>
-              <p style={{ fontSize: 13, color: p.textMuted, marginBottom: 12 }}>Aşağıdaki butona tıklayarak sistemin XP ve rozet ekleme animasyonlarını test edebilirsiniz.</p>
-              <button onClick={handleTestGamification} style={{ padding: '8px 16px', background: p.accent, color: '#fff', border: 'none', borderRadius: 8, fontWeight: 700, cursor: 'pointer' }}>
-                150 XP Ekle & Rozet Kazan
-              </button>
-            </div>
-          </div>
-
-          <div>
-            <h2 style={{ fontSize: 20, color: p.text, marginBottom: t.spacing[4], display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Trophy size={24} color="#f59e0b" /> Haftalık Özet
-            </h2>
-            <Card style={{ background: p.panel, padding: t.spacing[5] }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16, borderBottom: `1px solid ${p.border}`, paddingBottom: 16 }}>
-                <div>
-                  <div style={{ fontSize: 12, color: p.textMuted, textTransform: 'uppercase', fontWeight: 700, letterSpacing: 1 }}>Kazanılan XP</div>
-                  <div style={{ fontSize: 24, fontWeight: 800, color: p.text, marginTop: 4 }}>{currentXP}</div>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: 12, color: p.textMuted, textTransform: 'uppercase', fontWeight: 700, letterSpacing: 1 }}>Sıralama</div>
-                  <div style={{ fontSize: 24, fontWeight: 800, color: '#f59e0b', marginTop: 4 }}>#{sortedLeaderboard.findIndex(u => u.isCurrentUser) + 1}</div>
-                </div>
-              </div>
-              <div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: p.text, marginBottom: 12 }}>Son Rozetlerin</div>
-                <div style={{ display: 'flex', gap: 8 }}>
-                  {(user?.badges || []).slice(-4).map(bId => {
-                    const bInfo = BADGES_DB.find(b => b.id === bId);
-                    return bInfo ? (
-                      <div key={bId} title={bInfo.name} style={{ width: 40, height: 40, borderRadius: '50%', background: `${bInfo.color}20`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>
-                        {bInfo.icon}
-                      </div>
-                    ) : null;
-                  })}
-                  {(!user?.badges || user.badges.length === 0) && (
-                    <span style={{ fontSize: 13, color: p.textMuted }}>Henüz rozet kazanmadın. Görevleri tamamlayarak ilk rozetini al!</span>
-                  )}
-                </div>
-              </div>
-            </Card>
-          </div>
-        </div>
-      )}
-
-      {/* 2. ROZETLERİM */}
-      {activeTab === 'badges' && (
+      {/* ─── HEADER ─── */}
+      <div style={{ marginBottom: '40px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '20px' }}>
         <div>
-          <h2 style={{ fontSize: 20, color: p.text, marginBottom: t.spacing[2] }}>Rozet Koleksiyonu</h2>
-          <p style={{ color: p.textMuted, marginBottom: t.spacing[6] }}>Öğrenme yolculuğunda kazandığın tüm başarımlar burada sergilenir.</p>
+          <h1 style={{ fontSize: '32px', fontWeight: 800, color: p.text, margin: '0 0 8px 0', letterSpacing: '-0.5px' }}>
+            Kariyer & Ödüller
+          </h1>
+          <p style={{ margin: 0, color: p.textMuted, fontSize: '16px' }}>Öğrenme yolculuğunuzu takip edin ve başarılarınızı kutlayın.</p>
+        </div>
+        <button 
+          onClick={handleTestGamification} 
+          style={{ 
+            padding: '10px 20px', background: isDark ? 'rgba(255,255,255,0.05)' : '#fff', 
+            border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`, 
+            color: p.text, borderRadius: '12px', fontWeight: 600, cursor: 'pointer',
+            display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
+          }}
+        >
+          <Zap size={16} color="#f59e0b" /> Simüle Et (+150 XP)
+        </button>
+      </div>
+
+      {/* ─── BENTO GRID LAYOUT ─── */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '24px' }}>
+        
+        {/* 1. KULLANICI PROFİL KARTI */}
+        <div style={{ 
+          background: isDark ? '#1e293b' : '#ffffff', 
+          borderRadius: '24px', padding: '32px',
+          border: `1px solid ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'}`,
+          boxShadow: isDark ? '0 10px 30px rgba(0,0,0,0.2)' : '0 10px 30px rgba(0,0,0,0.03)',
+          display: 'flex', flexDirection: 'column',
+          position: 'relative', overflow: 'hidden'
+        }}>
+          <div style={{ position: 'absolute', top: -50, right: -50, width: 200, height: 200, background: p.accent, opacity: 0.05, filter: 'blur(40px)', borderRadius: '50%' }} />
           
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: t.spacing[4] }}>
-            {BADGES_DB.map(badge => {
-              const isEarned = (user?.badges || []).includes(badge.id);
-              return (
-                <Card key={badge.id} style={{ 
-                  background: isEarned ? p.panelElevated : p.background, 
-                  border: `1px solid ${isEarned ? badge.color + '40' : p.border}`,
-                  opacity: isEarned ? 1 : 0.6,
-                  display: 'flex', alignItems: 'center', gap: 16, padding: 16,
-                  transition: 'all 0.3s'
-                }}>
-                  <div style={{ 
-                    width: 64, height: 64, borderRadius: '50%', 
-                    background: isEarned ? `${badge.color}20` : p.panel, 
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                    fontSize: 32, filter: isEarned ? 'none' : 'grayscale(100%)' 
-                  }}>
-                    {isEarned ? badge.icon : <Lock size={24} color={p.textMuted} />}
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <h4 style={{ margin: 0, color: p.text, fontSize: 16, fontWeight: 700 }}>{badge.name}</h4>
-                    <p style={{ margin: '4px 0 0', color: p.textMuted, fontSize: 12, lineHeight: 1.4 }}>{badge.desc}</p>
-                    {!isEarned && <div style={{ fontSize: 11, fontWeight: 700, color: p.accent, marginTop: 6 }}>Hedef: {badge.req}</div>}
-                  </div>
-                </Card>
-              )
-            })}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '32px', zIndex: 1 }}>
+            <div style={{ position: 'relative', width: 90, height: 90 }}>
+              <svg width="90" height="90" style={{ transform: 'rotate(-90deg)', position: 'absolute', top: 0, left: 0 }}>
+                <circle cx="45" cy="45" r={circleRadius} stroke={isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'} strokeWidth="6" fill="none" />
+                <circle 
+                  cx="45" cy="45" r={circleRadius} 
+                  stroke={p.accent} strokeWidth="6" fill="none" 
+                  strokeDasharray={circleCircumference}
+                  strokeDashoffset={strokeDashoffset}
+                  strokeLinecap="round"
+                  style={{ transition: 'stroke-dashoffset 1s cubic-bezier(0.16, 1, 0.3, 1)' }}
+                />
+              </svg>
+              <div style={{ 
+                position: 'absolute', top: 5, left: 5, right: 5, bottom: 5, 
+                background: `linear-gradient(135deg, ${p.accent}, #3b82f6)`, 
+                borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: '#fff', fontSize: '24px', fontWeight: 800, border: `3px solid ${isDark ? '#1e293b' : '#fff'}`
+              }}>
+                {user?.avatarInitials || '👤'}
+              </div>
+            </div>
+            <div>
+              <h2 style={{ margin: '0 0 4px 0', fontSize: '24px', color: p.text, fontWeight: 800 }}>{user?.name || 'Öğrenci'}</h2>
+              <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                <div style={{ color: p.accent, fontWeight: 700, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <Medal size={16} /> Seviye {currentLevel}
+                </div>
+                <div style={{ width: 4, height: 4, borderRadius: '50%', background: p.textMuted }} />
+                <div style={{ color: '#f59e0b', fontWeight: 700, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <Flame size={16} fill="#f59e0b" /> {currentStreak} Gün
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ marginTop: 'auto', background: isDark ? 'rgba(0,0,0,0.2)' : '#f8fafc', padding: '20px', borderRadius: '16px', zIndex: 1 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+              <span style={{ fontSize: '13px', fontWeight: 600, color: p.textMuted, textTransform: 'uppercase', letterSpacing: '0.5px' }}>XP İlerlemesi</span>
+              <span style={{ fontSize: '13px', fontWeight: 800, color: p.text }}>{currentXP} <span style={{ color: p.textMuted }}>/ {nextLevelXP}</span></span>
+            </div>
+            <p style={{ margin: 0, fontSize: '13px', color: p.textMuted }}>
+              Sonraki seviyeye sadece <strong style={{ color: p.text }}>{nextLevelXP - currentXP} XP</strong> kaldı. Harika gidiyorsun!
+            </p>
           </div>
         </div>
-      )}
 
-      {/* 3. LİDERLİK TABLOSU */}
-      {activeTab === 'leaderboard' && (
-        <div style={{ maxWidth: 800, margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: t.spacing[8] }}>
-            <Trophy size={48} color="#f59e0b" style={{ marginBottom: 16 }} />
-            <h2 style={{ fontSize: 24, color: p.text, margin: 0 }}>Haftanın Liderleri</h2>
-            <p style={{ color: p.textMuted, marginTop: 8 }}>En çok XP toplayan öğrencilerle yarış, zirveye yerleş!</p>
+        {/* 2. GÜNLÜK GÖREVLER */}
+        <div style={{ 
+          background: isDark ? '#1e293b' : '#ffffff', 
+          borderRadius: '24px', padding: '32px',
+          border: `1px solid ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'}`,
+          boxShadow: isDark ? '0 10px 30px rgba(0,0,0,0.2)' : '0 10px 30px rgba(0,0,0,0.03)',
+          gridColumn: 'span 1'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+            <div style={{ width: 36, height: 36, borderRadius: '10px', background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Target size={18} />
+            </div>
+            <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: p.text }}>Günlük Hedefler</h3>
           </div>
 
-          <div style={{ background: p.panel, borderRadius: t.borderRadius.xl, border: `1px solid ${p.border}`, overflow: 'hidden' }}>
-            {sortedLeaderboard.map((u, i) => (
-              <div key={u.id} style={{ 
-                display: 'flex', alignItems: 'center', padding: '16px 24px', 
-                background: u.isCurrentUser ? `${p.accent}10` : (i % 2 === 0 ? p.panelElevated : 'transparent'),
-                borderBottom: i !== sortedLeaderboard.length - 1 ? `1px solid ${p.border}` : 'none'
-              }}>
-                <div style={{ width: 40, fontWeight: 800, fontSize: 18, color: i === 0 ? '#f59e0b' : i === 1 ? '#94a3b8' : i === 2 ? '#b45309' : p.textMuted }}>
-                  #{i + 1}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {[
+              { title: 'Güne Merhaba', desc: 'Platforma giriş yap.', xp: 20, done: true },
+              { title: 'Derse Dönüş', desc: 'Kayıtlı olduğun bir kurstan en az 1 ders videosu izle.', xp: 50, done: false },
+              { title: 'Topluluk Ruhu', desc: 'Soru-cevap forumunda aktif ol.', xp: 40, done: false }
+            ].map((task, i) => (
+              <div key={i} style={{ 
+                display: 'flex', alignItems: 'flex-start', gap: '16px',
+                padding: '16px', borderRadius: '16px',
+                background: task.done ? (isDark ? 'rgba(0,212,170,0.05)' : 'rgba(0,212,170,0.03)') : (isDark ? 'rgba(255,255,255,0.02)' : '#f8fafc'),
+                border: `1px solid ${task.done ? `${p.accent}30` : 'transparent'}`,
+                transition: 'all 0.2s', cursor: 'default'
+              }}
+              onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+              onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+              >
+                <div style={{ 
+                  width: 32, height: 32, borderRadius: '50%', 
+                  background: task.done ? p.accent : (isDark ? 'rgba(255,255,255,0.1)' : '#e2e8f0'), 
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                  color: '#fff', flexShrink: 0, marginTop: '2px'
+                }}>
+                  {task.done && <CheckCircle2 size={16} />}
                 </div>
-                <div style={{ width: 44, height: 44, borderRadius: '50%', background: `linear-gradient(135deg, ${p.background}, ${p.border})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, color: p.text, marginRight: 16 }}>
-                  {u.avatar}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: task.done ? p.text : p.text, opacity: task.done ? 1 : 0.8 }}>{task.title}</h4>
+                  <p style={{ margin: '4px 0 0', fontSize: '13px', color: p.textMuted, lineHeight: 1.4 }}>{task.desc}</p>
                 </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 700, color: u.isCurrentUser ? p.accent : p.text, fontSize: 16 }}>
-                    {u.name} {u.isCurrentUser && <span style={{ fontSize: 12, background: p.accent, color: '#fff', padding: '2px 8px', borderRadius: 12, marginLeft: 8 }}>Sen</span>}
-                  </div>
-                </div>
-                <div style={{ fontWeight: 800, color: p.text, fontSize: 16 }}>
-                  {u.xp} <span style={{ fontSize: 12, color: p.textMuted, fontWeight: 600 }}>XP</span>
+                <div style={{ fontSize: '15px', fontWeight: 800, color: task.done ? p.accent : p.textMuted, paddingTop: '4px' }}>
+                  +{task.xp} <span style={{ fontSize: '11px', fontWeight: 600 }}>XP</span>
                 </div>
               </div>
             ))}
           </div>
         </div>
-      )}
 
+        {/* 3. LİDERLİK TABLOSU */}
+        <div style={{ 
+          background: isDark ? '#1e293b' : '#ffffff', 
+          borderRadius: '24px', padding: '32px',
+          border: `1px solid ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'}`,
+          boxShadow: isDark ? '0 10px 30px rgba(0,0,0,0.2)' : '0 10px 30px rgba(0,0,0,0.03)',
+          gridColumn: '1 / -1' // Span full width on smaller screens, but controlled by grid on large
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ width: 36, height: 36, borderRadius: '10px', background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <TrendingUp size={18} />
+              </div>
+              <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: p.text }}>Haftalık Sıralama</h3>
+            </div>
+            <div style={{ fontSize: '13px', fontWeight: 700, color: p.accent, background: `${p.accent}15`, padding: '6px 12px', borderRadius: '20px' }}>
+              Sıranız: #{sortedLeaderboard.findIndex(u => u.isCurrentUser) + 1}
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
+            {sortedLeaderboard.slice(0, 3).map((u, i) => (
+              <div key={u.id} style={{ 
+                display: 'flex', alignItems: 'center', gap: '16px', padding: '20px', 
+                background: u.isCurrentUser ? (isDark ? 'rgba(0,212,170,0.08)' : '#f0fdfa') : (isDark ? 'rgba(255,255,255,0.02)' : '#f8fafc'),
+                borderRadius: '16px', border: u.isCurrentUser ? `1px solid ${p.accent}40` : `1px solid transparent`,
+                position: 'relative', overflow: 'hidden'
+              }}>
+                <div style={{ width: 48, height: 48, borderRadius: '12px', background: `linear-gradient(135deg, ${isDark ? '#334155' : '#e2e8f0'}, ${isDark ? '#0f172a' : '#cbd5e1'})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, color: p.text, fontSize: '18px' }}>
+                  {u.avatar}
+                </div>
+                <div>
+                  <div style={{ fontSize: '12px', fontWeight: 800, color: i === 0 ? '#f59e0b' : i === 1 ? '#94a3b8' : i === 2 ? '#b45309' : p.textMuted, marginBottom: '4px', textTransform: 'uppercase' }}>
+                    {i === 0 ? '🏆 1. SIRA' : i === 1 ? '🥈 2. SIRA' : '🥉 3. SIRA'}
+                  </div>
+                  <div style={{ fontSize: '15px', fontWeight: 700, color: p.text, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    {u.name} {u.isCurrentUser && <span style={{ fontSize: '10px', background: p.accent, color: '#fff', padding: '2px 6px', borderRadius: '4px' }}>SEN</span>}
+                  </div>
+                  <div style={{ fontSize: '13px', color: p.textMuted, marginTop: '2px', fontWeight: 600 }}>{u.xp} XP</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 4. ROZETLERİM */}
+        <div style={{ 
+          background: isDark ? '#1e293b' : '#ffffff', 
+          borderRadius: '24px', padding: '32px',
+          border: `1px solid ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'}`,
+          boxShadow: isDark ? '0 10px 30px rgba(0,0,0,0.2)' : '0 10px 30px rgba(0,0,0,0.03)',
+          gridColumn: '1 / -1'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+            <div style={{ width: 36, height: 36, borderRadius: '10px', background: 'rgba(139, 92, 246, 0.1)', color: '#8b5cf6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Star size={18} />
+            </div>
+            <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: p.text }}>Başarı Rozetleri</h3>
+          </div>
+
+          <div style={{ display: 'flex', gap: '16px', overflowX: 'auto', paddingBottom: '16px', scrollbarWidth: 'thin' }}>
+            {BADGES_DB.map(badge => {
+              const isEarned = (user?.badges || []).includes(badge.id);
+              return (
+                <div key={badge.id} style={{ 
+                  minWidth: 160, padding: '24px 16px', 
+                  background: isEarned ? `${badge.color}08` : (isDark ? 'rgba(255,255,255,0.02)' : '#f8fafc'),
+                  border: `1px solid ${isEarned ? `${badge.color}30` : (isDark ? 'rgba(255,255,255,0.05)' : 'transparent')}`,
+                  borderRadius: '20px', textAlign: 'center',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px',
+                  transition: 'transform 0.2s', cursor: 'pointer'
+                }}
+                onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-4px)'}
+                onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+                >
+                  <div style={{ 
+                    width: 64, height: 64, borderRadius: '16px', 
+                    background: isEarned ? `${badge.color}15` : (isDark ? 'rgba(0,0,0,0.2)' : '#e2e8f0'), 
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                    fontSize: '28px', filter: isEarned ? 'none' : 'grayscale(100%) opacity(0.4)',
+                    boxShadow: isEarned ? `0 8px 20px ${badge.color}30` : 'none',
+                    border: `1px solid ${isEarned ? `${badge.color}50` : 'transparent'}`
+                  }}>
+                    {isEarned ? badge.icon : <Lock size={20} color={p.textMuted} />}
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '14px', fontWeight: 800, color: isEarned ? p.text : p.textMuted }}>{badge.name}</div>
+                    {!isEarned && <div style={{ fontSize: '11px', color: p.textMuted, marginTop: '4px' }}>Hedef: {badge.req}</div>}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
+      </div>
     </div>
   );
 }
