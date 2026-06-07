@@ -1,18 +1,13 @@
 import React, { useState } from 'react';
-import { useTheme } from '../context/ThemeContext';
-import GlobalNavbar from '../components/GlobalNavbar';
+import { useTheme } from '../../context/ThemeContext';
+import GlobalNavbar from '../../components/GlobalNavbar';
 import {
   Users, BookOpen, DollarSign, TrendingUp,
   MessageCircle, Star, Video, Activity,
   Clock, CheckCircle, ChevronRight
 } from 'lucide-react';
 
-const STATS = [
-  { label: 'Toplam Öğrenci', value: '1,284', icon: Users, color: '#00d4aa', trend: '+12% bu ay' },
-  { label: 'Aktif Kurslar', value: '4', icon: BookOpen, color: '#7C5CFC', trend: 'Stabil' },
-  { label: 'Aylık Gelir', value: '₺24,500', icon: DollarSign, color: '#f59e0b', trend: '+8% bu ay' },
-  { label: 'Ort. Değerlendirme', value: '4.8/5', icon: Star, color: '#f43f5e', trend: 'Son 30 gün: 4.9' },
-];
+// Statik kısımlar bileşen içine taşınacak
 
 const RECENT_SALES = [
   { id: 1, student: 'Ahmet Yılmaz', course: 'React & Next.js Full Stack', date: '2 saat önce', price: '₺450' },
@@ -25,8 +20,36 @@ const UPCOMING_LIVES = [
   { id: 2, title: 'UI/UX Portfolyo İncelemesi', time: 'Yarın, 19:30', students: 112 },
 ];
 
+import api from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
+
 export default function InstructorDashboardView({ onNavigate }) {
   const { isDark, theme } = useTheme();
+  const { user } = useAuth();
+  
+  const [statsData, setStatsData] = useState({ totalStudents: 0, totalCourses: 0, monthlyRevenue: 0, averageRating: 0 });
+  const [loading, setLoading] = useState(true);
+
+  React.useEffect(() => {
+    async function fetchStats() {
+      try {
+        const res = await api.getInstructorStats();
+        if (res.success) setStatsData(res.data);
+      } catch (error) {
+        console.error('Eğitmen istatistikleri çekilemedi:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchStats();
+  }, []);
+
+  const STATS = [
+    { label: 'Toplam Öğrenci', value: loading ? '...' : statsData.totalStudents, icon: Users, color: '#00d4aa', trend: '+12% bu ay' },
+    { label: 'Aktif Kurslar', value: loading ? '...' : statsData.totalCourses, icon: BookOpen, color: '#7C5CFC', trend: 'Stabil' },
+    { label: 'Aylık Gelir', value: loading ? '...' : `₺${statsData.monthlyRevenue?.toLocaleString('tr-TR')}`, icon: DollarSign, color: '#f59e0b', trend: '+8% bu ay' },
+    { label: 'Ort. Değerlendirme', value: loading ? '...' : `${statsData.averageRating}/5`, icon: Star, color: '#f43f5e', trend: 'Son 30 gün: ' + statsData.averageRating },
+  ];
   
   // Eğitmen Paneli için özel koyu/açık palet
   const p = isDark ? {
@@ -65,7 +88,7 @@ export default function InstructorDashboardView({ onNavigate }) {
               Eğitmen Paneli
             </h1>
             <p style={{ color: p.textMuted, fontSize: 16 }}>
-              Hoş geldin, Dr. Ahmet Yılmaz! İşte genel performans özetin.
+              Hoş geldin, {user?.name || 'Eğitmen'}! İşte genel performans özetin.
             </p>
           </div>
           <button style={{

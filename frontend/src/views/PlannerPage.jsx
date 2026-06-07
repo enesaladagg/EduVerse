@@ -3,18 +3,55 @@ import { useTheme } from '../context/ThemeContext';
 import { Calendar as CalendarIcon, CheckCircle2, Circle, Clock, Play, Plus, MoreHorizontal, Target } from 'lucide-react';
 import Button from '../components/Button';
 
+import api from '../services/api';
+
 export default function PlannerPage() {
   const { palette: p, tokens: t, isDark } = useTheme();
 
-  const [tasks, setTasks] = useState([
-    { id: 1, title: 'React State Yönetimi Tekrarı', course: 'React 101', duration: '45 dk', status: 'todo', time: '10:00' },
-    { id: 2, title: 'Modül 4 Quizini Çöz', course: 'React 101', duration: '20 dk', status: 'completed', time: '11:30' },
-    { id: 3, title: 'Python Veri Yapıları Ödevi', course: 'Python Bootcamp', duration: '60 dk', status: 'todo', time: '14:00' },
-    { id: 4, title: 'Canlı Ders: Redux Temelleri', course: 'React 101', duration: '90 dk', status: 'todo', time: '19:00', isLive: true }
-  ]);
+  const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newTaskTitle, setNewTaskTitle] = useState('');
 
-  const toggleTask = (id) => {
-    setTasks(tasks.map(task => task.id === id ? { ...task, status: task.status === 'completed' ? 'todo' : 'completed' } : task));
+  React.useEffect(() => {
+    async function fetchTasks() {
+      try {
+        const res = await api.getPlannerTasks();
+        if (res.success) setTasks(res.data);
+      } catch (err) {
+        console.error('Görevler yüklenirken hata:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchTasks();
+  }, []);
+
+  const toggleTask = async (id) => {
+    const task = tasks.find(t => t._id === id || t.id === id);
+    if (!task) return;
+    const newStatus = task.status === 'completed' ? 'todo' : 'completed';
+    setTasks(tasks.map(t => (t._id === id || t.id === id) ? { ...t, status: newStatus } : t));
+    try {
+      await api.updatePlannerTask(id, { status: newStatus });
+    } catch (err) {
+      console.error('Görev güncellenirken hata:', err);
+    }
+  };
+
+  const handleAddTask = async (e) => {
+    e.preventDefault();
+    if (!newTaskTitle.trim()) return;
+    try {
+      const res = await api.addPlannerTask({ title: newTaskTitle, duration: '30 dk', status: 'todo' });
+      if (res.success) {
+        setTasks([...tasks, res.data]);
+        setNewTaskTitle('');
+        setShowAddForm(false);
+      }
+    } catch (err) {
+      console.error('Görev eklenirken hata:', err);
+    }
   };
 
   const handleStartFocus = (taskTitle) => {
@@ -44,10 +81,24 @@ export default function PlannerPage() {
             </h1>
             <p style={{ color: p.textMuted, margin: 0, fontSize: 16 }}>Derslerini, ödevlerini ve hedeflerini tek bir yerden yönet.</p>
           </div>
-          <Button variant="primary" style={{ padding: '12px 24px', borderRadius: '14px', fontWeight: 800 }}>
-            <Plus size={18} style={{ marginRight: 8 }} /> Yeni Etkinlik
+          <Button variant="primary" onClick={() => setShowAddForm(!showAddForm)} style={{ padding: '12px 24px', borderRadius: '14px', fontWeight: 800 }}>
+            <Plus size={18} style={{ marginRight: 8 }} /> {showAddForm ? 'Kapat' : 'Yeni Etkinlik'}
           </Button>
         </div>
+
+        {showAddForm && (
+          <form onSubmit={handleAddTask} style={{ display: 'flex', gap: 12, background: p.panelElevated, padding: 16, borderRadius: 16, border: `1px solid ${p.border}` }}>
+            <input 
+              type="text" 
+              value={newTaskTitle} 
+              onChange={e => setNewTaskTitle(e.target.value)} 
+              placeholder="Görev adı..." 
+              style={{ flex: 1, padding: '10px 16px', borderRadius: 12, border: `1px solid ${p.border}`, background: p.background, color: p.text, outline: 'none' }} 
+              autoFocus
+            />
+            <Button variant="primary" type="submit" style={{ padding: '10px 20px', borderRadius: 12 }}>Ekle</Button>
+          </form>
+        )}
 
         {/* AI Planner Banner */}
         <div style={{ 
@@ -167,15 +218,19 @@ export default function PlannerPage() {
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {tasks.map(task => (
-              <div key={task.id} style={{ 
+            {loading ? (
+              <div style={{ color: p.textMuted, textAlign: 'center', padding: 20 }}>Yükleniyor...</div>
+            ) : tasks.length === 0 ? (
+              <div style={{ color: p.textMuted, textAlign: 'center', padding: 20 }}>Görev bulunamadı. Yeni bir tane ekleyin!</div>
+            ) : tasks.map(task => (
+              <div key={task._id || task.id} style={{ 
                 padding: '16px', borderRadius: '16px', background: isDark ? 'rgba(0,0,0,0.2)' : '#f8fafc',
                 border: `1px solid ${p.border}`, display: 'flex', flexDirection: 'column', gap: 12,
                 opacity: task.status === 'completed' ? 0.6 : 1, transition: 'all 0.3s'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <div style={{ display: 'flex', gap: 12, flex: 1 }}>
-                    <button onClick={() => toggleTask(task.id)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, color: task.status === 'completed' ? p.accent : p.textMuted, marginTop: 2 }}>
+                    <button onClick={() => toggleTask(task._id || task.id)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, color: task.status === 'completed' ? p.accent : p.textMuted, marginTop: 2 }}>
                       {task.status === 'completed' ? <CheckCircle2 size={22} /> : <Circle size={22} />}
                     </button>
                     <div>
@@ -183,7 +238,7 @@ export default function PlannerPage() {
                         {task.title}
                       </div>
                       <div style={{ fontSize: 13, color: p.textMuted, fontWeight: 500, marginTop: 4 }}>
-                        {task.course}
+                        {task.course || 'Genel Görev'}
                       </div>
                     </div>
                   </div>
@@ -191,8 +246,8 @@ export default function PlannerPage() {
                 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: `1px solid ${p.border}`, paddingTop: 12 }}>
                   <div style={{ display: 'flex', gap: 12, fontSize: 12, color: p.textMuted, fontWeight: 600 }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Clock size={14} /> {task.time}</span>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Target size={14} /> {task.duration}</span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Clock size={14} /> {task.time || '12:00'}</span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Target size={14} /> {task.duration || '30 dk'}</span>
                   </div>
                   
                   {task.status !== 'completed' && !task.isLive && (

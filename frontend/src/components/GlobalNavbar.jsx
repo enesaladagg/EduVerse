@@ -38,10 +38,10 @@ const NAV_ITEMS = [
   { id: 'home', icon: Home, label: 'Ana Sayfa' },
   { id: 'courses', icon: BookOpen, label: 'Kurslar' },
   { id: 'live', icon: MonitorPlay, label: 'Canlı Dersler' },
-  { id: 'calendar', icon: Calendar, label: 'Takvim & Plan' },
-  { id: 'messages', icon: MessageSquare, label: 'Mesajlar' },
-  { id: 'certificates', icon: Award, label: 'Sertifikalar' },
-  { id: 'profile', icon: GraduationCap, label: 'Profilim' },
+  { id: 'calendar', icon: Calendar, label: 'Takvim & Plan', auth: true },
+  { id: 'messages', icon: MessageSquare, label: 'Mesajlar', auth: true },
+  { id: 'certificates', icon: Award, label: 'Sertifikalar', auth: true },
+  { id: 'profile', icon: GraduationCap, label: 'Profilim', auth: true },
   { id: 'instructor', icon: Briefcase, label: 'Eğitmen Paneli', auth: true, role: 'teacher' },
 ];
 
@@ -61,14 +61,7 @@ export default function GlobalNavbar({ activePage, onNavigate }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [showNotifs, setShowNotifs] = useState(false);
   const [showAllNotifs, setShowAllNotifs] = useState(false);
-  const [notifications, setNotifications] = useState([
-    { id: 1, title: 'EduBot', desc: 'Sana yeni bir mesaj gönderdi.', time: '2 dk önce', type: 'msg' },
-    { id: 2, title: 'React 101', desc: 'Yeni modül yayında: "Hooks Derinlemesine"', time: '1 saat önce', type: 'course' },
-    { id: 3, title: 'Ahmet Yılmaz', desc: 'Sana arkadaşlık isteği gönderdi.', time: 'Dün', type: 'friend' },
-    { id: 4, title: 'Sistem', desc: 'Haftalık hedefine ulaştın!', time: '2 gün önce', type: 'system' },
-    { id: 5, title: 'Elif Kaya', desc: 'Seni "Frontend Bootcamp" grubuna ekledi.', time: '3 gün önce', type: 'group' },
-    { id: 6, title: 'Canlı Ders', desc: 'Python OOP dersi 10 dakika içinde başlıyor.', time: '3 gün önce', type: 'live' }
-  ]);
+  const [notifications, setNotifications] = useState([]);
   const menuRef = useRef(null);
   const notifRef = useRef(null);
   
@@ -560,13 +553,23 @@ export default function GlobalNavbar({ activePage, onNavigate }) {
                     <div style={{ fontSize: 13, color: isDark ? '#94a3b8' : '#64748b' }}>{user?.role === 'instructor' ? 'Eğitmen' : 'Öğrenci'} • Seviye {user?.level || 1}</div>
                   </div>
                   
-                  <button onClick={() => { onNavigate('profile'); setShowProfileMenu(false); }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '10px 16px', background: 'transparent', border: 'none', color: isDark ? '#cbd5e1' : '#334155', fontSize: 14, fontWeight: 600, cursor: 'pointer', borderRadius: 8, transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                    <User size={16} /> Profilim
-                  </button>
-                  <button onClick={() => { onNavigate('settings'); setShowProfileMenu(false); }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '10px 16px', background: 'transparent', border: 'none', color: isDark ? '#cbd5e1' : '#334155', fontSize: 14, fontWeight: 600, cursor: 'pointer', borderRadius: 8, transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                  {user?.role === 'admin' ? (
+                    <button onClick={() => { onNavigate('admin'); setShowProfileMenu(false); }} style={{ boxSizing: 'border-box', width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '10px 16px', background: 'transparent', border: 'none', color: '#ef4444', fontSize: 14, fontWeight: 600, cursor: 'pointer', borderRadius: 8, transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(239, 68, 68, 0.1)' : 'rgba(239, 68, 68, 0.1)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                      <ShieldCheck size={16} /> Yönetici Paneli
+                    </button>
+                  ) : user?.role === 'teacher' ? (
+                    <button onClick={() => { onNavigate('instructor'); setShowProfileMenu(false); }} style={{ boxSizing: 'border-box', width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '10px 16px', background: 'transparent', border: 'none', color: '#3b82f6', fontSize: 14, fontWeight: 600, cursor: 'pointer', borderRadius: 8, transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(59, 130, 246, 0.1)' : 'rgba(59, 130, 246, 0.1)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                      <Briefcase size={16} /> Eğitmen Paneli
+                    </button>
+                  ) : (
+                    <button onClick={() => { onNavigate('profile'); setShowProfileMenu(false); }} style={{ boxSizing: 'border-box', width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '10px 16px', background: 'transparent', border: 'none', color: isDark ? '#cbd5e1' : '#334155', fontSize: 14, fontWeight: 600, cursor: 'pointer', borderRadius: 8, transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                      <User size={16} /> Öğrenci Paneli
+                    </button>
+                  )}
+                  <button onClick={() => { onNavigate('settings'); setShowProfileMenu(false); }} style={{ boxSizing: 'border-box', width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '10px 16px', background: 'transparent', border: 'none', color: isDark ? '#cbd5e1' : '#334155', fontSize: 14, fontWeight: 600, cursor: 'pointer', borderRadius: 8, transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                     <Settings size={16} /> Hesap Ayarları
                   </button>
-                  <button onClick={() => { logout(); setShowProfileMenu(false); }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '10px 16px', marginTop: 4, background: 'transparent', border: 'none', color: '#ef4444', fontSize: 14, fontWeight: 600, cursor: 'pointer', borderRadius: 8, transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(239, 68, 68, 0.1)' : 'rgba(239, 68, 68, 0.1)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                  <button onClick={() => { logout(); setShowProfileMenu(false); onNavigate('home'); }} style={{ boxSizing: 'border-box', width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '10px 16px', marginTop: 4, background: 'transparent', border: 'none', color: '#ef4444', fontSize: 14, fontWeight: 600, cursor: 'pointer', borderRadius: 8, transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(239, 68, 68, 0.1)' : 'rgba(239, 68, 68, 0.1)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                     <LogOut size={16} /> Çıkış Yap
                   </button>
                 </div>

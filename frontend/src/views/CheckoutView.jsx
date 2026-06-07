@@ -4,11 +4,31 @@ import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { ShieldCheck, CreditCard, Lock, ChevronRight, CheckCircle2 } from 'lucide-react';
 
+import api from '../services/api';
+
 export default function CheckoutView({ onNavigate }) {
   const { cartItems, cartTotal, clearCart } = useCart();
   const { isDark, palette: p, tokens: t } = useTheme();
-  const { purchaseCourses } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [isSuccess, setIsSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  if (!isAuthenticated) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: p.bg, color: p.text, textAlign: 'center' }}>
+        <Lock size={64} color={p.textMuted} style={{ marginBottom: 24 }} />
+        <h2 style={{ fontSize: 28, marginBottom: 12 }}>Giriş Yapmanız Gerekiyor</h2>
+        <p style={{ color: p.textMuted, fontSize: 16, marginBottom: 32, maxWidth: 400 }}>
+          Sepetinizdeki kursları satın almak ve eğitiminize hemen başlamak için giriş yapın veya yeni bir hesap oluşturun.
+        </p>
+        <div style={{ display: 'flex', gap: 16 }}>
+           <button onClick={() => onNavigate('login')} style={{ padding: '14px 28px', background: p.accent, color: '#fff', borderRadius: 12, border: 'none', fontWeight: 600, fontSize: 16, cursor: 'pointer' }}>Giriş Yap</button>
+           <button onClick={() => onNavigate('register')} style={{ padding: '12px 28px', background: 'transparent', color: p.accent, border: `2px solid ${p.accent}`, borderRadius: 12, fontWeight: 600, fontSize: 16, cursor: 'pointer' }}>Ücretsiz Kayıt Ol</button>
+        </div>
+      </div>
+    );
+  }
 
   if (cartItems.length === 0 && !isSuccess) {
     return (
@@ -30,13 +50,25 @@ export default function CheckoutView({ onNavigate }) {
     );
   }
 
-  const handlePay = (e) => {
+  const handlePay = async (e) => {
     e.preventDefault();
-    if (purchaseCourses) {
-      purchaseCourses(cartItems);
+    setLoading(true);
+    setError('');
+    try {
+      const items = cartItems.map(c => ({ id: c._id || c.id }));
+      const response = await api.checkout(items);
+      
+      if (response.success && response.data?.paymentPageUrl) {
+        clearCart();
+        window.location.href = response.data.paymentPageUrl;
+      } else {
+        setError('Ödeme başlatılamadı.');
+        setLoading(false);
+      }
+    } catch (err) {
+      setError(err.message || 'Ödeme sırasında bir hata oluştu.');
+      setLoading(false);
     }
-    clearCart();
-    setIsSuccess(true);
   };
 
   const inputStyle = {
@@ -91,8 +123,10 @@ export default function CheckoutView({ onNavigate }) {
                 </div>
               </div>
 
-              <button type="submit" style={{ width: '100%', padding: '18px', background: p.accent, color: '#fff', border: 'none', borderRadius: 14, fontSize: 16, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, boxShadow: '0 8px 24px rgba(0,212,170,0.3)', transition: 'transform 0.2s' }} onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'} onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}>
-                <Lock size={18} /> ₺{cartTotal.toFixed(2)} Güvenle Öde
+              {error && <div style={{ color: '#ef4444', marginBottom: 16, fontSize: 14 }}>{error}</div>}
+              
+              <button type="submit" disabled={loading} style={{ width: '100%', padding: '18px', background: p.accent, color: '#fff', border: 'none', borderRadius: 14, fontSize: 16, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, boxShadow: '0 8px 24px rgba(0,212,170,0.3)', transition: 'transform 0.2s', opacity: loading ? 0.7 : 1 }} onMouseEnter={e => !loading && (e.currentTarget.style.transform = 'translateY(-2px)')} onMouseLeave={e => !loading && (e.currentTarget.style.transform = 'translateY(0)')}>
+                <Lock size={18} /> {loading ? 'İşleniyor...' : `₺${cartTotal.toFixed(2)} Güvenle Öde (Iyzico)`}
               </button>
 
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 24, fontSize: 13, color: p.textMuted }}>

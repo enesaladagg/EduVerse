@@ -70,19 +70,32 @@ const AssignmentsView = memo(function AssignmentsView() {
             <p style={{ color: p.textMuted, fontSize: t.typography.fontSize.sm }}>{a.description}</p>
             {user?.role === 'student' && (
               <>
-                <Input
-                  label="Cevabınız"
-                  value={answers[a._id] || ''}
-                  onChange={(e) => setAnswers({ ...answers, [a._id]: e.target.value })}
-                />
-                <Button
-                  variant="primary"
-                  loading={submitting === a._id}
-                  onClick={() => handleSubmit(a._id)}
-                  style={{ marginTop: t.spacing[3] }}
-                >
-                  Teslim Et
-                </Button>
+                {a.mySubmission ? (
+                  <div style={{ marginTop: t.spacing[3], padding: t.spacing[3], background: 'rgba(16, 185, 129, 0.1)', border: `1px solid rgba(16, 185, 129, 0.2)`, borderRadius: t.spacing[2] }}>
+                    <Badge variant="success" size="sm" style={{ marginBottom: t.spacing[2] }}>Teslim Edildi</Badge>
+                    <p style={{ margin: 0, fontSize: t.typography.fontSize.sm, color: p.text }}>Cevabınız: <strong>{a.mySubmission.content}</strong></p>
+                    <p style={{ margin: `4px 0 0`, fontSize: t.typography.fontSize.xs, color: p.textMuted }}>Teslim Tarihi: {new Date(a.mySubmission.submittedAt).toLocaleString('tr-TR')}</p>
+                  </div>
+                ) : (
+                  <>
+                    <Input
+                      label="Cevabınız"
+                      value={answers[a._id] || ''}
+                      onChange={(e) => setAnswers({ ...answers, [a._id]: e.target.value })}
+                    />
+                    <Button
+                      variant="primary"
+                      loading={submitting === a._id}
+                      onClick={async () => {
+                        await handleSubmit(a._id);
+                        api.getAssignments().then(res => setAssignments(res.data || []));
+                      }}
+                      style={{ marginTop: t.spacing[3] }}
+                    >
+                      Teslim Et
+                    </Button>
+                  </>
+                )}
               </>
             )}
           </Card>

@@ -69,9 +69,44 @@ const CustomCheckbox = ({ label, checked, onChange, count, p, t }) => (
 
 const CoursesPage = memo(function CoursesPage({ onNavigate }) {
   const { isDark, palette: p, tokens: t } = useTheme();
-  const [courses, setCourses] = useState(DUMMY_COURSES);
-  const [loading, setLoading] = useState(false);
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  
+  useEffect(() => {
+    async function fetchCourses() {
+      try {
+        const res = await api.getCourses();
+        if (res.success && res.data && res.data.length > 0) {
+          // Gelen veriyi DUMMY_COURSES formatına dönüştür (veya doğrudan kullan)
+          const apiCourses = res.data.map(c => ({
+            ...c,
+            _id: c._id,
+            title: c.title,
+            category: c.category || 'Yazılım',
+            level: c.level || 'Başlangıç',
+            rating: 4.8, // Mock for now if not in DB
+            students: 120, // Mock
+            hours: 24, // Mock
+            instructor: 'Eğitmen', // Mock
+            price: '₺199.99', // Mock
+            oldPrice: '',
+            image: 'react', // Mock
+            tag: c.isActive ? 'Aktif' : ''
+          }));
+          setCourses(apiCourses);
+        } else {
+          setCourses(DUMMY_COURSES); // Veritabanı boşsa demoları göster
+        }
+      } catch (err) {
+        console.error('Kurslar çekilemedi', err);
+        setCourses(DUMMY_COURSES);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchCourses();
+  }, []);
   
   const [selectedCats, setSelectedCats] = useState([]);
   const [selectedLevels, setSelectedLevels] = useState([]);

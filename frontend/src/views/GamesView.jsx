@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
-import { Trophy, Star, Target, Flame, CheckCircle2, Lock, Sparkles, TrendingUp, Zap, ChevronRight, Medal } from 'lucide-react';
+import api from '../services/api';
+import { Trophy, Star, Target, Flame, CheckCircle2, Lock, Sparkles, TrendingUp, Zap, ChevronRight, Medal, Code2 } from 'lucide-react';
 
 const BADGES_DB = [
   { id: 'first_step', name: 'İlk Adım', desc: 'Platforma kayıt oldun ve ilk adımını attın.', icon: '🎯', color: '#3b82f6', req: 'Kayıt Olmak' },
@@ -24,9 +25,22 @@ export default function GamesView() {
   const { palette: p, isDark } = useTheme();
   const { user, addXP, unlockBadge } = useAuth();
   const [mounted, setMounted] = useState(false);
+  const [ctfChallenges, setCtfChallenges] = useState([]);
+  const [loadingCtf, setLoadingCtf] = useState(true);
 
   useEffect(() => {
     setMounted(true);
+    async function fetchCtf() {
+      try {
+        const res = await api.getCtfChallenges();
+        if (res.success) setCtfChallenges(res.data);
+      } catch (err) {
+        console.error('CTF çekilemedi:', err);
+      } finally {
+        setLoadingCtf(false);
+      }
+    }
+    fetchCtf();
   }, []);
 
   const currentXP = user?.xp || 0;
@@ -290,6 +304,77 @@ export default function GamesView() {
                   </div>
                 </div>
               )
+            })}
+          </div>
+        </div>
+
+        {/* 5. CTF / LABORATUVAR GÖREVLERİ */}
+        <div style={{ 
+          background: isDark ? '#1e293b' : '#ffffff', 
+          borderRadius: '24px', padding: '32px',
+          border: `1px solid ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'}`,
+          boxShadow: isDark ? '0 10px 30px rgba(0,0,0,0.2)' : '0 10px 30px rgba(0,0,0,0.03)',
+          gridColumn: '1 / -1'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+            <div style={{ width: 36, height: 36, borderRadius: '10px', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+               <Code2 size={18} />
+            </div>
+            <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: p.text }}>CTF & Laboratuvar Görevleri</h3>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px' }}>
+            {loadingCtf ? (
+               <div style={{ color: p.textMuted }}>Görevler yükleniyor...</div>
+            ) : ctfChallenges.map(challenge => {
+               const isCompleted = user?.completedLabs?.includes(challenge._id) || user?.gamification?.completedChallenges?.some(c => c.challengeKey === challenge.key);
+               return (
+                 <div key={challenge.key} style={{
+                   background: isCompleted ? (isDark ? 'rgba(16,185,129,0.05)' : 'rgba(16,185,129,0.03)') : (isDark ? 'rgba(255,255,255,0.02)' : '#f8fafc'),
+                   border: `1px solid ${isCompleted ? '#10b98150' : (isDark ? 'rgba(255,255,255,0.05)' : p.border)}`,
+                   borderRadius: '16px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px'
+                 }}>
+                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                     <div>
+                       <h4 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: p.text }}>{challenge.title}</h4>
+                       <div style={{ fontSize: '12px', color: p.textMuted, marginTop: '4px' }}>{challenge.category} • {challenge.level}</div>
+                     </div>
+                     <div style={{ background: '#10b98120', color: '#10b981', padding: '4px 8px', borderRadius: '8px', fontSize: '12px', fontWeight: 800 }}>
+                       +{challenge.points} XP
+                     </div>
+                   </div>
+                   <p style={{ margin: 0, fontSize: '13px', color: p.textMuted, lineHeight: 1.4 }}>{challenge.description}</p>
+                   <div style={{ marginTop: 'auto', paddingTop: '12px', display: 'flex', justifyContent: 'flex-end' }}>
+                     <button
+                       disabled={isCompleted}
+                       onClick={async () => {
+                         // Simulate completing task (In real life this needs the payload for the CTF)
+                         try {
+                           const payload = challenge.key === 'directory-traversal-101' ? { path: '../../etc/passwd' } : { requestedRole: 'admin' };
+                           const res = await api.completeCtfChallenge(challenge.key, payload);
+                           if (res.success) {
+                             alert(`Tebrikler! ${res.awardedPoints} XP kazandınız.`);
+                             window.location.reload(); // Quick refresh to update state
+                           } else {
+                             alert('Görev tamamlanamadı.');
+                           }
+                         } catch (err) {
+                           alert('Görevi tamamlarken bir hata oluştu veya zaten tamamlandı.');
+                         }
+                       }}
+                       style={{
+                         background: isCompleted ? 'transparent' : p.accent,
+                         color: isCompleted ? p.textMuted : '#fff',
+                         border: isCompleted ? `1px solid ${p.border}` : 'none',
+                         padding: '8px 16px', borderRadius: '8px', fontWeight: 700, fontSize: '13px',
+                         cursor: isCompleted ? 'not-allowed' : 'pointer'
+                       }}
+                     >
+                       {isCompleted ? 'Tamamlandı' : 'Laboratuvarı Çöz'}
+                     </button>
+                   </div>
+                 </div>
+               );
             })}
           </div>
         </div>

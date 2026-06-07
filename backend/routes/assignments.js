@@ -16,7 +16,18 @@ router.get('/assignments', authenticate, asyncHandler(async (req, res) => {
     .sort({ dueDate: 1 })
     .lean();
 
-  res.json({ success: true, count: assignments.length, data: assignments });
+  const submissions = await Submission.find({ studentId: req.user.id }).lean();
+  const submissionsMap = submissions.reduce((acc, sub) => {
+    acc[sub.assignmentId] = sub;
+    return acc;
+  }, {});
+
+  const data = assignments.map(a => ({
+    ...a,
+    mySubmission: submissionsMap[a._id] || null
+  }));
+
+  res.json({ success: true, count: data.length, data });
 }));
 
 router.post('/assignments', authenticate, authorize('teacher', 'admin'), asyncHandler(async (req, res, next) => {

@@ -1,11 +1,12 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import EduFlowShell from './layouts/EduFlowShell';
 import HomeView from './views/HomeView';
 import LiveSessionView from './views/LiveSessionView';
 import DashboardView from './views/DashboardView';
-import InstructorDashboardView from './views/InstructorDashboardView';
+import InstructorDashboardView from './views/instructor/InstructorDashboardView';
+import AdminDashboardView from './views/admin/AdminDashboardView';
 import LoginView from './views/LoginView';
 import RegisterView from './views/RegisterView';
 import AssignmentsView from './views/AssignmentsView';
@@ -37,7 +38,21 @@ const GUEST_USER = {
 
 function AppContent() {
   const { user, isAuthenticated } = useAuth();
-  const [page, setPage] = useState('home');
+  const [page, setPage] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('page')) return params.get('page');
+      if (params.get('payment') === 'success') return 'profile';
+    }
+    return 'home';
+  });
+
+  // URL'yi temizle
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.search) {
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, []);
 
   const navigate = useCallback((id) => setPage(id), []);
   const displayUser = user || GUEST_USER;
@@ -59,13 +74,24 @@ function AppContent() {
     case 'h-corporate': content = <CorporateView onNavigate={navigate} />; break;
     case 'live': content = <LiveSessionView user={displayUser} onNavigateHome={() => navigate('home')} />; break;
     case 'home': content = <HomeView onNavigate={navigate} />; break;
-    case 'profile': content = <DashboardView user={displayUser} onNavigate={navigate} />; break;
+    case 'profile': 
+      if (displayUser.role === 'admin') content = <AdminDashboardView onNavigate={navigate} />;
+      else if (displayUser.role === 'teacher') content = <InstructorDashboardView onNavigate={navigate} />;
+      else content = <DashboardView user={displayUser} onNavigate={navigate} />; 
+      break;
     case 'settings': content = <SettingsView onNavigate={navigate} />; break;
-    case 'instructor': content = <InstructorDashboardView onNavigate={navigate} />; break;
+    case 'instructor': 
+      if (displayUser.role === 'teacher' || displayUser.role === 'admin') content = <InstructorDashboardView onNavigate={navigate} />;
+      else { setPage('home'); content = <HomeView onNavigate={navigate} />; }
+      break;
+    case 'admin': 
+      if (displayUser.role === 'admin') content = <AdminDashboardView onNavigate={navigate} />;
+      else { setPage('home'); content = <HomeView onNavigate={navigate} />; }
+      break;
     default: content = <HomeView onNavigate={navigate} />;
   }
 
-  const isShellPage = !['home', 'profile', 'settings', 'instructor', 'live', 'login', 'register', 'certificates', 'h-paths', 'h-community', 'h-corporate'].includes(page);
+  const isShellPage = !['home', 'profile', 'settings', 'instructor', 'admin', 'live', 'login', 'register', 'certificates', 'h-paths', 'h-community', 'h-corporate'].includes(page);
 
   return (
     <>
