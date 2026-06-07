@@ -341,7 +341,24 @@ export default function GlobalNavbar({ activePage, onNavigate }) {
         </div>
 
         {/* RIGHT ACTIONS */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          {/* Gamification Indicator */}
+          <button
+            onClick={() => onNavigate('games')}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 6,
+              height: 36, padding: '0 12px', borderRadius: 18,
+              border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
+              background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
+              color: isDark ? '#fff' : '#1e293b',
+              cursor: 'pointer', transition: 'all 0.2s', fontWeight: 700, fontSize: 13
+            }}
+          >
+            <Flame size={16} fill="#f59e0b" color="#f59e0b" />
+            <span>{user?.streak || 1}</span>
+            <div style={{ width: 1, height: 16, background: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)' }} />
+            <span style={{ color: '#00d4aa' }}>Lvl {user?.level || 1}</span>
+          </button>
           
           <button
             onClick={openCart}
