@@ -861,6 +861,8 @@ export default function HomeView({ onNavigate }) {
               { icon: Users, title: "Mentor Desteği", desc: "Her kursiyere özel atanan mentorlarla birebir destek ve kariyer rehberliği", color: COLORS.warm },
               { icon: LineChart, title: "Kişisel İlerleme Takibi", desc: "AI destekli analitik panelle güçlü ve zayıf yönlerini keşfet", color: "#74b9ff" },
               { icon: Globe, title: "Topluluk & Networking", desc: "10.000+ üyeli aktif toplulukta sektör profesyonelleriyle bağlantı kur", color: "#55efc4" },
+              { icon: Smartphone, title: "Mobil Uygulama Desteği", desc: "İstediğin her yerde, telefon veya tabletinden eğitime kesintisiz devam et", color: "#a29bfe" },
+              { icon: BrainCircuit, title: "Mülakat Hazırlığı", desc: "Teknik mülakat simülasyonları ve CV danışmanlığı ile iş bulma sürecini hızlandır", color: "#fd79a8" }
             ].map((f) => (
               <div key={f.title} style={{
                 padding: 28, borderRadius: 18, background: COLORS.primary,

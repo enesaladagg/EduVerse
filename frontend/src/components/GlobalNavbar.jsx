@@ -533,7 +533,9 @@ export default function GlobalNavbar({ activePage, onNavigate }) {
                   boxShadow: isDark ? '0 10px 40px rgba(0,0,0,0.5)' : '0 10px 40px rgba(0,0,0,0.08)',
                   border: `1px solid ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'}`,
                   animation: 'slideDownFade 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-                  zIndex: 1000
+                  zIndex: 1000,
+                  overflow: 'hidden',
+                  boxSizing: 'border-box'
                 }}>
                   <div style={{ padding: '12px 16px', borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'}`, marginBottom: 8 }}>
                     <div style={{ fontWeight: 800, color: isDark ? '#fff' : '#1e293b', fontSize: 15, marginBottom: 2 }}>{user?.name || 'Kullanıcı'}</div>

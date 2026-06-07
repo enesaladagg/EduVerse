@@ -38,6 +38,17 @@ export default function SettingsView({ onNavigate }) {
     }, 1000);
   };
 
+  const handleAvatarChange = (e) => {
+    const file = e.target.files[0];
+    if (file && updateProfile) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        updateProfile({ avatar: reader.result });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const tabs = [
     { id: 'personal', label: 'Kişisel Bilgiler', icon: User },
     { id: 'security', label: 'Şifre & Güvenlik', icon: Lock },
@@ -134,7 +145,16 @@ export default function SettingsView({ onNavigate }) {
                   ) : (
                     user?.avatarInitials || 'EA'
                   )}
-                  <button style={{
+                  <input 
+                    type="file" 
+                    id="avatar-upload" 
+                    accept="image/*" 
+                    style={{ display: 'none' }} 
+                    onChange={handleAvatarChange} 
+                  />
+                  <button 
+                    onClick={() => document.getElementById('avatar-upload').click()}
+                    style={{
                     position: 'absolute', bottom: 0, right: 0,
                     width: 32, height: 32, borderRadius: '50%',
                     background: '#1e293b', border: '2px solid #fff',
