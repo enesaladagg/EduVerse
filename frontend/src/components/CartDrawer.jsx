@@ -66,7 +66,7 @@ export default function CartDrawer({ onNavigate }) {
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 14, fontWeight: 600, color: p.text, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginBottom: 4 }}>{item.title}</div>
-                    <div style={{ fontSize: 13, color: p.textMuted, marginBottom: 8 }}>{item.instructor}</div>
+                    <div style={{ fontSize: 13, color: p.textMuted, marginBottom: 8 }}>{typeof item.instructor === 'object' ? item.instructor?.name : item.instructor}</div>
                     <div style={{ fontSize: 15, fontWeight: 700, color: p.text }}>{item.price || item.priceStr || '₺0'}</div>
                   </div>
                   <button onClick={() => removeFromCart(item._id)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: 8, alignSelf: 'flex-start' }}>
