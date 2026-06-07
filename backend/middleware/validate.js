@@ -17,7 +17,8 @@ const schemas = {
     name: Joi.string().min(2).max(100).required(),
     email: Joi.string().email().required(),
     password: Joi.string().min(8).max(128).required(),
-    role: Joi.string().valid('student', 'teacher').required(),
+    role: Joi.string().valid('student', 'teacher').optional(),
+    applyInstructor: Joi.boolean().optional()
   }),
 
   login: Joi.object({

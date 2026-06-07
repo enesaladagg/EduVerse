@@ -6,6 +6,8 @@ const mongoSanitize = require('express-mongo-sanitize');
 const { rateLimit } = require('express-rate-limit');
 const logger = require('./utils/logger');
 const AppError = require('./utils/AppError');
+const session = require('express-session');
+const passport = require('./config/passport');
 
 const healthRoutes = require('./routes/health');
 const usersRoutes = require('./routes/users');
@@ -65,8 +67,22 @@ const authLimiter = rateLimit({
 
 app.use(globalLimiter);
 app.use(express.json({ limit: '50kb' }));
+app.use(express.urlencoded({ extended: true, limit: '50kb' }));
 app.use(mongoSanitize());
 app.use(morgan('combined', { stream: logger.stream }));
+
+app.use(session({
+  secret: process.env.JWT_SECRET || 'fallback_secret',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  }
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use('/api', healthRoutes);
 app.use('/api/auth', authLimiter, authRoutes);

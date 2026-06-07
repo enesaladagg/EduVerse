@@ -6,6 +6,7 @@ const AppError = require('../utils/AppError');
 const { validate, schemas } = require('../middleware/validate');
 const env = require('../config/env');
 const asyncHandler = require('../middleware/asyncHandler');
+const passport = require('passport');
 
 const router = express.Router();
 
@@ -74,5 +75,27 @@ router.post('/demo-session', asyncHandler(async (req, res) => {
     data: { ...user.toSafeObject(), demo: true },
   });
 }));
+
+// OAuth Error/Success Redirection Helper
+const oauthRedirect = (req, res) => {
+  const token = signToken(req.user);
+  const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+  // Redirect to frontend with token in URL (Frontend will parse and remove it)
+  res.redirect(`${clientUrl}/?token=${token}`);
+};
+
+// Google OAuth Routes
+router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+router.get('/google/callback', 
+  passport.authenticate('google', { session: false, failureRedirect: '/login?error=oauth_failed' }),
+  oauthRedirect
+);
+
+// LinkedIn OAuth Routes
+router.get('/linkedin', passport.authenticate('linkedin', { state: true }));
+router.get('/linkedin/callback', 
+  passport.authenticate('linkedin', { session: false, failureRedirect: '/login?error=oauth_failed' }),
+  oauthRedirect
+);
 
 module.exports = router;

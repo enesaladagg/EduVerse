@@ -479,14 +479,22 @@ export default function GlobalNavbar({ activePage, onNavigate }) {
                 onClick={() => onNavigate('login')}
                 style={{
                   padding: '10px 24px',
-                  borderRadius: 8,
-                  border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
-                  background: 'transparent',
+                  borderRadius: 10,
+                  border: `1.5px solid ${isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)'}`,
+                  background: isDark ? 'rgba(255,255,255,0.02)' : '#f8fafc',
                   color: isDark ? '#fff' : '#1e293b',
-                  fontWeight: 600,
+                  fontWeight: 700,
                   fontSize: 14,
                   cursor: 'pointer',
                   transition: 'all 0.2s'
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.08)' : '#f1f5f9';
+                  e.currentTarget.style.borderColor = isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.3)';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.02)' : '#f8fafc';
+                  e.currentTarget.style.borderColor = isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)';
                 }}
               >
                 Giriş Yap

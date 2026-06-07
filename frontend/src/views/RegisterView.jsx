@@ -2,370 +2,433 @@ import React, { useState, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import GlobalNavbar from '../components/GlobalNavbar';
-import { User, Mail, Lock, ArrowRight, CheckCircle2, Loader2, Sparkles, Eye, EyeOff } from 'lucide-react';
+import {
+  User, Mail, Lock, ArrowRight, Loader2, Sparkles, Eye, EyeOff, Star
+} from 'lucide-react';
+
+const TESTIMONIALS = [
+  { name: 'Ece Arslan',  role: 'Frontend Developer @ Trendyol', text: '"EduVerse sayesinde 4 ayda iş buldum. Canlı dersler ve sertifikalar inanılmaz fark yarattı!"', avatar: 'EA', color: '#00d4aa' },
+  { name: 'Burak Yıldız', role: 'Data Scientist @ Getir',        text: '"Kurs kalitesi ve eğitmen erişimi gerçekten üst düzey. Hiç beklemediğim kadar hızlı öğrendim."', avatar: 'BY', color: '#7c6cf0' },
+  { name: 'Selin Koç',   role: 'UX Designer @ Insider',         text: '"Sertifikamı LinkedIn\'e ekledim, bir hafta içinde işe alım teklifi aldım!"', avatar: 'SK', color: '#f59e0b' },
+];
 
 export default function RegisterView({ onNavigate }) {
   const { isDark } = useTheme();
   const { register } = useAuth();
-  
-  const [roleMode, setRoleMode] = useState('student');
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
 
+  const [roleMode, setRoleMode]         = useState('student');
+  const [name, setName]                 = useState('');
+  const [email, setEmail]               = useState('');
+  const [password, setPassword]         = useState('');
+  const [error, setError]               = useState('');
+  const [loading, setLoading]           = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [focused, setFocused]           = useState(null);
+  const [testiIdx, setTestiIdx]         = useState(0);
+
+  useEffect(() => { setError(''); }, [roleMode]);
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    setError('');
-  }, [roleMode]);
+    const t = setInterval(() => setTestiIdx(i => (i + 1) % TESTIMONIALS.length), 4000);
+    return () => clearInterval(t);
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
-    // Simulate network delay for effect
     await new Promise(r => setTimeout(r, 800));
     const result = await register({ name, email, password, applyInstructor: roleMode === 'teacher' });
     setLoading(false);
     if (result.success) {
-      if (roleMode === 'teacher') {
-        alert("Eğitmenlik başvurunuz alındı. Sistem yöneticileri onayladığında yetkileriniz tanımlanacaktır.");
-      }
+      if (roleMode === 'teacher') alert('Eğitmenlik başvurunuz alındı. Yöneticiler onayladığında yetkileriniz tanımlanacak.');
       onNavigate('home');
     } else {
       setError(result.message);
     }
   };
 
-  const inputStyle = {
+  const bg   = isDark ? '#060d1b' : '#f0f4f8';
+  const card = isDark ? '#0e1628' : '#ffffff';
+  const text = isDark ? '#f1f5f9' : '#0f172a';
+  const sub  = isDark ? '#94a3b8' : '#64748b';
+  const bdr  = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.07)';
+
+  const inputBase = {
     width: '100%',
-    padding: '14px 16px 14px 44px',
+    padding: '14px 16px 14px 46px',
     background: isDark ? 'rgba(255,255,255,0.03)' : '#f8fafc',
-    border: `1.5px solid ${isDark ? 'rgba(255,255,255,0.08)' : '#e2e8f0'}`,
+    border: `1.5px solid ${bdr}`,
     borderRadius: 12,
-    color: isDark ? '#fff' : '#1e293b',
+    color: text,
     fontSize: 15,
-    transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+    fontFamily: "'Outfit', sans-serif",
     outline: 'none',
-    boxSizing: 'border-box'
+    boxSizing: 'border-box',
+    transition: 'border-color 0.2s, box-shadow 0.2s, background 0.2s',
   };
 
-  const socialBtnStyle = {
-    flex: 1,
-    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-    padding: '12px',
-    background: isDark ? 'rgba(255,255,255,0.02)' : '#fff',
-    border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : '#e2e8f0'}`,
-    borderRadius: 12,
-    color: isDark ? '#cbd5e1' : '#475569',
-    fontWeight: 600, fontSize: 14, cursor: 'pointer',
-    transition: 'all 0.2s',
-  };
+  const iconColor = (id) => focused === id ? '#7c6cf0' : (isDark ? '#64748b' : '#94a3b8');
+  const testi = TESTIMONIALS[testiIdx];
 
   return (
     <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap');
+
+        .full-page-container {
+          height: 100vh;
+          padding-top: 76px; /* Navbar space */
+          display: flex;
+          flex-direction: row-reverse;
+          box-sizing: border-box;
+          font-family: 'Outfit', sans-serif;
+          background: ${card};
+        }
+
+        .split-brand {
+          flex: 1.1;
+          position: relative;
+          overflow: hidden;
+          background: ${isDark
+            ? 'linear-gradient(145deg, rgba(124,108,240,0.08) 0%, rgba(0,212,170,0.05) 100%)'
+            : 'linear-gradient(145deg, rgba(124,108,240,0.06) 0%, rgba(0,212,170,0.04) 100%)'};
+          border-right: 1px solid ${bdr};
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          padding: 40px;
+        }
+
+        .split-form {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          padding: 40px;
+          background: ${card};
+          overflow-y: auto;
+        }
+
+        .form-inner {
+          width: 100%;
+          max-width: 420px;
+        }
+
+        @media (max-width: 900px) {
+          .split-brand { display: none; }
+          .split-form { padding: 20px; }
+        }
+
+        /* input focus */
+        .rv-input:focus {
+          border-color: #7c6cf0 !important;
+          background: ${isDark ? 'rgba(124,108,240,0.05)' : '#fff'} !important;
+          box-shadow: 0 0 0 4px rgba(124,108,240,0.1) !important;
+        }
+
+        @keyframes rv-fadeUp {
+          from { opacity: 0; transform: translateY(10px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        .rv-testi { animation: rv-fadeUp 0.4s ease; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .spin { animation: spin 0.9s linear infinite; }
+        .rv-divider { flex: 1; height: 1px; background: ${isDark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.09)'}; }
+      `}</style>
+
       <GlobalNavbar activePage="register" onNavigate={onNavigate} />
-      <div style={{
-        minHeight: 'calc(100vh - 80px)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      padding: '40px 20px',
-      position: 'relative', overflow: 'hidden',
-      background: isDark ? '#060d1b' : '#f8fafc',
-      fontFamily: "'Outfit', sans-serif"
-    }}>
-      <style>
-        {`
-          .register-container { flex-direction: row-reverse; }
-          .register-right { display: flex; }
-          @media (max-width: 900px) {
-            .register-container { flex-direction: column !important; }
-            .register-right { display: none !important; }
-          }
-          .custom-input:focus {
-            border-color: #00d4aa !important;
-            background: ${isDark ? 'rgba(0,212,170,0.05)' : '#fff'} !important;
-            box-shadow: 0 0 0 4px rgba(0,212,170,0.1) !important;
-          }
-          .social-btn:hover {
-            background: ${isDark ? 'rgba(255,255,255,0.05)' : '#f1f5f9'} !important;
-            transform: translateY(-2px);
-          }
-          @keyframes glowPulse {
-            0% { box-shadow: 0 0 20px rgba(0,212,170,0.3); }
-            50% { box-shadow: 0 0 40px rgba(0,212,170,0.6); }
-            100% { box-shadow: 0 0 20px rgba(0,212,170,0.3); }
-          }
-        `}
-      </style>
 
-      {/* Background Orbs */}
-      <div style={{
-        position: 'absolute', top: '15%', right: '15%', width: 400, height: 400,
-        background: 'radial-gradient(circle, rgba(0,212,170,0.12) 0%, transparent 70%)',
-        filter: 'blur(50px)', borderRadius: '50%', zIndex: 0
-      }} />
-      <div style={{
-        position: 'absolute', bottom: '10%', left: '10%', width: 500, height: 500,
-        background: 'radial-gradient(circle, rgba(124,108,240,0.12) 0%, transparent 70%)',
-        filter: 'blur(50px)', borderRadius: '50%', zIndex: 0
-      }} />
-
-      {/* Main Card Container */}
-      <div className="register-container" style={{
-        position: 'relative', zIndex: 1,
-        display: 'flex',
-        width: '100%', maxWidth: 1050, minHeight: 650,
-        background: isDark ? 'rgba(16, 29, 53, 0.6)' : '#ffffff',
-        backdropFilter: 'blur(24px)',
-        borderRadius: 24,
-        boxShadow: isDark ? '0 24px 80px rgba(0,0,0,0.5)' : '0 24px 80px rgba(0,0,0,0.08)',
-        border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)'}`,
-        overflow: 'hidden'
-      }}>
+      <div className="full-page-container">
         
-        {/* RIGHT PANEL - Branding (Reversed for Register) */}
-        <div className="register-right" style={{
-          flex: 1, padding: 60,
-          flexDirection: 'column', justifyContent: 'space-between',
-          background: isDark 
-            ? 'linear-gradient(135deg, rgba(124,108,240,0.08) 0%, rgba(0,212,170,0.08) 100%)'
-            : 'linear-gradient(135deg, rgba(124,108,240,0.05) 0%, rgba(0,212,170,0.05) 100%)',
-          borderLeft: `1px solid ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'}`
-        }}>
-          <div>
-            <div style={{
-              display: 'inline-flex', alignItems: 'center', gap: 10,
-              padding: '8px 16px', background: 'rgba(124,108,240,0.15)',
-              borderRadius: 50, color: '#7c6cf0', fontWeight: 600, fontSize: 14,
-              marginBottom: 32
-            }}>
-              <Sparkles size={16} /> Harika Bir Başlangıç
-            </div>
-            <h1 style={{
-              margin: '0 0 24px', fontSize: 42, fontWeight: 800, lineHeight: 1.2,
-              color: isDark ? '#fff' : '#0f172a'
-            }}>
-              Geleceğine<br/>
-              <span style={{ 
-                background: 'linear-gradient(135deg, #7c6cf0, #00d4aa)',
-                WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'
-              }}>Yatırım Yap.</span>
-            </h1>
-            <p style={{
-              margin: 0, fontSize: 16, lineHeight: 1.6,
-              color: isDark ? '#94a3b8' : '#64748b'
-            }}>
-              Milyonlarca öğrencinin ve binlerce uzman eğitmenin buluştuğu global ağa katılın. 
-              Sıfırdan zirveye giden yolculuğunuz bugün başlıyor.
+        {/* LEFT SIDE - FORM */}
+        <div className="split-form">
+          <div className="form-inner">
+            <h2 style={{ margin: '0 0 6px', fontSize: 28, fontWeight: 900, color: text, letterSpacing: '-0.5px' }}>
+              Ücretsiz Kayıt Ol
+            </h2>
+            <p style={{ margin: '0 0 28px', color: sub, fontSize: 15 }}>
+              Saniyeler içinde hesabınızı oluşturun
             </p>
-          </div>
 
-          <div style={{ 
-            background: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.5)', 
-            padding: 24, borderRadius: 16, border: `1px solid ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'}` 
-          }}>
-            <p style={{ margin: '0 0 16px', fontSize: 15, fontStyle: 'italic', color: isDark ? '#cbd5e1' : '#334155', lineHeight: 1.6 }}>
-              "EduVerse sayesinde sadece 6 ayda kariyerimi tamamen değiştirdim ve hayalimdeki şirkete girdim. Burası bir eğitim platformundan çok daha fazlası."
-            </p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div style={{ width: 40, height: 40, borderRadius: 20, background: '#7c6cf0', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>
-                AE
-              </div>
-              <div>
-                <div style={{ fontWeight: 700, fontSize: 14, color: isDark ? '#fff' : '#0f172a' }}>Ayşe Yılmaz</div>
-                <div style={{ fontSize: 12, color: isDark ? '#94a3b8' : '#64748b' }}>Yazılım Geliştirici @ TechCorp</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* LEFT PANEL - Form */}
-        <div style={{
-          flex: 1, padding: '40px 60px',
-          display: 'flex', flexDirection: 'column', justifyContent: 'center'
-        }}>
-          <h2 style={{ margin: '0 0 8px', fontSize: 28, fontWeight: 800, color: isDark ? '#fff' : '#0f172a' }}>
-            Ücretsiz Kayıt Ol
-          </h2>
-          <p style={{ margin: '0 0 32px', color: isDark ? '#94a3b8' : '#64748b', fontSize: 15 }}>
-            Saniyeler içinde hesabınızı oluşturun
-          </p>
-
-          {/* Role Segmented Control */}
-          <div style={{
-            position: 'relative', display: 'flex',
-            background: isDark ? 'rgba(0,0,0,0.2)' : '#f1f5f9',
-            borderRadius: 14, padding: 4, marginBottom: 24
-          }}>
+            {/* Role toggle */}
             <div style={{
-              position: 'absolute', top: 4, bottom: 4, left: roleMode === 'student' ? 4 : '50%',
-              width: 'calc(50% - 4px)', background: isDark ? '#1e293b' : '#fff',
-              borderRadius: 10, transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-            }} />
-            
-            <button
-              type="button"
-              onClick={() => setRoleMode('student')}
-              style={{
-                position: 'relative', flex: 1, padding: '10px 0', border: 'none', background: 'transparent',
-                display: 'flex', justifyContent: 'center', alignItems: 'center',
-                color: roleMode === 'student' ? (isDark ? '#fff' : '#0f172a') : (isDark ? '#64748b' : '#94a3b8'),
-                fontWeight: 600, fontSize: 14, cursor: 'pointer', zIndex: 1, transition: 'color 0.2s'
-              }}
-            >
-              Öğrenci Olarak
-            </button>
-            <div style={{
-                position: 'relative', zIndex: 1, flex: 1, textAlign: 'center',
-                padding: '12px 16px', cursor: 'pointer', fontWeight: 600, fontSize: 14,
-                color: roleMode === 'teacher' ? (isDark ? '#fff' : '#0f172a') : (isDark ? '#94a3b8' : '#64748b'),
-                transition: 'color 0.3s'
-              }} onClick={() => setRoleMode('teacher')}>
-                Eğitmen Ol (Başvuru)
-            </div>
-          </div>
-
-          {roleMode === 'teacher' && (
-              <div style={{ marginBottom: 20, padding: 12, borderRadius: 8, background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', color: '#f59e0b', fontSize: 13 }}>
-                Eğitmenlik talebiniz yöneticiler tarafından incelenecek ve onaylandıktan sonra yetkileriniz açılacaktır.
-              </div>
-          )}
-
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {/* Name Input */}
-            <div style={{ position: 'relative' }}>
-              <User size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: isDark ? '#64748b' : '#94a3b8' }} />
-              <input
-                className="custom-input"
-                type="text"
-                placeholder="Adınız Soyadınız"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-                style={inputStyle}
-              />
-            </div>
-
-            {/* Email Input */}
-            <div style={{ position: 'relative' }}>
-              <Mail size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: isDark ? '#64748b' : '#94a3b8' }} />
-              <input
-                className="custom-input"
-                type="email"
-                placeholder="E-posta adresiniz"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                style={inputStyle}
-              />
-            </div>
-
-            {/* Password Input */}
-            <div style={{ position: 'relative' }}>
-              <Lock size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: isDark ? '#64748b' : '#94a3b8' }} />
-              <input
-                className="custom-input"
-                type={showPassword ? "text" : "password"}
-                placeholder="Şifreniz"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                style={{...inputStyle, paddingRight: 44}}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                style={{
-                  position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)',
-                  background: 'none', border: 'none', padding: 0, cursor: 'pointer',
-                  color: isDark ? '#64748b' : '#94a3b8', display: 'flex', alignItems: 'center'
-                }}
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              position: 'relative', display: 'flex',
+              background: isDark ? 'rgba(0,0,0,0.2)' : '#f1f5f9',
+              borderRadius: 14, padding: 4, marginBottom: 24,
+            }}>
+              <div style={{
+                position: 'absolute', top: 4, bottom: 4,
+                left: roleMode === 'student' ? 4 : '50%',
+                width: 'calc(50% - 4px)',
+                background: isDark ? '#1e293b' : '#fff',
+                borderRadius: 10,
+                transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                boxShadow: isDark ? '0 2px 8px rgba(0,0,0,0.2)' : '0 2px 8px rgba(0,0,0,0.06)',
+              }} />
+              <button type="button" onClick={() => setRoleMode('student')}
+                style={{ 
+                  color: roleMode === 'student' ? text : sub,
+                  position: 'relative', flex: 1, padding: '10px 0',
+                  border: 'none', background: 'transparent', cursor: 'pointer',
+                  fontFamily: "'Outfit', sans-serif", fontSize: 14, fontWeight: 600,
+                  zIndex: 1, transition: 'color 0.2s',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }}>
+                Öğrenci Olarak
+              </button>
+              <button type="button" onClick={() => setRoleMode('teacher')}
+                style={{ 
+                  color: roleMode === 'teacher' ? text : sub,
+                  position: 'relative', flex: 1, padding: '10px 0',
+                  border: 'none', background: 'transparent', cursor: 'pointer',
+                  fontFamily: "'Outfit', sans-serif", fontSize: 14, fontWeight: 600,
+                  zIndex: 1, transition: 'color 0.2s',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }}>
+                Eğitmen (Başvuru)
               </button>
             </div>
 
-            {error && (
-              <div style={{ 
-                padding: '12px 16px', background: 'rgba(239, 68, 68, 0.1)', 
-                borderLeft: '4px solid #ef4444', borderRadius: 8,
-                color: '#ef4444', fontSize: 14, fontWeight: 500, marginTop: 4 
+            {roleMode === 'teacher' && (
+              <div style={{
+                marginBottom: 20, padding: '12px 16px', borderRadius: 12,
+                background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)',
+                color: '#f59e0b', fontSize: 13, fontWeight: 500, lineHeight: 1.5
               }}>
-                {error}
+                ⚠️ Eğitmenlik talebiniz yöneticiler tarafından incelenecektir.
               </div>
             )}
 
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                width: '100%', padding: '14px', marginTop: 8,
-                background: 'linear-gradient(135deg, #00d4aa, #00b38f)',
-                color: '#fff', border: 'none', borderRadius: 12,
-                fontWeight: 700, fontSize: 16, cursor: loading ? 'not-allowed' : 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                boxShadow: '0 8px 24px rgba(0,212,170,0.3)',
-                transition: 'all 0.2s',
-                animation: 'glowPulse 3s infinite',
-                opacity: loading ? 0.8 : 1
-              }}
-            >
-              {loading ? (
-                <>
-                  <Loader2 size={20} className="spin" /> Hesabınız Oluşturuluyor...
-                </>
-              ) : (
-                <>
-                  Hemen Kaydol <ArrowRight size={20} />
-                </>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              {/* Name */}
+              <div style={{ position: 'relative' }}>
+                <User size={18} style={{
+                  position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)',
+                  color: iconColor('name'), transition: 'color 0.2s', pointerEvents: 'none',
+                }} />
+                <input className="rv-input" type="text" placeholder="Adınız Soyadınız"
+                  value={name} onChange={e => setName(e.target.value)}
+                  onFocus={() => setFocused('name')} onBlur={() => setFocused(null)}
+                  required style={inputBase} />
+              </div>
+
+              {/* Email */}
+              <div style={{ position: 'relative' }}>
+                <Mail size={18} style={{
+                  position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)',
+                  color: iconColor('email'), transition: 'color 0.2s', pointerEvents: 'none',
+                }} />
+                <input className="rv-input" type="email" placeholder="E-posta adresiniz"
+                  value={email} onChange={e => setEmail(e.target.value)}
+                  onFocus={() => setFocused('email')} onBlur={() => setFocused(null)}
+                  required style={inputBase} />
+              </div>
+
+              {/* Password */}
+              <div style={{ position: 'relative' }}>
+                <Lock size={18} style={{
+                  position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)',
+                  color: iconColor('password'), transition: 'color 0.2s', pointerEvents: 'none',
+                }} />
+                <input className="rv-input" type={showPassword ? 'text' : 'password'} placeholder="Şifreniz (min. 8 karakter)"
+                  value={password} onChange={e => setPassword(e.target.value)}
+                  onFocus={() => setFocused('password')} onBlur={() => setFocused(null)}
+                  required minLength={8} style={{ ...inputBase, paddingRight: 46 }} />
+                <button type="button" onClick={() => setShowPassword(!showPassword)} style={{
+                  position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)',
+                  background: 'none', border: 'none', padding: 4, cursor: 'pointer',
+                  color: isDark ? '#64748b' : '#94a3b8', display: 'flex', alignItems: 'center',
+                  transition: 'color 0.2s',
+                }}>
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+
+              {/* Error */}
+              {error && (
+                <div style={{
+                  padding: '12px 16px', borderRadius: 12,
+                  background: 'rgba(239,68,68,0.1)', borderLeft: '3px solid #ef4444',
+                  color: '#ef4444', fontSize: 14, fontWeight: 500,
+                }}>{error}</div>
               )}
-            </button>
-          </form>
 
-          {/* Divider */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, margin: '24px 0' }}>
-            <div style={{ flex: 1, height: 1, background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }} />
-            <span style={{ fontSize: 12, fontWeight: 600, color: isDark ? '#64748b' : '#94a3b8', textTransform: 'uppercase', letterSpacing: 1 }}>
-              veya şununla kayıt ol
-            </span>
-            <div style={{ flex: 1, height: 1, background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }} />
+              {/* Submit */}
+              <button type="submit" disabled={loading} style={{
+                width: '100%', padding: '16px', marginTop: 8,
+                background: loading ? 'rgba(124,108,240,0.6)' : 'linear-gradient(135deg, #7c6cf0, #6c5ce7)',
+                color: '#fff', border: 'none', borderRadius: 12,
+                fontFamily: "'Outfit', sans-serif", fontWeight: 700, fontSize: 16,
+                cursor: loading ? 'not-allowed' : 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                boxShadow: '0 8px 24px rgba(124,108,240,0.3)',
+                transition: 'transform 0.2s, box-shadow 0.2s',
+              }}
+              onMouseEnter={e => { if(!loading) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 32px rgba(124,108,240,0.4)'; } }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(124,108,240,0.3)'; }}
+              >
+                {loading
+                  ? <><Loader2 size={20} className="spin" /> Hesabınız Oluşturuluyor...</>
+                  : <>Hemen Kaydol <ArrowRight size={20} /></>}
+              </button>
+            </form>
+
+            {/* Divider */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16, margin: '24px 0' }}>
+              <div className="rv-divider" />
+              <span style={{ fontSize: 12, fontWeight: 600, color: sub, textTransform: 'uppercase', letterSpacing: 1, whiteSpace: 'nowrap' }}>
+                veya şununla kayıt ol
+              </span>
+              <div className="rv-divider" />
+            </div>
+
+            {/* Social */}
+            <div style={{ display: 'flex', gap: 16 }}>
+              <button type="button" 
+                onClick={() => window.location.href = 'http://localhost:5000/api/auth/google'}
+                style={{
+                  flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+                  padding: '12px', borderRadius: 12, cursor: 'pointer',
+                  fontFamily: "'Outfit', sans-serif", fontSize: 14, fontWeight: 700,
+                  background: isDark ? 'rgba(255,255,255,0.02)' : '#ffffff',
+                  border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : '#e2e8f0'}`,
+                  color: isDark ? '#fff' : '#334155',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.05)'; e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.05)' : '#f8fafc'; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.02)' : '#ffffff'; }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                Google
+              </button>
+              <button type="button"
+                onClick={() => window.location.href = 'http://localhost:5000/api/auth/linkedin'}
+                style={{
+                  flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+                  padding: '12px', borderRadius: 12, cursor: 'pointer',
+                  fontFamily: "'Outfit', sans-serif", fontSize: 14, fontWeight: 700,
+                  background: isDark ? 'rgba(10, 102, 194, 0.15)' : '#f1f5f9',
+                  border: `1px solid ${isDark ? 'rgba(10, 102, 194, 0.3)' : 'transparent'}`,
+                  color: isDark ? '#60a5fa' : '#334155',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.05)'; e.currentTarget.style.background = isDark ? 'rgba(10, 102, 194, 0.25)' : '#e2e8f0'; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.background = isDark ? 'rgba(10, 102, 194, 0.15)' : '#f1f5f9'; }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="#0A66C2"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                LinkedIn
+              </button>
+            </div>
+
+            {/* Register Link */}
+            <div style={{ marginTop: 24, textAlign: 'center', fontSize: 15, color: sub }}>
+              Zaten hesabınız var mı?{' '}
+              <button onClick={() => onNavigate('login')} style={{
+                background: 'none', border: 'none', padding: 0,
+                color: '#7c6cf0', fontWeight: 700, cursor: 'pointer',
+                fontFamily: "'Outfit', sans-serif", fontSize: 15,
+              }}>
+                Giriş Yapın →
+              </button>
+            </div>
+
           </div>
+        </div>
 
-          {/* Social Logins */}
-          <div style={{ display: 'flex', gap: 16 }}>
-            <button className="social-btn" style={socialBtnStyle}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-              Google
-            </button>
-            <button className="social-btn" style={socialBtnStyle}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
-              Github
-            </button>
-          </div>
-
-          {/* Login Link */}
-          <div style={{ marginTop: 24, textAlign: 'center', fontSize: 15, color: isDark ? '#94a3b8' : '#64748b' }}>
-            Zaten hesabınız var mı?{' '}
-            <button onClick={() => onNavigate('login')} style={{
-              background: 'none', border: 'none', padding: 0,
-              color: '#00d4aa', fontWeight: 700, cursor: 'pointer'
+        {/* RIGHT SIDE - BRANDING */}
+        <div className="split-brand">
+          <div style={{ position: 'absolute', top: '-10%', left: '-10%', width: 400, height: 400, background: 'radial-gradient(circle, rgba(124,108,240,0.15) 0%, transparent 70%)', filter: 'blur(40px)' }} />
+          <div style={{ position: 'absolute', bottom: '-10%', right: '-10%', width: 500, height: 500, background: 'radial-gradient(circle, rgba(0,212,170,0.12) 0%, transparent 70%)', filter: 'blur(40px)' }} />
+          
+          <div style={{ maxWidth: 500, position: 'relative', zIndex: 2 }}>
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: 8,
+              padding: '8px 18px', borderRadius: 50,
+              background: 'rgba(124,108,240,0.15)',
+              border: '1px solid rgba(124,108,240,0.2)',
+              color: '#7c6cf0', fontWeight: 700, fontSize: 13,
+              letterSpacing: 0.5, marginBottom: 32,
             }}>
-              Giriş Yapın
-            </button>
-          </div>
+              <Sparkles size={15} /> Harika Bir Başlangıç
+            </div>
 
+            <h1 style={{
+              margin: '0 0 20px', fontSize: 44, fontWeight: 900,
+              lineHeight: 1.15, color: isDark ? '#fff' : '#0f172a',
+              letterSpacing: '-1px',
+            }}>
+              Geleceğine<br />
+              <span style={{
+                background: 'linear-gradient(135deg, #7c6cf0 30%, #00d4aa)',
+                WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+              }}>Yatırım Yap.</span>
+            </h1>
+
+            <p style={{ margin: '0 0 40px', fontSize: 16, lineHeight: 1.7, color: sub, maxWidth: 400 }}>
+              Milyonlarca öğrencinin ve binlerce uzman eğitmenin buluştuğu global ağa katılın.
+            </p>
+
+            {/* Mini stats */}
+            <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', marginBottom: 40 }}>
+              {[
+                { v: '50K+',   l: 'Öğrenci' },
+                { v: '8.500+', l: 'Sertifika' },
+                { v: '4.9★',   l: 'Ortalama Puan' },
+              ].map((s, i) => (
+                <div key={i} style={{
+                  background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
+                  border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)'}`,
+                  borderRadius: 16, padding: '16px 24px',
+                }}>
+                  <div style={{ fontWeight: 800, fontSize: 24, color: isDark ? '#fff' : '#0f172a', lineHeight: 1 }}>{s.v}</div>
+                  <div style={{ fontSize: 13, color: sub, marginTop: 6, fontWeight: 500 }}>{s.l}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* Rotating testimonial */}
+            <div key={testiIdx} className="rv-testi" style={{
+              background: isDark ? 'rgba(255,255,255,0.03)' : '#fff',
+              border: `1px solid ${bdr}`,
+              borderRadius: 20, padding: 24,
+              boxShadow: isDark ? 'none' : '0 10px 30px rgba(0,0,0,0.04)'
+            }}>
+              <div style={{ display: 'flex', gap: 4, marginBottom: 14 }}>
+                {[...Array(5)].map((_, i) => <Star key={i} size={15} fill="#f59e0b" color="#f59e0b" />)}
+              </div>
+              <p style={{ fontSize: 15, lineHeight: 1.6, color: isDark ? '#cbd5e1' : '#334155', marginBottom: 20, fontStyle: 'italic' }}>
+                {testi.text}
+              </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                <div style={{
+                  width: 44, height: 44, borderRadius: 12, flexShrink: 0,
+                  background: testi.color, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontWeight: 700, fontSize: 15, color: '#fff',
+                }}>{testi.avatar}</div>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: 15, color: isDark ? '#fff' : '#0f172a' }}>{testi.name}</div>
+                  <div style={{ fontSize: 13, color: sub }}>{testi.role}</div>
+                </div>
+              </div>
+              {/* Dots */}
+              <div style={{ display: 'flex', gap: 6, marginTop: 20 }}>
+                {TESTIMONIALS.map((_, i) => (
+                  <div key={i} onClick={() => setTestiIdx(i)} style={{
+                    width: i === testiIdx ? 24 : 8, height: 8, borderRadius: 4, cursor: 'pointer',
+                    background: i === testiIdx
+                      ? '#7c6cf0'
+                      : (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'),
+                    transition: 'all 0.3s',
+                  }} />
+                ))}
+              </div>
+            </div>
+
+          </div>
         </div>
       </div>
-      
-      <style>{`
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-        .spin { animation: spin 1s linear infinite; }
-      `}</style>
-    </div>
     </>
   );
 }

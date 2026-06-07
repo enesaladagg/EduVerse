@@ -20,9 +20,20 @@ const UserSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: true,
+      // Optional for OAuth users
+      required: false,
       minlength: 8,
       select: false,
+    },
+    googleId: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
+    linkedinId: {
+      type: String,
+      unique: true,
+      sparse: true,
     },
     role: {
       type: String,
