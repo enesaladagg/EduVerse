@@ -316,7 +316,7 @@ export default function MessagingPage() {
               <MoreVertical size={24} />
             </button>
             {showChatOptions && (
-              <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: 8, width: 200, background: isDark ? '#0f172a' : '#fff', borderRadius: 16, padding: 8, boxShadow: t.shadows.md, border: `1px solid ${p.border}`, zIndex: 10 }}>
+              <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: 8, width: 240, background: isDark ? '#0f172a' : '#fff', borderRadius: 16, padding: 8, boxShadow: t.shadows.md, border: `1px solid ${p.border}`, zIndex: 10 }}>
                 <button onClick={() => setShowChatOptions(false)} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: 12, background: 'transparent', border: 'none', color: p.text, borderRadius: 12, cursor: 'pointer' }} onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.05)' : '#f8fafc'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                   <User size={16} /> <span style={{ fontWeight: 600 }}>Profili Gör</span>
                 </button>
