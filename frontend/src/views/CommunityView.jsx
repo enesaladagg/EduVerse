@@ -52,6 +52,20 @@ export default function CommunityView({ onNavigate }) {
       .finally(() => setLoading(false));
   }, [forumTab]);
 
+  const handleNewPost = async () => {
+    const title = prompt("Yeni konu başlığını giriniz:");
+    if (!title) return;
+    const content = prompt("Konu içeriği:");
+    if (!content) return;
+    
+    try {
+      await api.createCommunityPost({ title, content, tags: ['Genel', 'Soru'] });
+      api.getCommunityPosts().then(res => setPosts(res.data || []));
+    } catch (err) {
+      alert("Gönderi paylaşılamadı: " + err.message);
+    }
+  };
+
   const getTimeAgo = (date) => {
     const seconds = Math.floor((new Date() - new Date(date)) / 1000);
     let interval = seconds / 31536000;
@@ -90,7 +104,7 @@ export default function CommunityView({ onNavigate }) {
   return (
     <>
       <GlobalNavbar activePage="community" onNavigate={onNavigate} />
-      <div style={{ minHeight: 'calc(100vh - 80px)', background: C.pageBg, padding: '40px 5%', color: C.body, fontFamily: C.font }}>
+      <div style={{ minHeight: 'calc(100vh - 80px)', background: C.pageBg, padding: '120px 5% 60px', color: C.body, fontFamily: C.font }}>
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>
           
           <div style={{
@@ -121,26 +135,33 @@ export default function CommunityView({ onNavigate }) {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 32, alignItems: "start" }}>
             
             <div className="fade-in-up">
-              <div style={{ display: "flex", gap: 4, marginBottom: 24, background: C.white, borderRadius: 12, padding: 4, border: `1px solid ${C.border}`, width: "fit-content", boxShadow: C.shadow }}>
-                {[
-                  { k: "hot", l: "Gündem", icon: <Flame size={16} /> }, 
-                  { k: "new", l: "Yeni", icon: <Sparkles size={16} /> }, 
-                  { k: "unanswered", l: "Cevaplanmamış", icon: <HelpCircle size={16} /> }
-                ].map(t => (
-                  <button key={t.k} onClick={() => setForumTab(t.k)} style={{
-                    padding: "10px 20px", borderRadius: 10, border: "none", cursor: "pointer", fontFamily: C.font,
-                    fontSize: 14, fontWeight: forumTab === t.k ? 700 : 600, transition: 'all 0.2s',
-                    background: forumTab === t.k ? C.primaryDim : "transparent", color: forumTab === t.k ? C.primary : C.muted,
-                    display: 'flex', alignItems: 'center', gap: 6
-                  }}>
-                    {t.icon} {t.l}
-                  </button>
-                ))}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24, flexWrap: "wrap", gap: 16 }}>
+                <div style={{ display: "flex", gap: 4, background: C.white, borderRadius: 12, padding: 4, border: `1px solid ${C.border}`, boxShadow: C.shadow }}>
+                  {[
+                    { k: "hot", l: "Gündem", icon: <Flame size={16} /> }, 
+                    { k: "new", l: "Yeni", icon: <Sparkles size={16} /> }, 
+                    { k: "unanswered", l: "Cevaplanmamış", icon: <HelpCircle size={16} /> }
+                  ].map(t => (
+                    <button key={t.k} onClick={() => setForumTab(t.k)} style={{
+                      padding: "10px 20px", borderRadius: 10, border: "none", cursor: "pointer", fontFamily: C.font,
+                      fontSize: 14, fontWeight: forumTab === t.k ? 700 : 600, transition: 'all 0.2s',
+                      background: forumTab === t.k ? C.primaryDim : "transparent", color: forumTab === t.k ? C.primary : C.muted,
+                      display: 'flex', alignItems: 'center', gap: 6
+                    }}>
+                      {t.icon} {t.l}
+                    </button>
+                  ))}
+                </div>
+                <button onClick={handleNewPost} style={{
+                  padding: "12px 24px", borderRadius: 12, border: "none", background: C.primary, color: "#fff",
+                  fontFamily: C.font, fontSize: 15, fontWeight: 800, cursor: "pointer", transition: 'all 0.2s',
+                  boxShadow: `0 8px 16px ${C.primaryDim}`
+                }} onMouseEnter={e=>e.currentTarget.style.transform='translateY(-2px)'} onMouseLeave={e=>e.currentTarget.style.transform='none'}>+ Yeni Konu Aç</button>
               </div>
 
               <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                {loading && <div style={{ color: C.muted, textAlign: 'center', padding: 20 }}>Yükleniyor...</div>}
-                {!loading && posts.length === 0 && <div style={{ color: C.muted, textAlign: 'center', padding: 20 }}>Henüz gönderi yok.</div>}
+                {loading && <div style={{ color: C.muted, textAlign: 'center', padding: 40, background: C.white, borderRadius: 16, border: `1px dashed ${C.border}` }}>Yükleniyor...</div>}
+                {!loading && posts.length === 0 && <div style={{ color: C.muted, textAlign: 'center', padding: 60, background: C.white, borderRadius: 16, border: `1px dashed ${C.border}`, fontSize: 16, fontWeight: 600 }}>Bu kategoride henüz gönderi bulunmuyor. İlk konuyu sen aç!</div>}
                 {posts.map((topic, i) => {
                   const avatar = topic.author?.profilePicture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${topic.author?.name}&backgroundColor=b6e3f4`;
                   return (
@@ -176,12 +197,6 @@ export default function CommunityView({ onNavigate }) {
                   </Card>
                 )})}
               </div>
-
-              <button style={{
-                width: "100%", marginTop: 24, padding: "16px", borderRadius: 16,
-                border: `2px dashed ${C.border}`, background: C.white, color: C.primary,
-                fontFamily: C.font, fontSize: 15, fontWeight: 800, cursor: "pointer", transition: 'all 0.2s'
-              }} onMouseEnter={e=>{e.currentTarget.style.background=C.primaryDim; e.currentTarget.style.borderColor=C.primary;}} onMouseLeave={e=>{e.currentTarget.style.background=C.white; e.currentTarget.style.borderColor=C.border;}}>+ Yeni Konu Aç</button>
             </div>
 
             <div className="fade-in-right" style={{ display: "flex", flexDirection: "column", gap: 24, position: "sticky", top: 100 }}>

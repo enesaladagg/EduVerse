@@ -1,5 +1,6 @@
 const express = require('express');
 const User = require('../models/User');
+const Course = require('../models/Course');
 const AppError = require('../utils/AppError');
 const { authenticate, authorize } = require('../middleware/auth');
 const asyncHandler = require('../middleware/asyncHandler');
@@ -98,7 +99,6 @@ router.delete('/users/:id', asyncHandler(async (req, res, next) => {
 // @access  Private/Admin
 router.put('/courses/:id/status', asyncHandler(async (req, res, next) => {
   const { isActive } = req.body;
-  const Course = require('../models/Course');
 
   const course = await Course.findById(req.params.id);
   if (!course) {
@@ -119,7 +119,6 @@ router.put('/courses/:id/status', asyncHandler(async (req, res, next) => {
 // @route   DELETE /api/admin/courses/:id
 // @access  Private/Admin
 router.delete('/courses/:id', asyncHandler(async (req, res, next) => {
-  const Course = require('../models/Course');
   const course = await Course.findById(req.params.id);
   if (!course) {
     return next(new AppError('Kurs bulunamadı', 404, 'COURSE_NOT_FOUND'));

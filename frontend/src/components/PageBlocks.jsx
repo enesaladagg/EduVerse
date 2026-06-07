@@ -40,5 +40,5 @@ export const SectionHead = ({ title, sub, action, onAction, C }) => (
 );
 
 export const Tag = ({ children, color = "#00d4aa" }) => (
-  <span style={{ padding: "2px 8px", borderRadius: 6, fontSize: 11, fontWeight: 600, background: `${color}10`, color }}>{children}</span>
+  <span style={{ padding: "4px 10px", borderRadius: 8, fontSize: 12, fontWeight: 600, background: `${color}15`, color }}>{children}</span>
 );

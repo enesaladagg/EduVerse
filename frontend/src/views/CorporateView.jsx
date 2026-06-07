@@ -70,7 +70,7 @@ export default function CorporateView({ onNavigate }) {
   return (
     <>
       <GlobalNavbar activePage="corporate" onNavigate={onNavigate} />
-      <div style={{ minHeight: 'calc(100vh - 80px)', background: C.pageBg, padding: '40px 5%', color: C.body, fontFamily: C.font }}>
+      <div style={{ minHeight: 'calc(100vh - 80px)', background: C.pageBg, padding: '120px 5% 60px', color: C.body, fontFamily: C.font }}>
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>
           
           <div style={{
@@ -90,49 +90,50 @@ export default function CorporateView({ onNavigate }) {
               </p>
               <div style={{ display: "flex", gap: 16, justifyContent: "center" }}>
                 <button onClick={() => window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'})} style={{ padding: "16px 36px", borderRadius: 14, border: "none", background: C.primary, color: "#fff", fontFamily: C.font, fontSize: 16, fontWeight: 800, cursor: "pointer", boxShadow: `0 4px 16px ${C.primary}40`, transition: 'transform 0.2s' }} onMouseEnter={e=>e.currentTarget.style.transform='translateY(-2px)'} onMouseLeave={e=>e.currentTarget.style.transform='none'}>Demo Talep Et</button>
-                <button style={{ padding: "16px 32px", borderRadius: 14, border: "2px solid rgba(255,255,255,0.2)", background: "transparent", color: "#f8fafc", fontFamily: C.font, fontSize: 16, fontWeight: 700, cursor: "pointer", transition: 'background 0.2s' }} onMouseEnter={e=>e.currentTarget.style.background='rgba(255,255,255,0.05)'} onMouseLeave={e=>e.currentTarget.style.background='transparent'}>Fiyatları Gör ↓</button>
+                <button onClick={() => {const el = document.getElementById('pricing'); if(el) el.scrollIntoView({behavior: 'smooth'})}} style={{ padding: "16px 32px", borderRadius: 14, border: "2px solid rgba(255,255,255,0.2)", background: "transparent", color: "#f8fafc", fontFamily: C.font, fontSize: 16, fontWeight: 700, cursor: "pointer", transition: 'background 0.2s' }} onMouseEnter={e=>e.currentTarget.style.background='rgba(255,255,255,0.05)'} onMouseLeave={e=>e.currentTarget.style.background='transparent'}>Fiyatları Gör ↓</button>
               </div>
             </div>
           </div>
 
-          <div className="fade-in-up" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(250px,1fr))", gap: 20, marginBottom: 48 }}>
+          <div className="fade-in-up" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 20, marginBottom: 48, marginTop: -80, position: "relative", zIndex: 10, padding: "0 20px" }}>
             {ENTERPRISE_STATS.map((s, i) => (
-              <Card key={i} hover={false} style={{ padding: 32, textAlign: "center" }} C={C}>
+              <Card key={i} hover={false} style={{ padding: "32px 20px", textAlign: "center", background: C.white }} C={C}>
                 <div style={{ fontFamily: C.mono, fontSize: 36, fontWeight: 900, color: C.primary, marginBottom: 8 }}>{s.v}</div>
                 <div style={{ fontSize: 15, color: C.muted, fontWeight: 600 }}>{s.l}</div>
               </Card>
             ))}
           </div>
 
-          <div className="fade-in-up" style={{ marginBottom: 60, textAlign: "center" }}>
-            <p style={{ fontSize: 14, color: C.faint, marginBottom: 20, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1.5 }}>Bize güvenen yüzlerce şirket</p>
-            <div style={{ display: "flex", justifyContent: "center", gap: 16, flexWrap: "wrap" }}>
+          <div className="fade-in-up" style={{ marginBottom: 80, textAlign: "center", padding: "0 20px" }}>
+            <p style={{ fontSize: 14, color: C.faint, marginBottom: 24, fontWeight: 700, textTransform: "uppercase", letterSpacing: 2 }}>Bize Güvenen Yüzlerce Şirket</p>
+            <div style={{ display: "flex", justifyContent: "center", gap: 16, flexWrap: "wrap", opacity: 0.8 }}>
               {ENTERPRISE_LOGOS.map((logo, i) => (
-                <div key={i} style={{ padding: "12px 24px", borderRadius: 12, background: C.white, border: `1px solid ${C.border}`, fontSize: 15, fontWeight: 700, color: C.heading, boxShadow: C.shadow }}>{logo}</div>
+                <div key={i} style={{ padding: "14px 28px", borderRadius: 12, background: C.white, border: `1px solid ${C.border}`, fontSize: 16, fontWeight: 700, color: C.heading, boxShadow: C.shadow, transition: 'all 0.3s' }} onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.opacity=1;}} onMouseLeave={e=>{e.currentTarget.style.transform='none'; e.currentTarget.style.opacity=0.8;}}>{logo}</div>
               ))}
             </div>
           </div>
 
-          <div className="fade-in-up">
+          <div className="fade-in-up" id="pricing">
             <SectionHead title="Kurumsal Fiyatlandırma" sub="Ekip büyüklüğünüze uygun planı seçin veya bizimle iletişime geçin" C={C} />
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(340px,1fr))", gap: 24, marginBottom: 60 }}>
               {ENTERPRISE_PLANS.map((plan, i) => (
                 <Card key={i} hover={false} style={{
                   padding: 0, overflow: "hidden", position: "relative",
                   border: plan.popular ? `2px solid ${plan.color}` : `1px solid ${C.border}`,
+                  display: "flex", flexDirection: "column"
                 }} C={C}>
                   {plan.popular && (
                     <div style={{ background: plan.color, color: "#fff", textAlign: "center", padding: "8px", fontSize: 13, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
                       <Star size={14} fill="currentColor" /> En Popüler Seçim
                     </div>
                   )}
-                  <div style={{ padding: 32 }}>
+                  <div style={{ padding: 32, display: "flex", flexDirection: "column", flexGrow: 1 }}>
                     <h3 style={{ fontFamily: C.font, fontSize: 22, fontWeight: 900, color: C.heading, marginBottom: 12 }}>{plan.name}</h3>
                     <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 24 }}>
-                      <span style={{ fontFamily: C.mono, fontSize: 40, fontWeight: 900, color: plan.color }}>{plan.price}</span>
+                      <span style={{ fontFamily: C.mono, fontSize: plan.price === "İletişim" ? 32 : 40, fontWeight: 900, color: plan.color, letterSpacing: plan.price === "İletişim" ? -1 : 0 }}>{plan.price}</span>
                       <span style={{ fontSize: 15, color: C.muted, fontWeight: 600 }}>{plan.per}</span>
                     </div>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 32 }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 32, flexGrow: 1 }}>
                       {plan.features.map((f, j) => (
                         <div key={j} style={{ display: "flex", alignItems: "flex-start", gap: 10, fontSize: 15, color: C.body, fontWeight: 500 }}>
                           <span style={{ color: plan.color, marginTop: 2, flexShrink: 0 }}><Check size={18} strokeWidth={3} /></span>
@@ -140,12 +141,18 @@ export default function CorporateView({ onNavigate }) {
                         </div>
                       ))}
                     </div>
-                    <button style={{
+                    <button onClick={() => {
+                      if(plan.price === "İletişim") {
+                        window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});
+                      } else {
+                        onNavigate('register');
+                      }
+                    }} style={{
                       width: "100%", padding: "16px", borderRadius: 14, border: plan.popular ? "none" : `2px solid ${C.border}`,
-                      background: plan.popular ? plan.color : C.white,
+                      background: plan.popular ? plan.color : "transparent",
                       color: plan.popular ? "#fff" : C.heading,
-                      fontFamily: C.font, fontSize: 16, fontWeight: 800, cursor: "pointer", transition: 'all 0.2s',
-                    }} onMouseEnter={e=>e.currentTarget.style.transform='scale(1.02)'} onMouseLeave={e=>e.currentTarget.style.transform='scale(1)'}>{plan.price === "İletişim" ? "İletişime Geç" : "Planı Seç"}</button>
+                      fontFamily: C.font, fontSize: 16, fontWeight: 800, cursor: "pointer", transition: 'all 0.2s', marginTop: 'auto'
+                    }} onMouseEnter={e=>{if(!plan.popular) {e.currentTarget.style.background=C.border;}}} onMouseLeave={e=>{if(!plan.popular) {e.currentTarget.style.background='transparent';}}}>{plan.price === "İletişim" ? "İletişime Geç" : "Planı Seç"}</button>
                   </div>
                 </Card>
               ))}
