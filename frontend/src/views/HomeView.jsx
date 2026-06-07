@@ -336,10 +336,6 @@ export default function HomeView({ onNavigate }) {
         .btn-secondary { background: transparent; color: ${COLORS.accent}; border: 2px solid ${COLORS.accent}; padding: 12px 28px; border-radius: 12px; font-weight: 600; font-size: 15px; cursor: pointer; transition: all 0.3s; font-family: inherit; }
         .btn-secondary:hover { background: rgba(0,212,170,0.1); transform: translateY(-2px); }
         
-        .tab-btn { background: ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'}; border: 1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}; color: ${COLORS.textMuted}; font-size: 15px; font-weight: 600; padding: 10px 24px; cursor: pointer; border-radius: 50px; transition: all 0.3s; font-family: inherit; }
-        .tab-btn.active { background: ${COLORS.accent}; color: #fff; border-color: ${COLORS.accent}; box-shadow: 0 4px 12px rgba(0,212,170,0.3); }
-        .tab-btn:hover:not(.active) { color: ${COLORS.text}; background: ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'}; border-color: ${isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}; }
-        
         .testimonial-card { background: ${COLORS.surface}; border-radius: 20px; padding: 32px; border: 1px solid ${COLORS.border}; transition: all 0.4s; }
         .testimonial-card:hover { border-color: ${COLORS.accentAlt}; transform: translateY(-4px); }
         
@@ -680,13 +676,35 @@ export default function HomeView({ onNavigate }) {
             </h2>
             <p style={{ color: COLORS.textMuted, fontSize: 16 }}>En çok tercih edilen ve en yüksek puanlı eğitimler</p>
           </div>
-          <div style={{ display: "flex", gap: 12 }}>
+          <div style={{ display: "flex", background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)', padding: '6px', borderRadius: '50px' }}>
             {[
               { key: "popular", label: "Popüler" },
               { key: "new", label: "En Yeni" },
               { key: "top", label: "En Yüksek Puan" },
             ].map(({ key, label }) => (
-              <button key={key} className={`tab-btn ${activeTab === key ? "active" : ""}`} onClick={() => setActiveTab(key)}>
+              <button 
+                key={key} 
+                onClick={() => setActiveTab(key)}
+                style={{
+                  background: activeTab === key ? COLORS.accent : 'transparent',
+                  color: activeTab === key ? '#fff' : COLORS.textMuted,
+                  border: 'none',
+                  padding: '10px 24px',
+                  borderRadius: '50px',
+                  fontSize: '15px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.3s',
+                  boxShadow: activeTab === key ? `0 4px 12px rgba(0,212,170,0.3)` : 'none',
+                  fontFamily: 'inherit'
+                }}
+                onMouseEnter={e => {
+                  if (activeTab !== key) e.currentTarget.style.color = COLORS.text;
+                }}
+                onMouseLeave={e => {
+                  if (activeTab !== key) e.currentTarget.style.color = COLORS.textMuted;
+                }}
+              >
                 {label}
               </button>
             ))}
