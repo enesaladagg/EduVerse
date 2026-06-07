@@ -340,9 +340,9 @@ export default function HomeView({ onNavigate }) {
         .btn-secondary { background: transparent; color: ${COLORS.accent}; border: 2px solid ${COLORS.accent}; padding: 12px 28px; border-radius: 12px; font-weight: 600; font-size: 15px; cursor: pointer; transition: all 0.3s; font-family: inherit; }
         .btn-secondary:hover { background: rgba(0,212,170,0.1); transform: translateY(-2px); }
         
-        .tab-btn { background: none; border: none; color: ${COLORS.textMuted}; font-size: 15px; font-weight: 500; padding: 10px 20px; cursor: pointer; border-radius: 10px; transition: all 0.3s; font-family: inherit; }
-        .tab-btn.active { background: rgba(0,212,170,0.12); color: ${COLORS.accent}; font-weight: 600; }
-        .tab-btn:hover { color: ${COLORS.text}; }
+        .tab-btn { background: transparent; border: 1px solid transparent; color: ${COLORS.textMuted}; font-size: 15px; font-weight: 600; padding: 10px 24px; cursor: pointer; border-radius: 8px; transition: all 0.3s; font-family: inherit; }
+        .tab-btn.active { background: ${COLORS.surface}; color: ${COLORS.accent}; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-color: ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'}; }
+        .tab-btn:hover:not(.active) { color: ${COLORS.text}; background: ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)'}; }
         
         .testimonial-card { background: ${COLORS.surface}; border-radius: 20px; padding: 32px; border: 1px solid ${COLORS.border}; transition: all 0.4s; }
         .testimonial-card:hover { border-color: ${COLORS.accentAlt}; transform: translateY(-4px); }
@@ -684,7 +684,7 @@ export default function HomeView({ onNavigate }) {
             </h2>
             <p style={{ color: COLORS.textMuted, fontSize: 16 }}>En çok tercih edilen ve en yüksek puanlı eğitimler</p>
           </div>
-          <div style={{ display: "flex", gap: 4, background: COLORS.surface, borderRadius: 12, padding: 4 }}>
+          <div style={{ display: "flex", gap: 8, background: isDark ? 'rgba(0,0,0,0.2)' : '#f1f5f9', borderRadius: 12, padding: 6, border: `1px solid ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'}` }}>
             {[
               { key: "popular", label: "Popüler" },
               { key: "new", label: "En Yeni" },
