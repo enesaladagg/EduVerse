@@ -119,6 +119,14 @@ router.get('/mock-iyzico-page', (req, res) => {
 });
 
 // Iyzico Callback (Ödeme Sonucu)
+router.post('/callback', asyncHandler(async (req, res) => {
+  try {
+    const { userId, courses } = req.body;
+    const courseArray = courses ? courses.split(',') : [];
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.redirect('http://localhost:5173/?page=checkout&payment=failed');
     }
 
     for (const cid of courseArray) {
@@ -137,6 +145,6 @@ router.get('/mock-iyzico-page', (req, res) => {
     console.error(err);
     res.redirect('http://localhost:5173/?page=checkout&payment=failed');
   }
-});
+}));
 
 module.exports = router;

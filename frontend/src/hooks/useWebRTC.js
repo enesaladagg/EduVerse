@@ -190,6 +190,7 @@ export function useWebRTC({ socket, roomId, localStream, canPublish = true }) {
       // Tüm peer bağlantılarını kapat (bellek sızıntısı önleme)
       peersRef.current.forEach((pc) => pc.close());
       peersRef.current.clear();
+      setRemoteStreams({});
     };
   }, [socket, roomId, createPeer, cleanupPeer]);
 

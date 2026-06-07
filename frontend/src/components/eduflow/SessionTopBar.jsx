@@ -138,35 +138,7 @@ const SessionTopBar = memo(function SessionTopBar({
         </div>
       )}
 
-      {user?.role === 'admin' && (
-        <div style={{
-          display: 'inline-flex',
-          background: p.pillInactive,
-          borderRadius: t.borderRadius.full,
-          padding: '3px',
-          gap: '2px',
-        }}>
-          {['teacher', 'student'].map((role) => (
-            <button
-              key={role}
-              type="button"
-              onClick={() => onViewRoleChange(role)}
-              style={{
-                padding: `${t.spacing[1]} ${t.spacing[3]}`,
-                borderRadius: t.borderRadius.full,
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: t.typography.fontSize.xs,
-                fontWeight: t.typography.fontWeight.semibold,
-                background: viewRole === role ? p.accent : 'transparent',
-                color: viewRole === role ? '#fff' : p.textMuted,
-              }}
-            >
-              {role === 'teacher' ? 'Eğitmen' : 'Öğrenci'}
-            </button>
-          ))}
-        </div>
-      )}
+      {/* Role toggle was removed from here */}
 
       {user && <XPBar xp={user.points || user.xp || 0} compact />}
 

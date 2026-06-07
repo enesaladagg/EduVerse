@@ -11,7 +11,7 @@ import api from '../services/api';
 
 export default function SettingsView({ onNavigate }) {
   const { isDark } = useTheme();
-  const { user, updateProfile } = useAuth();
+  const { user, updateUser } = useAuth();
   const [activeTab, setActiveTab] = useState('personal');
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
@@ -31,8 +31,8 @@ export default function SettingsView({ onNavigate }) {
     try {
       if (activeTab === 'personal') {
         const response = await api.updateMe({ name: formData.name });
-        if (response.success && updateProfile) {
-          updateProfile({ name: response.data.name, avatar: response.data.profilePicture });
+        if (response.success && updateUser) {
+          updateUser({ name: response.data.name, avatar: response.data.profilePicture });
         }
       }
       setSaveSuccess(true);
@@ -46,13 +46,13 @@ export default function SettingsView({ onNavigate }) {
 
   const handleAvatarChange = async (e) => {
     const file = e.target.files[0];
-    if (file && updateProfile) {
+    if (file && updateUser) {
       const reader = new FileReader();
       reader.onloadend = async () => {
         try {
           const response = await api.updateMe({ profilePicture: reader.result });
           if (response.success) {
-            updateProfile({ avatar: response.data.profilePicture });
+            updateUser({ avatar: response.data.profilePicture });
           }
         } catch (err) {
           console.error("Avatar upload error:", err);

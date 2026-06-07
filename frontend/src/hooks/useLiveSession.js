@@ -172,30 +172,38 @@ export function useLiveSession({ user, viewRole, onLeave }) {
   }, [connected, mic, cam, hand, syncPresence]);
 
   useEffect(() => {
-    const offChat = on(E.CHAT_MESSAGE, ({ message }) => {
+    if (!socket) return;
+
+    const onChat = ({ message }) => {
       if (message) setMessages((prev) => [...prev, message]);
-    });
-    const offHistory = on(E.CHAT_HISTORY, ({ messages: history }) => {
+    };
+    const onHistory = ({ messages: history }) => {
       if (Array.isArray(history)) setMessages(history);
-    });
-    const offPoll = on(E.POLL_UPDATE, ({ poll: nextPoll }) => {
+    };
+    const onPollUpdate = ({ poll: nextPoll }) => {
       if (nextPoll) setPoll(nextPoll);
-    });
-    const offCode = on(E.CODE_UPDATE, (payload) => {
+    };
+    const onCodeUpdate = (payload) => {
       setStudentCode(payload);
-    });
-    const offSubmit = on(E.CODE_SUBMIT, (payload) => {
+    };
+    const onCodeSubmit = (payload) => {
       setStudentCode({ ...payload, submitted: true });
-    });
+    };
+
+    socket.on(E.CHAT_MESSAGE, onChat);
+    socket.on(E.CHAT_HISTORY, onHistory);
+    socket.on(E.POLL_UPDATE, onPollUpdate);
+    socket.on(E.CODE_UPDATE, onCodeUpdate);
+    socket.on(E.CODE_SUBMIT, onCodeSubmit);
 
     return () => {
-      offChat?.();
-      offHistory?.();
-      offPoll?.();
-      offCode?.();
-      offSubmit?.();
+      socket.off(E.CHAT_MESSAGE, onChat);
+      socket.off(E.CHAT_HISTORY, onHistory);
+      socket.off(E.POLL_UPDATE, onPollUpdate);
+      socket.off(E.CODE_UPDATE, onCodeUpdate);
+      socket.off(E.CODE_SUBMIT, onCodeSubmit);
     };
-  }, [on]);
+  }, [socket]);
 
   const sendMessage = useCallback((text) => {
     emit(E.CHAT_MESSAGE, { roomId: ROOM_ID, text });

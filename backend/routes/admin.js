@@ -17,7 +17,6 @@ router.get('/stats', asyncHandler(async (req, res) => {
   const totalUsers = await User.countDocuments();
   const students = await User.countDocuments({ role: 'student' });
   const teachers = await User.countDocuments({ role: 'teacher' });
-  const Course = require('../models/Course');
   const totalCourses = await Course.countDocuments();
   
   res.json({

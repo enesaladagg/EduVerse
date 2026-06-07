@@ -71,7 +71,7 @@ function AppContent() {
     case 'h-paths':     content = <RoadmapsView onNavigate={navigate} />; break;
     case 'h-community': content = <CommunityView onNavigate={navigate} />; break;
     case 'h-corporate': content = <CorporateView onNavigate={navigate} />; break;
-    case 'live':        content = <LiveSessionView user={displayUser} onNavigateHome={() => navigate('home')} />; break;
+    case 'live':        content = <LiveSessionView user={displayUser} isAuthenticated={isAuthenticated} onNavigateHome={() => navigate('home')} onNavigate={navigate} />; break;
     case 'settings':    content = <SettingsView onNavigate={navigate} />; break;
     case 'home':        content = <HomeView onNavigate={navigate} />; break;
     case 'profile':

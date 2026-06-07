@@ -173,9 +173,26 @@ const InstructorCodePanel = memo(function InstructorCodePanel({ studentCode }) {
   );
 });
 
-const LiveSessionView = memo(function LiveSessionView({ user, onNavigateHome }) {
+const LiveSessionView = memo(function LiveSessionView({ user, isAuthenticated, onNavigateHome, onNavigate }) {
   const { palette: p, tokens: t } = useTheme();
-  const [viewRole, setViewRole] = useState(user?.role === 'teacher' || user?.role === 'admin' ? 'teacher' : 'student');
+
+  if (!isAuthenticated) {
+    return (
+      <div style={{
+        minHeight: '100vh', display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center', background: p.shell, color: p.text,
+        fontFamily: t.typography.fontFamily.base
+      }}>
+        <h2 style={{ fontSize: 24, marginBottom: 16, fontWeight: 800 }}>Canlı derse katılmak için giriş yapmalısınız</h2>
+        <div style={{ display: 'flex', gap: 16 }}>
+          <button onClick={() => onNavigate('login')} style={{ padding: '10px 24px', background: p.accent, color: '#fff', borderRadius: 8, border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 16 }}>Giriş Yap</button>
+          <button onClick={() => onNavigate('register')} style={{ padding: '10px 24px', background: 'transparent', color: p.accent, border: `2px solid ${p.accent}`, borderRadius: 8, cursor: 'pointer', fontWeight: 600, fontSize: 16 }}>Kayıt Ol</button>
+        </div>
+      </div>
+    );
+  }
+
+  const viewRole = user?.role === 'teacher' || user?.role === 'admin' ? 'teacher' : 'student';
 
   const session = useLiveSession({
     user,
@@ -370,7 +387,6 @@ const LiveSessionView = memo(function LiveSessionView({ user, onNavigateHome }) 
         moduleTitle="State Yönetimi & Hooks — Global Akademi"
         sessionTimer={session.timerLabel}
         viewRole={viewRole}
-        onViewRoleChange={setViewRole}
         participantCount={session.participants.length || 1}
         user={user}
         connected={session.connected}
