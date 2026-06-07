@@ -80,10 +80,8 @@ export function AuthProvider({ children }) {
       applySession(token, data);
       return { success: true };
     } catch (err) {
-      console.warn("Backend'e ulaşılamadı. Demo kullanıcı olarak giriş yapılıyor.");
-      const mockData = { id: "123", name: "Enes Aladağ", email, role: "student", points: 250, xp: 250, streak: 3, purchasedCourses: [] };
-      applySession("mock-token-123", mockData);
-      return { success: true };
+      console.error("Giriş başarısız:", err.message);
+      return { success: false, message: err.message };
     }
   }, [applySession]);
 

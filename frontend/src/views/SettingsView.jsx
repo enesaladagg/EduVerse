@@ -7,6 +7,7 @@ import {
   Save, Shield, Smartphone, Mail,
   Camera, CheckCircle
 } from 'lucide-react';
+import api from '../services/api';
 
 export default function SettingsView({ onNavigate }) {
   const { isDark } = useTheme();
@@ -25,25 +26,37 @@ export default function SettingsView({ onNavigate }) {
     address: ''
   });
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setIsSaving(true);
-    // Mock save delay
-    setTimeout(() => {
-      setIsSaving(false);
-      setSaveSuccess(true);
-      if (activeTab === 'personal' && updateProfile) {
-        updateProfile({ name: formData.name });
+    try {
+      if (activeTab === 'personal') {
+        const response = await api.updateMe({ name: formData.name });
+        if (response.success && updateProfile) {
+          updateProfile({ name: response.data.name, avatar: response.data.profilePicture });
+        }
       }
+      setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
-    }, 1000);
+    } catch (err) {
+      console.error("Save error:", err);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const handleAvatarChange = (e) => {
+  const handleAvatarChange = async (e) => {
     const file = e.target.files[0];
     if (file && updateProfile) {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        updateProfile({ avatar: reader.result });
+      reader.onloadend = async () => {
+        try {
+          const response = await api.updateMe({ profilePicture: reader.result });
+          if (response.success) {
+            updateProfile({ avatar: response.data.profilePicture });
+          }
+        } catch (err) {
+          console.error("Avatar upload error:", err);
+        }
       };
       reader.readAsDataURL(file);
     }

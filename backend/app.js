@@ -18,6 +18,7 @@ const sessionsRoutes = require('./routes/sessions');
 const assignmentsRoutes = require('./routes/assignments');
 const socialRoutes = require('./routes/social');
 const plannerRoutes = require('./routes/planner');
+const paymentRoutes = require('./routes/payment');
 const { notFoundHandler, errorHandler } = require('./middleware/errorHandler');
 const { isOriginAllowed } = require('./utils/corsOrigins');
 
@@ -76,6 +77,7 @@ app.use('/api', sessionsRoutes);
 app.use('/api', assignmentsRoutes);
 app.use('/api/social', socialRoutes);
 app.use('/api/planner', plannerRoutes);
+app.use('/api/payment', paymentRoutes);
 
 app.get('/', (req, res) => {
   return res.json({

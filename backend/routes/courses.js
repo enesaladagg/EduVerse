@@ -1,8 +1,30 @@
 const express = require('express');
 const Course = require('../models/Course');
+const User = require('../models/User');
 const asyncHandler = require('../middleware/asyncHandler');
+const { authenticate, authorize } = require('../middleware/auth');
 
 const router = express.Router();
+
+router.get('/courses/instructor-stats', authenticate, authorize('teacher', 'admin'), asyncHandler(async (req, res) => {
+  const teacherId = req.user.id;
+  const myCourses = await Course.find({ teacherId }).select('_id');
+  const courseIds = myCourses.map(c => c._id.toString());
+  
+  // Find students who have purchased at least one of these courses
+  // purchasedCourses contains ObjectIds or Strings
+  const totalStudents = await User.countDocuments({ purchasedCourses: { $in: courseIds } });
+  
+  res.json({
+    success: true,
+    data: {
+      totalCourses: courseIds.length,
+      totalStudents,
+      monthlyRevenue: 24500, // Gerçek entegrasyon sonrası hesaplanacak
+      averageRating: 4.8
+    }
+  });
+}));
 
 router.get('/courses', asyncHandler(async (req, res) => {
   const page = Math.max(1, Number.parseInt(req.query.page, 10) || 1);

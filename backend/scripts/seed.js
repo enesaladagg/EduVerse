@@ -56,7 +56,7 @@ async function upsertUser({ name, email, role, points = 0, badges = [] }) {
     existing.role = role;
     existing.points = points;
     existing.badges = badges;
-    existing.password = await bcrypt.hash(DEMO_PASSWORD, 12);
+    existing.password = DEMO_PASSWORD;
     await existing.save();
     return existing;
   }
@@ -81,6 +81,14 @@ async function seed() {
     role: 'student',
     points: 875,
     badges: ['first_login', 'first_course', 'streak_3', 'code_first'],
+  });
+
+  const admin = await upsertUser({
+    name: 'Sistem Yöneticisi',
+    email: 'admin@demo.com',
+    role: 'admin',
+    points: 9999,
+    badges: ['founder', 'admin'],
   });
 
   await Course.deleteMany({});
@@ -124,6 +132,7 @@ async function seed() {
 
   console.log('\n✓ Seed tamamlandı\n');
   console.log('Demo hesaplar:');
+  console.log(`  Yönetici → admin@demo.com / ${DEMO_PASSWORD}`);
   console.log(`  Eğitmen  → teacher@demo.com / ${DEMO_PASSWORD}`);
   console.log(`  Öğrenci  → student@demo.com / ${DEMO_PASSWORD}`);
   console.log(`  Canlı oda → react-101-live\n`);

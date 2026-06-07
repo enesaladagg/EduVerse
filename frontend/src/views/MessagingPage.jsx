@@ -3,8 +3,12 @@ import { useTheme } from '../context/ThemeContext';
 import { Send, Bot, Hash, User, Code2, Plus, Paperclip, MoreVertical, Smile, Image, FileText, Users, UserPlus, MicOff, LogOut, X, Trash2 } from 'lucide-react';
 import Button from '../components/Button';
 
+import api from '../services/api';
+import { useAuth } from '../context/AuthContext';
+
 export default function MessagingPage() {
   const { palette: p, tokens: t, isDark } = useTheme();
+  const { user } = useAuth();
   const messagesEndRef = useRef(null);
   
   const [activeChannel, setActiveChannel] = useState('edubot');
@@ -33,28 +37,60 @@ export default function MessagingPage() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
   
-  // Channels and Users
-  const channels = [
-    { id: 'edubot', type: 'bot', name: 'EduBot AI', status: 'online' },
-    { id: 'react-101', type: 'group', name: 'React 101 Sınıfı', status: 'online' },
-    { id: 'python-basics', type: 'group', name: 'Python Temelleri', status: 'offline' },
-    { id: 'user-1', type: 'dm', name: 'Ahmet Yılmaz', status: 'online' },
-    { id: 'user-2', type: 'dm', name: 'Zeynep Kaya', status: 'offline' }
-  ];
-
+  const [channels, setChannels] = useState([
+    { id: 'edubot', type: 'bot', name: 'EduBot AI', status: 'online' }
+  ]);
   const [messages, setMessages] = useState({
     'edubot': [
       { id: 1, sender: 'edubot', text: 'Merhaba! Ben EduBot. Bugün hangi konuda öğrenmeye devam etmek istersin? İstersen yazdığın kodlardaki hataları da inceleyebilirim.', time: '09:00' },
-    ],
-    'react-101': [
-      { id: 1, sender: 'user-2', name: 'Zeynep Kaya', text: 'Arkadaşlar modül 4 teki useEffect ödevini yapan var mı?', time: '14:20' },
-      { id: 2, sender: 'user-1', name: 'Ahmet Yılmaz', text: 'Evet ben bitirdim. Bağımlılık dizisine dikkat etmen gerekiyor.', time: '14:25' },
-      { id: 3, sender: 'user-1', name: 'Ahmet Yılmaz', text: '```jsx\nuseEffect(() => {\n  console.log("Component yüklendi");\n  return () => console.log("Temizlendi");\n}, []);\n```\nÖrnek bir yapı bu şekilde.', time: '14:26', isCode: true }
-    ],
-    'user-1': [
-      { id: 1, sender: 'user-1', name: 'Ahmet Yılmaz', text: 'Selam, projede beraber çalışalım mı?', time: 'Dün' }
     ]
   });
+  const [loadingChannels, setLoadingChannels] = useState(true);
+
+  useEffect(() => {
+    async function fetchConvs() {
+      try {
+        const res = await api.getConversations();
+        if (res.success && res.data) {
+          const apiChannels = res.data.map(c => ({
+            id: c._id,
+            type: c.isGroup ? 'group' : 'dm',
+            name: c.name || c.participants.find(p => p._id !== user?.id)?.name || 'Kullanıcı',
+            status: 'online', // Mock online status
+            lastMessage: c.lastMessage?.content
+          }));
+          setChannels([{ id: 'edubot', type: 'bot', name: 'EduBot AI', status: 'online' }, ...apiChannels]);
+        }
+      } catch (err) {
+        console.error('Konuşmalar çekilemedi', err);
+      } finally {
+        setLoadingChannels(false);
+      }
+    }
+    fetchConvs();
+  }, [user?.id]);
+
+  useEffect(() => {
+    async function fetchMessages() {
+      if (activeChannel === 'edubot' || !activeChannel) return;
+      try {
+        const res = await api.getMessages(activeChannel);
+        if (res.success && res.data) {
+          const formattedMsgs = res.data.map(m => ({
+            id: m._id,
+            sender: m.sender._id === user?.id ? 'me' : m.sender._id,
+            name: m.sender.name,
+            text: m.content,
+            time: new Date(m.createdAt).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
+          }));
+          setMessages(prev => ({ ...prev, [activeChannel]: formattedMsgs }));
+        }
+      } catch (err) {
+        console.error('Mesajlar çekilemedi', err);
+      }
+    }
+    fetchMessages();
+  }, [activeChannel, user?.id]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -64,7 +100,7 @@ export default function MessagingPage() {
     scrollToBottom();
   }, [messages, activeChannel]);
 
-  const handleSend = (e) => {
+  const handleSend = async (e) => {
     e.preventDefault();
     if (!input.trim() && !attachedFile) return;
 
@@ -91,15 +127,22 @@ export default function MessagingPage() {
     setInput('');
     setAttachedFile(null);
 
-    // Simulate Bot Response
-    if (activeChannel === 'edubot') {
+    // API çağrısı
+    if (activeChannel !== 'edubot') {
+      try {
+        await api.sendMessage(activeChannel, textToSend);
+      } catch (err) {
+        console.error('Mesaj gönderilemedi', err);
+      }
+    } else {
+      // Simulate Bot Response
       setTimeout(() => {
         setMessages(prev => ({
           ...prev,
           edubot: [...(prev.edubot || []), {
             id: Date.now() + 1,
             sender: 'edubot',
-            text: 'Bu konuda sana yardımcı olabilirim. Daha fazla detay verebilir misin?',
+            text: 'Anlıyorum. Bir AI entegrasyonu olarak backend henüz bağlanmadı ama çok yakında sana gerçek cevaplar vereceğim!',
             time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
           }]
         }));

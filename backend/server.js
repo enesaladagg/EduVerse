@@ -6,6 +6,18 @@ const logger = require('./utils/logger');
 const { connectDatabase, disconnectDatabase } = require('./config/db');
 const { initSocket } = require('./socket');
 
+const plannerRoutes = require('./routes/planner');
+const socialRoutes = require('./routes/social');
+const ctfRoutes = require('./routes/ctf');
+const certificatesRoutes = require('./routes/certificates');
+const communityRoutes = require('./routes/community');
+
+app.use('/api/planner', plannerRoutes);
+app.use('/api/social', socialRoutes);
+app.use('/api/ctf', ctfRoutes);
+app.use('/api/certificates', certificatesRoutes);
+app.use('/api/community', communityRoutes);
+
 const server = http.createServer(app);
 
 // Socket.io'yu HTTP sunucusuna bağla (WebRTC sinyalleşme + canlı etkileşim)

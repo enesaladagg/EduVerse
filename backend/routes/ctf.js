@@ -2,6 +2,7 @@ const express = require('express');
 const AppError = require('../utils/AppError');
 const User = require('../models/User');
 const CtfChallenge = require('../models/CtfChallenge');
+const Certificate = require('../models/Certificate');
 const { authenticate } = require('../middleware/auth');
 const asyncHandler = require('../middleware/asyncHandler');
 
@@ -171,7 +172,20 @@ router.post('/ctf/challenges/:key/complete', asyncHandler(async (req, res, next)
       title: `${challenge.title} Tamamlandı`,
       description: `${challenge.points} CTF puanı kazanıldı.`,
     });
-    await user.save();
+    
+    await Promise.all([
+      user.save(),
+      Certificate.create({
+        userId: user._id,
+        title: `${challenge.title} Uzmanlığı`,
+        issuer: 'EduVerse CTF Labs',
+        hours: 10,
+        score: challenge.points,
+        skills: [challenge.category, 'Security', 'CTF'],
+        color: '#ff6b6b',
+        certId: `CTF-${Math.random().toString(36).substring(2, 6).toUpperCase()}-${Date.now().toString().slice(-4)}`
+      })
+    ]);
   }
 
   res.json({

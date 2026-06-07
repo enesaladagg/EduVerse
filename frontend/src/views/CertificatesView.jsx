@@ -1,12 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import GlobalNavbar from '../components/GlobalNavbar';
 import { Code2, GitMerge, Rocket, Database, Cloud, Shield, Palette, Settings, Download, Share2, CheckCircle2, Search, Award, Star } from 'lucide-react';
+import api from '../services/api';
 
-const MY_CERTS = [
-  { id: "CERT-PY-2026-0412", title: "Python Temelleri", date: "12 Nisan 2026", issuer: "EduVerse", hours: 42, Icon: Code2, color: "#00d4aa", score: 92, skills: ["Değişkenler", "Döngüler", "Fonksiyonlar", "OOP Giriş"] },
-  { id: "CERT-GIT-2026-0318", title: "Git & GitHub Uzmanlığı", date: "18 Mart 2026", issuer: "EduVerse", hours: 18, Icon: GitMerge, color: "#6c5ce7", score: 88, skills: ["Branch", "Merge", "Pull Request", "CI/CD"] },
-];
+const ICONS = { Code2, GitMerge, Rocket, Database, Cloud, Shield, Palette, Settings, Award, Star };
+
 
 const AVAILABLE_CERTS = [
   { title: "Full Stack Web Developer", courses: 8, hours: 180, level: "İleri", Icon: Rocket, color: "#00d4aa", progress: 45, enrolled: 12450, price: "Ücretsiz", prereqs: ["Python Temelleri", "Git & GitHub"] },
@@ -22,6 +21,18 @@ export default function CertificatesView({ onNavigate }) {
   const [tab, setTab] = useState("available");
   const [verifyId, setVerifyId] = useState("");
   const [verifyResult, setVerifyResult] = useState(null);
+  const [myCerts, setMyCerts] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (tab === "my") {
+      setLoading(true);
+      api.getCertificates()
+        .then(res => setMyCerts(res.data || []))
+        .catch(err => console.error("Failed to load certs:", err))
+        .finally(() => setLoading(false));
+    }
+  }, [tab]);
 
   const C = {
     bg: isDark ? "#0a1628" : "#f0fdfa",
@@ -33,9 +44,14 @@ export default function CertificatesView({ onNavigate }) {
     accent: "#00d4aa",
   };
 
-  const handleVerify = () => {
-    const found = MY_CERTS.find(c => c.id === verifyId.trim());
-    setVerifyResult(found ? { valid: true, cert: found } : { valid: false });
+  const handleVerify = async () => {
+    if (!verifyId.trim()) return;
+    try {
+      const res = await api.verifyCertificate(verifyId.trim());
+      setVerifyResult(res.success && res.data ? { valid: true, cert: res.data } : { valid: false });
+    } catch (err) {
+      setVerifyResult({ valid: false });
+    }
   };
 
   const handleDownloadPdf = (cert) => {
@@ -76,14 +92,14 @@ export default function CertificatesView({ onNavigate }) {
             <h2>${cert.title}</h2>
             
             <div class="details">
-              <div><span>Veriliş Tarihi</span><strong>${cert.date}</strong></div>
+              <div><span>Veriliş Tarihi</span><strong>${new Date(cert.createdAt).toLocaleDateString('tr-TR')}</strong></div>
               <div><span>Sertifika Puanı</span><strong style="color: ${cert.color}">${cert.score} / 100</strong></div>
               <div><span>Eğitim Süresi</span><strong>${cert.hours} Saat</strong></div>
             </div>
 
             <div class="footer">
               <div class="logo"><span class="logo-dot"></span> EduVerse</div>
-              <div class="id-box">Doğrulama Kodu: ${cert.id}</div>
+              <div class="id-box">Doğrulama Kodu: ${cert.certId}</div>
             </div>
           </div>
           <script>
@@ -101,9 +117,9 @@ export default function CertificatesView({ onNavigate }) {
     const url = new URL('https://www.linkedin.com/profile/add');
     url.searchParams.append('startTask', 'CERTIFICATION_NAME');
     url.searchParams.append('name', cert.title);
-    url.searchParams.append('organizationName', cert.issuer);
-    url.searchParams.append('certId', cert.id);
-    url.searchParams.append('certUrl', `https://eduverse.app/verify/${cert.id}`);
+    url.searchParams.append('organizationName', cert.issuer || 'EduVerse');
+    url.searchParams.append('certId', cert.certId);
+    url.searchParams.append('certUrl', `https://eduverse.app/verify/${cert.certId}`);
     window.open(url.toString(), '_blank');
   };
 
@@ -255,7 +271,7 @@ export default function CertificatesView({ onNavigate }) {
                 </p>
               </div>
               <div style={{ display: "flex", gap: 20 }}>
-                {[{ v: MY_CERTS.length, l: "Kazanılan" }, { v: AVAILABLE_CERTS.length, l: "Mevcut" }, { v: "1", l: "Devam Eden" }].map((s, i) => (
+                {[{ v: myCerts.length, l: "Kazanılan" }, { v: AVAILABLE_CERTS.length, l: "Mevcut" }, { v: "1", l: "Devam Eden" }].map((s, i) => (
                   <div key={i} style={{ background: 'rgba(255,255,255,0.1)', padding: '20px 28px', borderRadius: 20, backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.2)', textAlign: 'center' }}>
                     <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 36, fontWeight: 800 }}>{s.v}</div>
                     <div style={{ fontSize: 14, fontWeight: 600, opacity: 0.9, textTransform: 'uppercase', letterSpacing: 1, marginTop: 4 }}>{s.l}</div>
@@ -324,18 +340,22 @@ export default function CertificatesView({ onNavigate }) {
             {/* MY CERTS */}
             {tab === "my" && (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(450px, 1fr))", gap: 30 }}>
-                {MY_CERTS.map(cert => (
-                  <div key={cert.id} className="glass-card" style={{ padding: 0 }}>
+                {loading && <div style={{ color: C.textMuted }}>Sertifikalar yükleniyor...</div>}
+                {!loading && myCerts.length === 0 && <div style={{ color: C.textMuted }}>Henüz sertifika kazanmadınız.</div>}
+                {myCerts.map(cert => {
+                  const IconComp = ICONS[cert.skills?.[0]] || Award;
+                  return (
+                  <div key={cert.certId} className="glass-card" style={{ padding: 0 }}>
                     <div style={{ height: 8, background: cert.color }} />
                     <div style={{ padding: 32 }}>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
                         <div style={{ display: "flex", gap: 20, alignItems: "center" }}>
                           <div style={{ width: 72, height: 72, borderRadius: 20, background: `${cert.color}15`, display: "flex", alignItems: "center", justifyContent: "center", border: `1px solid ${cert.color}30` }}>
-                            <cert.Icon size={36} color={cert.color} strokeWidth={1.5} />
+                            <IconComp size={36} color={cert.color} strokeWidth={1.5} />
                           </div>
                           <div>
                             <h3 style={{ fontSize: 22, fontWeight: 800, marginBottom: 6 }}>{cert.title}</h3>
-                            <p style={{ fontSize: 14, color: C.textMuted, fontWeight: 500 }}>Düzenlenme: {cert.date}</p>
+                            <p style={{ fontSize: 14, color: C.textMuted, fontWeight: 500 }}>Düzenlenme: {new Date(cert.createdAt).toLocaleDateString('tr-TR')}</p>
                           </div>
                         </div>
                         <div style={{ textAlign: "center", padding: "12px 20px", borderRadius: 16, background: `${cert.color}15`, border: `1px solid ${cert.color}30` }}>
@@ -345,7 +365,7 @@ export default function CertificatesView({ onNavigate }) {
                       </div>
 
                       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 24 }}>
-                        {cert.skills.map(s => (
+                        {(cert.skills || []).map(s => (
                           <span key={s} style={{ padding: '6px 14px', borderRadius: 20, fontSize: 13, fontWeight: 600, background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)', color: C.text }}>{s}</span>
                         ))}
                       </div>
@@ -360,7 +380,7 @@ export default function CertificatesView({ onNavigate }) {
                       </div>
                     </div>
                   </div>
-                ))}
+                )})}
               </div>
             )}
 
@@ -414,9 +434,9 @@ export default function CertificatesView({ onNavigate }) {
                           <div>
                             <div style={{ fontSize: 18, fontWeight: 800, color: C.accent, marginBottom: 8 }}>Orijinal Sertifika Onaylandı</div>
                             <div style={{ fontSize: 15, color: C.text, lineHeight: 1.6 }}>
-                              Bu sertifika <strong>{verifyResult.cert.issuer}</strong> tarafından düzenlenmiş resmi bir belgedir.<br/><br/>
+                              Bu sertifika <strong>{verifyResult.cert.issuer || 'EduVerse'}</strong> tarafından düzenlenmiş resmi bir belgedir.<br/><br/>
                               Kazanılan Program: <strong style={{ color: verifyResult.cert.color }}>{verifyResult.cert.title}</strong><br/>
-                              Sertifika Tarihi: <strong>{verifyResult.cert.date}</strong>
+                              Sertifika Tarihi: <strong>{new Date(verifyResult.cert.createdAt).toLocaleDateString('tr-TR')}</strong>
                             </div>
                           </div>
                         </div>

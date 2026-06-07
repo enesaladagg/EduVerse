@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import GlobalNavbar from '../components/GlobalNavbar';
-import { User, Mail, Lock, ArrowRight, CheckCircle2, Loader2, Sparkles } from 'lucide-react';
+import { User, Mail, Lock, ArrowRight, CheckCircle2, Loader2, Sparkles, Eye, EyeOff } from 'lucide-react';
 
 export default function RegisterView({ onNavigate }) {
   const { isDark } = useTheme();
@@ -14,6 +14,7 @@ export default function RegisterView({ onNavigate }) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -26,10 +27,16 @@ export default function RegisterView({ onNavigate }) {
     setError('');
     // Simulate network delay for effect
     await new Promise(r => setTimeout(r, 800));
-    const result = await register({ name, email, password, role: roleMode });
+    const result = await register({ name, email, password, applyInstructor: roleMode === 'teacher' });
     setLoading(false);
-    if (result.success) onNavigate('home');
-    else setError(result.message);
+    if (result.success) {
+      if (roleMode === 'teacher') {
+        alert("Eğitmenlik başvurunuz alındı. Sistem yöneticileri onayladığında yetkileriniz tanımlanacaktır.");
+      }
+      onNavigate('home');
+    } else {
+      setError(result.message);
+    }
   };
 
   const inputStyle = {
@@ -211,19 +218,21 @@ export default function RegisterView({ onNavigate }) {
             >
               Öğrenci Olarak
             </button>
-            <button
-              type="button"
-              onClick={() => setRoleMode('teacher')}
-              style={{
-                position: 'relative', flex: 1, padding: '10px 0', border: 'none', background: 'transparent',
-                display: 'flex', justifyContent: 'center', alignItems: 'center',
-                color: roleMode === 'teacher' ? (isDark ? '#fff' : '#0f172a') : (isDark ? '#64748b' : '#94a3b8'),
-                fontWeight: 600, fontSize: 14, cursor: 'pointer', zIndex: 1, transition: 'color 0.2s'
-              }}
-            >
-              Eğitmen Olarak
-            </button>
+            <div style={{
+                position: 'relative', zIndex: 1, flex: 1, textAlign: 'center',
+                padding: '12px 16px', cursor: 'pointer', fontWeight: 600, fontSize: 14,
+                color: roleMode === 'teacher' ? (isDark ? '#fff' : '#0f172a') : (isDark ? '#94a3b8' : '#64748b'),
+                transition: 'color 0.3s'
+              }} onClick={() => setRoleMode('teacher')}>
+                Eğitmen Ol (Başvuru)
+            </div>
           </div>
+
+          {roleMode === 'teacher' && (
+              <div style={{ marginBottom: 20, padding: 12, borderRadius: 8, background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', color: '#f59e0b', fontSize: 13 }}>
+                Eğitmenlik talebiniz yöneticiler tarafından incelenecek ve onaylandıktan sonra yetkileriniz açılacaktır.
+              </div>
+          )}
 
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {/* Name Input */}
@@ -259,13 +268,24 @@ export default function RegisterView({ onNavigate }) {
               <Lock size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: isDark ? '#64748b' : '#94a3b8' }} />
               <input
                 className="custom-input"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 placeholder="Şifreniz"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                style={inputStyle}
+                style={{...inputStyle, paddingRight: 44}}
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)',
+                  background: 'none', border: 'none', padding: 0, cursor: 'pointer',
+                  color: isDark ? '#64748b' : '#94a3b8', display: 'flex', alignItems: 'center'
+                }}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
 
             {error && (

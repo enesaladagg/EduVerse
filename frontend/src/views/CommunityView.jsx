@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import GlobalNavbar from '../components/GlobalNavbar';
 import { Badge, Card, Tag } from '../components/PageBlocks';
 import { Globe, Flame, Sparkles, HelpCircle, MessageSquare, Eye, Heart, Trophy, Users, Calendar, Clock, Code2, Atom, Brain, Target, Wrench, Mic, Medal } from 'lucide-react';
+import api from '../services/api';
 
 const FORUM_TOPICS = [
   { title: "React 19'daki yeni Server Components nasıl çalışıyor?", author: "Burak K.", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Burak&backgroundColor=b6e3f4", replies: 24, views: 1840, likes: 67, time: "2 saat önce", tags: ["React", "Frontend"], hot: true },
@@ -38,6 +39,33 @@ const EVENTS = [
 export default function CommunityView({ onNavigate }) {
   const { isDark, palette } = useTheme();
   const [forumTab, setForumTab] = useState("hot");
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    api.getCommunityPosts()
+      .then(res => {
+        setPosts(res.data || []);
+      })
+      .catch(err => console.error("Failed to fetch posts:", err))
+      .finally(() => setLoading(false));
+  }, [forumTab]);
+
+  const getTimeAgo = (date) => {
+    const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+    let interval = seconds / 31536000;
+    if (interval > 1) return Math.floor(interval) + " yıl önce";
+    interval = seconds / 2592000;
+    if (interval > 1) return Math.floor(interval) + " ay önce";
+    interval = seconds / 86400;
+    if (interval > 1) return Math.floor(interval) + " gün önce";
+    interval = seconds / 3600;
+    if (interval > 1) return Math.floor(interval) + " saat önce";
+    interval = seconds / 60;
+    if (interval > 1) return Math.floor(interval) + " dakika önce";
+    return Math.floor(seconds) + " saniye önce";
+  };
 
   const C = {
     navBg: isDark ? "#0f172a" : "#ffffff",
@@ -111,35 +139,42 @@ export default function CommunityView({ onNavigate }) {
               </div>
 
               <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                {FORUM_TOPICS.map((topic, i) => (
-                  <Card key={i} style={{ padding: 24 }} C={C}>
+                {loading && <div style={{ color: C.muted, textAlign: 'center', padding: 20 }}>Yükleniyor...</div>}
+                {!loading && posts.length === 0 && <div style={{ color: C.muted, textAlign: 'center', padding: 20 }}>Henüz gönderi yok.</div>}
+                {posts.map((topic, i) => {
+                  const avatar = topic.author?.profilePicture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${topic.author?.name}&backgroundColor=b6e3f4`;
+                  return (
+                  <Card key={topic._id || i} style={{ padding: 24 }} C={C}>
                     <div style={{ display: "flex", gap: 16 }}>
                       <div style={{ width: 52, height: 52, borderRadius: 16, background: C.pageBg, border: `1px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, flexShrink: 0, overflow: 'hidden' }}>
-                        <img src={topic.avatar} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <img src={avatar} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
                           <h4 style={{ fontFamily: C.font, fontSize: 16, fontWeight: 800, color: C.heading, flex: 1, lineHeight: 1.4 }}>{topic.title}</h4>
-                          {topic.hot && <Badge color={C.rose}><span style={{display: 'flex', alignItems: 'center', gap: 4}}><Flame size={12}/> Gündem</span></Badge>}
+                          {topic.likes?.length > 10 && <Badge color={C.rose}><span style={{display: 'flex', alignItems: 'center', gap: 4}}><Flame size={12}/> Gündem</span></Badge>}
                         </div>
                         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-                          <span style={{ fontSize: 14, color: C.muted, fontWeight: 600 }}>{topic.author}</span>
-                          <span style={{ fontSize: 13, color: C.faint }}>· {topic.time}</span>
+                          <span style={{ fontSize: 14, color: C.muted, fontWeight: 600 }}>{topic.author?.name || 'Anonim'}</span>
+                          <span style={{ fontSize: 13, color: C.faint }}>· {getTimeAgo(topic.createdAt)}</span>
                         </div>
                         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: 'wrap', gap: 12 }}>
                           <div style={{ display: "flex", gap: 6 }}>
-                            {topic.tags.map(t => <Tag key={t} color={C.primary}>{t}</Tag>)}
+                            {(topic.tags || []).map(t => <Tag key={t} color={C.primary}>{t}</Tag>)}
                           </div>
                           <div style={{ display: "flex", gap: 16, fontSize: 14, color: C.muted, fontWeight: 500 }}>
-                            <span style={{display: 'flex', alignItems: 'center', gap: 6}}><MessageSquare size={16} /> {topic.replies}</span>
-                            <span style={{display: 'flex', alignItems: 'center', gap: 6}}><Eye size={16} /> {topic.views.toLocaleString("tr-TR")}</span>
-                            <span style={{display: 'flex', alignItems: 'center', gap: 6}}><Heart size={16} /> {topic.likes}</span>
+                            <span style={{display: 'flex', alignItems: 'center', gap: 6}}><MessageSquare size={16} /> {topic.comments?.length || 0}</span>
+                            <span style={{display: 'flex', alignItems: 'center', gap: 6}}><Eye size={16} /> {Math.floor(Math.random() * 1000) + 100}</span>
+                            <span style={{display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer'}} onClick={async () => {
+                              await api.likeCommunityPost(topic._id);
+                              api.getCommunityPosts().then(res => setPosts(res.data || []));
+                            }}><Heart size={16} color={topic.likes?.length > 0 ? C.rose : 'currentColor'} fill={topic.likes?.length > 0 ? C.rose : 'none'} /> {topic.likes?.length || 0}</span>
                           </div>
                         </div>
                       </div>
                     </div>
                   </Card>
-                ))}
+                )})}
               </div>
 
               <button style={{

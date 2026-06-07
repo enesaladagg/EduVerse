@@ -335,7 +335,7 @@ export default function DashboardView({ user, onNavigate }) {
         
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 32, flexWrap: "wrap", gap: 20 }}>
           <div>
-            <h1 style={{ fontFamily: T.display, fontSize: 32, fontWeight: 900, marginBottom: 8, letterSpacing: -0.5 }}>Tekrar Hoş Geldin, {USER.name}</h1>
+            <h1 style={{ fontFamily: T.display, fontSize: 32, fontWeight: 900, marginBottom: 8, letterSpacing: -0.5 }}>Tekrar Hoş Geldin, {authUser?.name || user?.name}</h1>
             <p style={{ color: T.t2, fontSize: 16 }}>Bugün harika şeyler öğrenmek için mükemmel bir gün!</p>
           </div>
           <div style={{ display: "flex", gap: 16 }}>
@@ -345,7 +345,7 @@ export default function DashboardView({ user, onNavigate }) {
               </div>
               <div>
                 <div style={{ fontSize: 11, color: T.t3, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1 }}>Seri</div>
-                <div style={{ fontFamily: T.mono, fontSize: 18, fontWeight: 800, color: T.amber }}>{USER.streak} Gün</div>
+                <div style={{ fontFamily: T.mono, fontSize: 18, fontWeight: 800, color: T.amber }}>{authUser?.streak || user?.streak || 1} Gün</div>
               </div>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 16, padding: "12px 20px", borderRadius: T.r2, background: T.bg2, border: `1px solid ${T.b1}` }}>
@@ -373,10 +373,10 @@ export default function DashboardView({ user, onNavigate }) {
               </div>
               <div>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-                  <span style={{ fontSize: 11, color: T.t3, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1 }}>Seviye {USER.level}</span>
-                  <span style={{ fontSize: 10, color: T.t2 }}>{USER.xp} / {USER.xpNext} XP</span>
+                  <span style={{ fontSize: 11, color: T.t3, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1 }}>Seviye {authUser?.level || user?.level || 1}</span>
+                  <span style={{ fontSize: 10, color: T.t2 }}>{authUser?.xp || user?.xp || 0} / {(authUser?.level || user?.level || 1) * 1000} XP</span>
                 </div>
-                <Bar T={T} value={USER.xp} max={USER.xpNext} color={T.cyan} h={4} />
+                <Bar T={T} value={authUser?.xp || user?.xp || 0} max={(authUser?.level || user?.level || 1) * 1000} color={T.cyan} h={4} />
               </div>
             </div>
           </div>

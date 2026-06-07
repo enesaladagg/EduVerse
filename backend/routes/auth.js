@@ -13,14 +13,17 @@ const signToken = (user) =>
   jwt.sign({ sub: user._id, role: user.role }, env.jwtSecret, { expiresIn: env.jwtExpiresIn });
 
 router.post('/register', validate(schemas.register), asyncHandler(async (req, res, next) => {
-  const { name, email, password, role } = req.body;
+  const { name, email, password, applyInstructor } = req.body;
 
   const existing = await User.findOne({ email }).select('_id').lean();
   if (existing) {
     return next(new AppError('A user with this email already exists.', 409, 'DUPLICATE_RESOURCE'));
   }
 
-  const user = await User.create({ name, email, password, role });
+  const role = 'student';
+  const instructorStatus = applyInstructor ? 'pending' : 'none';
+
+  const user = await User.create({ name, email, password, role, instructorStatus });
   const token = signToken(user);
 
   return res.status(201).json({

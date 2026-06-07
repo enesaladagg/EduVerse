@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import GlobalNavbar from '../components/GlobalNavbar';
-import { Mail, Lock, ArrowRight, CheckCircle2, Loader2, Sparkles } from 'lucide-react';
+import { Mail, Lock, ArrowRight, CheckCircle2, Loader2, Sparkles, Eye, EyeOff } from 'lucide-react';
 
 export default function LoginView({ onNavigate }) {
   const { isDark } = useTheme();
@@ -14,6 +14,7 @@ export default function LoginView({ onNavigate }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -248,13 +249,24 @@ export default function LoginView({ onNavigate }) {
               <Lock size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: isDark ? '#64748b' : '#94a3b8' }} />
               <input
                 className="custom-input"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 placeholder="Şifreniz"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                style={inputStyle}
+                style={{...inputStyle, paddingRight: 44}}
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)',
+                  background: 'none', border: 'none', padding: 0, cursor: 'pointer',
+                  color: isDark ? '#64748b' : '#94a3b8', display: 'flex', alignItems: 'center'
+                }}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
 
             {/* Options */}

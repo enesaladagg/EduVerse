@@ -28,6 +28,12 @@ const UserSchema = new mongoose.Schema(
       type: String,
       enum: ['student', 'teacher', 'admin', 'parent'],
       required: true,
+      default: 'student',
+    },
+    instructorStatus: {
+      type: String,
+      enum: ['none', 'pending', 'approved', 'rejected'],
+      default: 'none',
     },
     educationLevel: {
       type: String,
