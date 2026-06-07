@@ -881,3 +881,189 @@ CTF Labs ve RSS modülleri arayüzden kaldırıldı (navigasyon, routing, view d
 
 **Proje durumu:** MVP — auth, canlı ders, gamification, ödev teslimi, kurs kataloğu.
 
+---
+
+## SON HAFTA — Platform Olgunlaştırma, Güvenlik ve Profesyonelleştirme Sprinti
+
+**Tarih:** 7 Haziran 2026  
+**Sorumlu:** Enes ALADAĞ  
+**Kapsam:** Tüm bu çalışmalar **Enes ALADAĞ** tarafından gerçekleştirilmiştir.
+
+---
+
+### 1. Admin Paneli — Tam Fonksiyonellik
+
+Admin hesabıyla giriş yapıldığında her şeyin çalışması hedeflenmiş ve aşağıdaki eksiklikler giderilmiştir:
+
+**Eklenen / Düzeltilen Özellikler:**
+- Admin panelinde **gerçek zamanlı istatistik çekimi** (`GET /api/admin/stats`) — toplam kullanıcı, öğrenci sayısı, eğitmen sayısı, kurs sayısı.
+- **Tüm kullanıcılar** listesi: arama/filtreleme, rol değiştirme, kullanıcı silme işlevleri API'ye bağlandı.
+- **Tüm kurslar** listesi: kurs aktif/pasif yapma ve silme işlevleri düzeltildi.
+- **Eğitmen Başvuruları** sekmesi eklendi: `pending` durumundaki başvurular listelenir, onaylama/reddetme butonları çalışır hale getirildi.
+- Panelde varsayılan veri yerine her bölüm gerçek API'den besleniyor.
+- `admin@demo.com` / `Demo12345!` ile seed hesabı eklendi.
+
+---
+
+### 2. Eğitmen Doğrulama Sistemi — Güvenlik Açığı Kapatıldı
+
+**Önceki Durum (Güvenlik Açığı):**  
+Kullanıcılar kayıt formunda `role: 'teacher'` seçerek anında eğitmen yetkisi alabiliyordu. Bu, yetki yükseltme (privilege escalation) açığıydı.
+
+**Yeni Sistem:**
+
+| Adım | Açıklama |
+|:---|:---|
+| **Başvuru** | Kullanıcı kayıt formunda "Eğitmen Olarak Başvur" seçeneğini işaretler |
+| **Kayıt** | Sistem kullanıcıyı `role: 'student'`, `instructorStatus: 'pending'` olarak kaydeder |
+| **Bildirim** | Kullanıcıya "Başvurunuz inceleniyor" mesajı gösterilir |
+| **Admin İncelemesi** | Admin panelinde "Eğitmen Başvuruları" sekmesinden inceleme yapılır |
+| **Onay** | Onay sonrası `role: 'teacher'`, `instructorStatus: 'approved'` set edilir |
+| **Red** | Reddedilirse `instructorStatus: 'rejected'` set edilir |
+
+**Backend değişiklikleri:**
+- `backend/models/User.js`: `instructorStatus: enum['none', 'pending', 'approved', 'rejected']` alanı eklendi.
+- `backend/routes/auth.js`: Kayıt sırasında `applyInstructor` bayrağı alınır, `role` her zaman `'student'` olarak set edilir.
+- `backend/routes/admin.js`:
+  - `GET /api/admin/applications/instructors` — pending başvuruları listeler.
+  - `PUT /api/admin/applications/instructors/:id/approve` — rolü teacher'a yükseltir.
+  - `PUT /api/admin/applications/instructors/:id/reject` — başvuruyu reddeder.
+
+**Frontend değişiklikleri:**
+- `RegisterView.jsx`: "Eğitmen Olarak Başvur" toggle ve başvuru sonrası bilgi mesajı.
+- `AdminDashboardView.jsx`: Eğitmen Başvuruları sekmesi ve onay/red butonları.
+
+---
+
+### 3. Kritik Backend Hata Düzeltmeleri (Senior Code Review)
+
+Projenin tüm dosyaları senior geliştirici gözüyle incelendi ve aşağıdaki kritik sorunlar tespit edilerek giderildi:
+
+#### 3.1 Kayıt Olmayan Rotalar
+`community` ve `certificates` rotaları `backend/routes/` altında tam olarak yazılmış olmasına rağmen `backend/app.js` içinde hiç mount edilmemişti. Bu durum tüm `/api/community` ve `/api/certificates` isteklerinin `404 Not Found` döndürmesine yol açıyordu.
+
+**Düzeltme:** `app.js`'e eklendi:
+```js
+app.use('/api/certificates', certificatesRoutes);
+app.use('/api/community', communityRoutes);
+```
+
+#### 3.2 `purchasedCourses` Alanı Şemada Tanımsız
+`backend/routes/payment.js` içinde `user.purchasedCourses` kullanılıyordu ama bu alan `User.js` şemasında tanımlı değildi. MongoDB bu alanı sparse array olarak kabul etse de şemada bulunması zorunludur.
+
+**Düzeltme:** `User.js` şemasına `purchasedCourses: { type: [String], default: [] }` eklendi.
+
+#### 3.3 Güvenlik Açığı — Kişisel Bilgi Kaynak Kodda
+`backend/routes/payment.js` içindeki mock ödeme formunda `value="Enes Aladağ"` ve `value="4321 0000 0000 0000"` gibi kişisel bilgi ve sahte kart numarası hardcoded bırakılmıştı. Bu hem güvenlik riski hem de GDPR ihlali anlamına gelirdi.
+
+**Düzeltme:** Tüm hardcoded değerler kaldırıldı, yerine `placeholder` attribute'ları konuldu.
+
+#### 3.4 `asyncHandler` Tutarsızlığı
+`payment.js` içindeki rotalar diğer dosyalardan farklı olarak `asyncHandler` yerine manuel `try/catch` kullanıyordu. Bu hata yönetiminin tutarsız davranmasına yol açıyordu.
+
+**Düzeltme:** Tüm payment rotaları `asyncHandler` ile sarıldı.
+
+#### 3.5 `Course` Modeli Satır İçi `require`
+`admin.js` içindeki birden fazla handler, dosya başında import etmek yerine fonksiyon içinde `const Course = require('../models/Course')` çağırıyordu. Node.js bunu cache'lediğinden performans kaybı yoktur ama okunabilirlik açısından kötü pratiktir.
+
+**Düzeltme:** Tek bir dosya-seviyesi import'a taşındı.
+
+---
+
+### 4. Frontend Temizliği ve Routing Düzeltmeleri
+
+**`App.jsx` Düzeltmeleri:**
+
+| Sorun | Düzeltme |
+|:---|:---|
+| `InstructorView.jsx` import edilmiş ama hiç kullanılmıyordu | Import kaldırıldı |
+| `AssignmentsView`, `PlannerPage`, `MessagingPage` `onNavigate` prop'u almıyordu | Tüm sayfalara `onNavigate={navigate}` geçildi |
+| Switch case girintileri okunaksızdı | Kolonlarla hizalandı |
+
+**Temizlenen Dosya:**
+- `temp.jsx` (36KB'lık test/geçici dosya) kök dizinden kalıcı olarak silindi.
+
+**Eklenen:**
+- `frontend/src/views/admin/components/.gitkeep` — boş dizin Git'te düzgünce işaretlendi.
+
+---
+
+### 5. UI/UX Optimizasyonları
+
+#### 5.1 Navbar Taşma Düzeltmesi
+Topluluk, Yol Haritaları ve Kurumsal Çözümler sayfalarında `GlobalNavbar` sabit (fixed) konumda olmasına rağmen sayfa içeriğinin `padding-top: 40px` olması içeriğin navbar arkasına girmesine yol açıyordu.
+
+**Düzeltme:** Üç sayfada da `padding: '120px 5% 60px'` olarak güncellendi.
+
+#### 5.2 Kurumsal Fiyatlandırma Kartları
+- Farklı sayıda özelliğe sahip kartlar farklı yükseklikte görünüyordu.
+- "Planı Seç" butonu içerik azsa ortada asılı kalıyordu.
+- "İletişim" yazısı ₺149 ile aynı büyük fontu kullandığından taşıyordu.
+
+**Düzeltme:** `flexDirection: column`, `flexGrow: 1`, `marginTop: 'auto'` ile buton her zaman kart altına sabitlendi; font scaling eklendi.
+
+#### 5.3 İşlevsiz Butonların Canlandırılması
+Görünürde bulunan ama hiçbir yere bağlı olmayan butonlar tek tek işlevlendirildi:
+
+| Buton | Bağlandığı İşlev |
+|:---|:---|
+| Topluluk: `+ Yeni Konu Aç` | `api.createCommunityPost()` API çağrısı |
+| Yol Haritaları: `▶ Derse Devam Et` | `onNavigate('courses')` yönlendirmesi |
+| Kurumsal: `Fiyatları Gör ↓` | `#pricing` ID'sine smooth scroll |
+| Kurumsal: `Planı Seç` | `onNavigate('register')` yönlendirmesi |
+| Kurumsal: `İletişime Geç` | Sayfanın altındaki forma smooth scroll |
+
+---
+
+### 6. `User.js` Model Güncellemesi
+
+`toSafeObject()` metoduna eksik alanlar eklendi:
+
+```js
+// Önceden eksik olanlar:
+instructorStatus: this.instructorStatus,  // Eğitmen başvuru durumu
+streak: this.streak || 0,                  // Günlük çalışma serisi
+purchasedCourses: this.purchasedCourses || [], // Satın alınan kurslar
+```
+
+---
+
+### 7. README Profesyonelleştirmesi
+
+`README.md` sıfırdan yeniden yazıldı:
+
+- Centered badge başlıkları ve navigasyon linkleri
+- ASCII mimarisi (Frontend ↔ Backend ↔ MongoDB şeması)
+- Tech Stack tablosu
+- Detaylı proje klasör yapısı
+- Tam API referans tabloları (auth, admin, community, certificates)
+- Güvenlik mimarisi (istek akış diyagramı)
+- Eğitmen başvuru sistemi açıklaması
+- Katkıda bulunma yönergeleri
+
+---
+
+### 8. Git & Versiyon Kontrolü
+
+Bu sprint boyunca yapılan tüm değişiklikler `feature/phase1-settings` dalına commit edilip GitHub'a push edildi:
+
+```
+commit: fix: register community & certificates routes, add purchasedCourses
+        to User schema, remove hardcoded credentials, clean App.jsx routing,
+        delete temp.jsx, update README
+```
+
+---
+
+### Sprint Özeti
+
+| Alan | Yapılan |
+|:---|:---|
+| 🔴 Kritik backend hataları | 5 adet tespit ve düzeltildi |
+| 🛡️ Güvenlik açığı | Eğitmen rol yükseltme açığı kapatıldı |
+| 🔒 Kişisel veri temizliği | Kaynak koddan kişisel bilgi kaldırıldı |
+| 🧭 API rotaları | 2 kayıt olmayan rota aktif edildi |
+| 🎨 UI/UX | 3 sayfada taşma, 1 fiyatlandırma, 5+ ölü buton düzeltildi |
+| 📄 Dokümantasyon | README sıfırdan yeniden yazıldı |
+| 🗑️ Teknik borç | temp.jsx silindi, import tutarsızlıkları giderildi |
+

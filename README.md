@@ -1,79 +1,174 @@
-# 🎓 EduVerse — Yeni Nesil Online Eğitim & Öğrenme Platformu
+<div align="center">
 
-![Status](https://img.shields.io/badge/Status-Active-success)
-![Version](https://img.shields.io/badge/Version-1.2.0-blue)
-![Stack](https://img.shields.io/badge/Stack-MERN_|_Vite_|_WebRTC-00d4aa)
-![License](https://img.shields.io/badge/License-ISC-purple)
+# EduVerse
 
-**EduVerse**, interaktif, gerçek zamanlı ve oyunlaştırılmış bir modern online eğitim platformudur. Öğrencilere ve eğitmenlere "dünya standartlarında" bir SaaS deneyimi sunmayı hedefler.
+### Yeni Nesil Online Eğitim & Öğrenme Platformu
 
----
+[![Status](https://img.shields.io/badge/Durum-Aktif-22c55e?style=flat-square&logo=checkmarx)](https://github.com)
+[![Version](https://img.shields.io/badge/Versiyon-1.2.0-6366f1?style=flat-square)](https://github.com)
+[![Stack](https://img.shields.io/badge/Stack-MERN%20%7C%20Vite%20%7C%20WebRTC-00d4aa?style=flat-square)](https://github.com)
+[![License](https://img.shields.io/badge/Lisans-ISC-f59e0b?style=flat-square)](https://github.com)
 
-## ✨ Öne Çıkan Özellikler
-
-🚀 **Gerçek Zamanlı Canlı Dersler (EduFlow Live)**
-- WebRTC & Socket.io ile sesli/görüntülü yayın, anlık sohbet, el kaldırma modülü.
-- Eşzamanlı çizim destekli **Canlı Beyaz Tahta** ve **Canlı Kod Laboratuvarı**.
-
-🏆 **Oyunlaştırma (Gamification) & Topluluk**
-- XP, seviyeler, rozetler ve dinamik liderlik tablosu.
-- Forum tartışmaları (Topluluk Sayfası) ile canlı gönderi, yorum ve beğeni sistemi.
-
-🗺️ **Kariyer Yol Haritaları & Planlama**
-- Etkileşimli kariyer yol haritaları (Full Stack, Data Science, DevOps, Mobil).
-- Pomodoro sayacı ve kişisel çalışma takvimi.
-
-🛡️ **Eğitmen Doğrulama Sistemi**
-- Kullanıcılar kayıt sırasında eğitmenlik başvurusu yapabilir.
-- Yöneticiler (Admin), başvuruları inceleyerek **onaylar veya reddeder**.
-- Rol ataması tamamen güvende; kimse kendini doğrudan eğitmen yapamaz.
-
-🏢 **Kurumsal Çözümler (B2B)**
-- Şirketlere özel raporlama, SSO entegrasyonları ve fiyatlandırma planları.
-
-🎨 **Modern Dark/Light Mode Tasarım**
-- Sıfırdan Vanilla CSS Design System, glassmorphism, mikro-animasyonlar.
+*WebRTC tabanlı canlı dersler, interaktif kod laboratuvarları, oyunlaştırma ve kurumsal B2B çözümlerini tek çatı altında birleştiren full-stack SaaS eğitim platformu.*
 
 ---
 
-## 🛠 Teknoloji Yığını
+[Hızlı Başlangıç](#-hızlı-başlangıç) • [Özellikler](#-özellikler) • [Mimari](#-mimari) • [API Referansı](#-api-referansı) • [Test Hesapları](#-test-hesapları)
+
+</div>
+
+---
+
+## ✨ Özellikler
+
+<table>
+<tr>
+<td width="50%">
+
+### 🚀 Canlı Ders Altyapısı
+- WebRTC + Socket.io ile kesintisiz video/ses
+- Anlık sohbet, canlı anketler, el kaldırma
+- Çok kullanıcılı eşzamanlı **Beyaz Tahta**
+- Gerçek zamanlı **Kod Laboratuvarı** (JS/Python/HTML)
+- AI destekli arka plan kaldırma & bulanıklaştırma
+- Seminer modu: Host / Guest Speaker / Attendee rolleri
+
+</td>
+<td width="50%">
+
+### 🏆 Oyunlaştırma & Topluluk
+- XP puanı, seviye sistemi ve rozet koleksiyonu
+- CTF güvenlik laboratuvarları ve skor tablosu
+- Forum gönderileri, yorumlar ve beğeniler
+- **Topluluk Sayfası** — canlı gerçek zamanlı gönderiler
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+### 🗺️ Kariyer & Planlama
+- Full Stack, Data Science, DevOps, Mobil yol haritaları
+- Görev bazlı interaktif Pomodoro sayacı
+- Takvim entegrasyonlu kişisel çalışma planı
+- Kurs tamamlama sertifikaları (QR doğrulama)
+
+</td>
+<td width="50%">
+
+### 🛡️ Güvenlik & Yönetim
+- Eğitmen doğrulama sistemi (başvuru → admin onayı)
+- JWT + bcrypt + Helmet + rate-limit
+- Tam admin paneli (kullanıcı, kurs, başvuru yönetimi)
+- Eğitmen paneli (kurs, öğrenci, gelir takibi)
+
+</td>
+</tr>
+</table>
+
+---
+
+## 🛠 Mimari
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        EduVerse Platform                        │
+├───────────────────────────┬─────────────────────────────────────┤
+│     Frontend (React 18)   │       Backend (Node.js)             │
+│                           │                                     │
+│  ├── Context API          │  ├── Express.js REST API            │
+│  │   ├── AuthContext      │  ├── Socket.io (WebRTC sinyalleşme) │
+│  │   ├── ThemeContext     │  ├── JWT Authentication             │
+│  │   └── CartContext      │  ├── Mongoose ODM                   │
+│  │                        │  └── Winston + Morgan logging       │
+│  ├── Views (19 sayfa)     │                                     │
+│  ├── Components           │  MongoDB Atlas / Local              │
+│  ├── Hooks (WebRTC/Socket)│  ├── User, Course, Certificate      │
+│  └── Services (api.js)    │  ├── CommunityPost, LiveSession     │
+│                           │  └── Assignment, CtfChallenge       │
+└───────────────────────────┴─────────────────────────────────────┘
+```
+
+### Tech Stack
 
 | Katman | Teknoloji |
 |:---|:---|
-| **Frontend** | React 18 + Vite, Vanilla CSS, Lucide React, Socket.io-client |
-| **Backend** | Node.js, Express.js, MongoDB (Mongoose) |
-| **Gerçek Zamanlı** | Socket.io, Simple-peer (WebRTC) |
+| **Frontend** | React 18, Vite, Vanilla CSS (özel design system), Lucide React |
+| **Backend** | Node.js, Express.js, asyncHandler, Joi validasyon |
+| **Veritabanı** | MongoDB, Mongoose |
+| **Gerçek Zamanlı** | Socket.io 4.x, Simple-peer (WebRTC), Perfect Negotiation |
 | **Güvenlik** | JWT, bcryptjs, Helmet, express-rate-limit, mongo-sanitize |
-| **Validasyon** | Joi (request validation middleware) |
+| **Loglama** | Winston (dosya rotasyonu), Morgan (HTTP) |
+
+---
+
+## 📂 Proje Yapısı
+
+```
+online-egitim-platformu/
+│
+├── backend/
+│   ├── config/               # DB bağlantısı, ortam değişkenleri
+│   ├── middleware/            # auth, asyncHandler, errorHandler, validate
+│   ├── models/                # User, Course, Certificate, CommunityPost,
+│   │                          # LiveSession, Assignment, CtfChallenge
+│   ├── routes/                # auth, admin, courses, payment, community,
+│   │                          # certificates, social, planner, ctf, rss…
+│   ├── socket/                # Socket.io modülleri
+│   │   ├── handlers/          # webrtcHandler, whiteboardHandler,
+│   │   │                      # chatHandler, pollHandler, seminarHandler
+│   │   └── roomManager.js     # Bellek-içi oda durumu
+│   ├── scripts/               # Seed, backup, restore betikleri
+│   ├── services/              # rssFetcher
+│   ├── utils/                 # logger, AppError, corsOrigins
+│   └── server.js / app.js     # Uygulama girişi
+│
+└── frontend/
+    └── src/
+        ├── components/        # GlobalNavbar, CartDrawer, PomodoroTimer,
+        │                      # PageBlocks, CodeSandbox, Whiteboard…
+        ├── context/           # ThemeContext, AuthContext, CartContext
+        ├── hooks/             # useSocket, useWebRTC, useWhiteboardSync
+        ├── services/          # api.js (tüm API çağrıları tek dosyada)
+        ├── views/
+        │   ├── admin/         # AdminDashboardView.jsx
+        │   ├── instructor/    # InstructorDashboardView.jsx
+        │   └── *.jsx          # 19 sayfa görünümü
+        └── design-system/     # CSS token ve yardımcı sınıflar
+```
 
 ---
 
 ## 🚀 Hızlı Başlangıç
 
 ### Gereksinimler
-- Node.js `v18+`
-- MongoDB `v6+`
 
-### 1. Backend Kurulumu
+| Araç | Versiyon |
+|:---|:---|
+| Node.js | `v18.0+` |
+| MongoDB | `v6.0+` |
+| MongoDB Database Tools | Backup/Restore için |
+
+### 1 — Backend
 
 ```bash
 cd backend
 
-# Ortam değişkenlerini kopyala
+# Ortam değişkenlerini hazırla
 cp .env.example .env
-# .env dosyasını düzenleyip MONGO_URI ve JWT_SECRET değerlerini gir
+# .env içinde MONGO_URI ve JWT_SECRET değerlerini güncelle
 
 npm install
 
-# (Opsiyonel) Test verilerini yükle
+# Örnek verilerle veritabanını doldur (opsiyonel ama önerilen)
 npm run db:seed
 
 # Geliştirme sunucusunu başlat
 npm run dev
-# → http://localhost:5000
+# ✓ http://localhost:5000
 ```
 
-### 2. Frontend Kurulumu
+### 2 — Frontend
 
 ```bash
 cd frontend
@@ -81,49 +176,64 @@ cd frontend
 npm install
 
 npm run dev
-# → http://localhost:5173
+# ✓ http://localhost:5173
 ```
+
+> **Not:** Her iki sunucu da aynı anda çalışmalıdır. Backend port `5000`, Frontend port `5173` kullanır.
 
 ---
 
 ## 🔐 Test Hesapları
 
-`npm run db:seed` çalıştırdıktan sonra aşağıdaki hesaplarla giriş yapabilirsiniz:
+`npm run db:seed` çalıştırdıktan sonra:
 
-| Rol | E-posta | Şifre |
-|:---|:---|:---|
-| **Admin** | `admin@demo.com` | `Demo12345!` |
-| **Eğitmen** | `teacher@demo.com` | `Demo12345!` |
-| **Öğrenci** | `student@demo.com` | `Demo12345!` |
+| Rol | E-posta | Şifre | Erişim |
+|:---|:---|:---|:---|
+| **Admin** | `admin@demo.com` | `Demo12345!` | Tam yönetim paneli |
+| **Eğitmen** | `teacher@demo.com` | `Demo12345!` | Eğitmen paneli, kurs yönetimi |
+| **Öğrenci** | `student@demo.com` | `Demo12345!` | Kurslar, canlı dersler, ödevler |
 
-> **Eğitmen Olmak İsteyenler:** Kayıt ekranında "Eğitmen Ol (Başvuru)" seçeneğini seçerek başvuru yapabilirsiniz. Admin hesabından giriş yapıp **Eğitmen Başvuruları** bölümünden onaylayabilirsiniz.
+> **Eğitmen Başvurusu:** Kayıt ekranında *"Eğitmen Olarak Başvur"* seçeneğini işaretleyin. Admin hesabıyla giriş yapıp **Eğitmen Başvuruları** bölümünden onaylayabilirsiniz.
+
+> **Canlı Ders Testi:** Aynı anda iki farklı tarayıcı sekmesini (biri Eğitmen, biri Öğrenci) açarak gerçek zamanlı WebRTC & Socket.io özelliklerini test edebilirsiniz.
 
 ---
 
-## 📂 Proje Yapısı
+## 📡 API Referansı
 
-```text
-online-egitim-platformu/
-├── backend/
-│   ├── config/         # DB ve ortam değişkeni yapılandırması
-│   ├── middleware/      # auth, asyncHandler, errorHandler, validate
-│   ├── models/          # Mongoose şemaları (User, Course, Certificate, CommunityPost…)
-│   ├── routes/          # Express rotaları (auth, admin, courses, payment, community…)
-│   ├── socket/          # Socket.io yöneticileri (chat, whiteboard, webrtc)
-│   ├── utils/           # Logger, AppError, corsOrigins
-│   └── scripts/         # Seed, backup ve restore betikleri
-│
-└── frontend/
-    └── src/
-        ├── components/      # GlobalNavbar, CartDrawer, PomodoroTimer, PageBlocks…
-        ├── context/         # ThemeContext, AuthContext, CartContext
-        ├── hooks/           # useSocket, useWebRTC
-        ├── services/        # api.js — tüm backend çağrıları tek dosyada
-        ├── views/           # Sayfa bileşenleri
-        │   ├── admin/       # AdminDashboardView
-        │   └── instructor/  # InstructorDashboardView
-        └── design-system/   # CSS token ve yardımcı sınıflar
-```
+### Kimlik Doğrulama
+| Method | Endpoint | Açıklama |
+|:---|:---|:---|
+| `POST` | `/api/auth/register` | Kayıt ol (instructor başvurusu opsiyonel) |
+| `POST` | `/api/auth/login` | Giriş yap, JWT al |
+| `POST` | `/api/auth/demo-session` | Canlı ders için geçici oturum |
+
+### Kurslar & Kullanıcılar
+| Method | Endpoint | Açıklama |
+|:---|:---|:---|
+| `GET` | `/api/courses` | Kurs listesi (filtreli & sayfalı) |
+| `GET` | `/api/users/me` | Aktif kullanıcı profili |
+| `PUT` | `/api/users/me` | Profil güncelle |
+
+### Admin
+| Method | Endpoint | Açıklama |
+|:---|:---|:---|
+| `GET` | `/api/admin/stats` | Platform istatistikleri |
+| `GET` | `/api/admin/users` | Tüm kullanıcılar |
+| `PUT` | `/api/admin/users/:id/role` | Rol değiştir |
+| `DELETE` | `/api/admin/users/:id` | Kullanıcı sil |
+| `GET` | `/api/admin/applications/instructors` | Bekleyen başvurular |
+| `PUT` | `/api/admin/applications/instructors/:id/approve` | Başvuruyu onayla |
+| `PUT` | `/api/admin/applications/instructors/:id/reject` | Başvuruyu reddet |
+
+### Topluluk & Sertifikalar
+| Method | Endpoint | Açıklama |
+|:---|:---|:---|
+| `GET` | `/api/community` | Forum gönderileri |
+| `POST` | `/api/community` | Yeni gönderi oluştur |
+| `POST` | `/api/community/:id/like` | Beğen / Beğeniyi geri al |
+| `GET` | `/api/certificates/me` | Sertifikalarım |
+| `GET` | `/api/certificates/verify/:certId` | Sertifika doğrula |
 
 ---
 
@@ -132,26 +242,56 @@ online-egitim-platformu/
 | Dizin | Komut | Açıklama |
 |:---|:---|:---|
 | `backend` | `npm run dev` | Nodemon ile geliştirme sunucusu |
-| `backend` | `npm run db:seed` | Örnek verilerle veritabanını doldur |
-| `backend` | `npm run db:backup` | Veritabanı yedeği al |
+| `backend` | `npm run db:seed` | Veritabanını örnek veriyle doldur |
+| `backend` | `npm run db:backup` | MongoDB yedeği al |
+| `backend` | `npm run db:restore` | Yedekten geri yükle |
 | `frontend` | `npm run dev` | Vite geliştirme sunucusu |
-| `frontend` | `npm run build` | Production build |
+| `frontend` | `npm run build` | Production bundle oluştur |
 
 ---
 
-## 🔒 Güvenlik Notları
+## 🔒 Güvenlik Mimarisi
 
-- JWT tokenlar `15 dakika` veya yapılandırılmış süre sonra sona erer.
-- Tüm auth uç noktalarına `rate-limit` (15 dk'da 20 istek) uygulanmıştır.
-- `express-mongo-sanitize` ile NoSQL injection koruması aktif.
-- `helmet` ile güvenlik HTTP başlıkları otomatik eklenir.
-- `purchasedCourses` alanı yalnızca backend callback üzerinden güncellenir.
+```
+İstek Akışı:
+Client → Helmet (güvenlik headerlari)
+       → Rate Limiter (global: 100/15dk, auth: 20/15dk)
+       → CORS (whitelist kontrolü)
+       → mongo-sanitize (NoSQL injection koruması)
+       → JWT Authenticate middleware
+       → Role Authorize middleware
+       → asyncHandler (tüm async hatalar yakalanır)
+       → Global errorHandler
+```
+
+| Özellik | Detay |
+|:---|:---|
+| **Token Süresi** | `JWT_EXPIRES_IN` (`.env` ile yapılandırılır) |
+| **Şifre Hash** | bcrypt, salt rounds: 12 |
+| **Rate Limit** | Auth: 20 istek/15 dk, Global: 100 istek/15 dk |
+| **Log Rotasyonu** | `logs/` altında günlük dosya, 14 gün saklama |
+| **Eğitmen Rolü** | Yalnızca Admin onayıyla atanır |
+
+---
+
+## 🤝 Katkıda Bulunma
+
+1. `feature/<özellik-adı>` dalı aç
+2. Değişikliklerini commit et
+3. Pull Request gönder — main dalı koruma altındadır
 
 ---
 
 ## 📄 Lisans
 
-**ISC** Lisansı. Katkıda bulunmak için `Pull Request` gönderin ya da `Issue` açın.
+Bu proje **ISC** lisansı altında sunulmaktadır.
 
 ---
-*EduVerse Team tarafından sevgiyle kodlandı.* 💻🚀
+
+<div align="center">
+
+*EduVerse Ekibi tarafından sevgiyle kodlandı* 💻🚀
+
+**[⬆ Yukarı Dön](#eduverse)**
+
+</div>
