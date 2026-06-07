@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
 import { ShieldCheck, CreditCard, Lock, ChevronRight, CheckCircle2 } from 'lucide-react';
 
 export default function CheckoutView({ onNavigate }) {
   const { cartItems, cartTotal, clearCart } = useCart();
   const { isDark, palette: p, tokens: t } = useTheme();
+  const { purchaseCourses } = useAuth();
   const [isSuccess, setIsSuccess] = useState(false);
 
   if (cartItems.length === 0 && !isSuccess) {
@@ -30,6 +32,9 @@ export default function CheckoutView({ onNavigate }) {
 
   const handlePay = (e) => {
     e.preventDefault();
+    if (purchaseCourses) {
+      purchaseCourses(cartItems);
+    }
     clearCart();
     setIsSuccess(true);
   };
