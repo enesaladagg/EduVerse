@@ -336,9 +336,9 @@ export default function HomeView({ onNavigate }) {
         .btn-secondary { background: transparent; color: ${COLORS.accent}; border: 2px solid ${COLORS.accent}; padding: 12px 28px; border-radius: 12px; font-weight: 600; font-size: 15px; cursor: pointer; transition: all 0.3s; font-family: inherit; }
         .btn-secondary:hover { background: rgba(0,212,170,0.1); transform: translateY(-2px); }
         
-        .tab-btn { background: transparent; border: 2px solid ${COLORS.border}; color: ${COLORS.textMuted}; font-size: 15px; font-weight: 600; padding: 10px 24px; cursor: pointer; border-radius: 50px; transition: all 0.3s; font-family: inherit; }
+        .tab-btn { background: ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'}; border: 1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}; color: ${COLORS.textMuted}; font-size: 15px; font-weight: 600; padding: 10px 24px; cursor: pointer; border-radius: 50px; transition: all 0.3s; font-family: inherit; }
         .tab-btn.active { background: ${COLORS.accent}; color: #fff; border-color: ${COLORS.accent}; box-shadow: 0 4px 12px rgba(0,212,170,0.3); }
-        .tab-btn:hover:not(.active) { color: ${COLORS.text}; border-color: ${COLORS.accent}; }
+        .tab-btn:hover:not(.active) { color: ${COLORS.text}; background: ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'}; border-color: ${isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}; }
         
         .testimonial-card { background: ${COLORS.surface}; border-radius: 20px; padding: 32px; border: 1px solid ${COLORS.border}; transition: all 0.4s; }
         .testimonial-card:hover { border-color: ${COLORS.accentAlt}; transform: translateY(-4px); }
