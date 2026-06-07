@@ -443,7 +443,7 @@ export default function HomeView({ onNavigate }) {
         .stat-pill { position: absolute; backdrop-filter: blur(12px); border-radius: 50px; padding: 8px 18px 8px 10px; display: flex; align-items: center; gap: 8px; font-size: 0.78rem; font-weight: 600; z-index: 20; white-space: nowrap; }
         .stat-pill .icon { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; }
         .pill-1 { top: 18%; right: 0%; animation: ci 0.9s cubic-bezier(0.16,1,0.3,1) 1.6s both, fy 9s ease-in-out 3s infinite; }
-        .pill-2 { bottom: 8%; left: 38%; animation: ci 0.9s cubic-bezier(0.16,1,0.3,1) 1.8s both, fy2 8s ease-in-out 3.3s infinite; }
+        .pill-2 { bottom: 15%; left: 30%; animation: ci 0.9s cubic-bezier(0.16,1,0.3,1) 1.8s both, fy2 8s ease-in-out 3.3s infinite; }
         .lines-svg { position: absolute; inset: 0; z-index: 2; pointer-events: none; animation: fadeIn 2.5s ease-out 1.5s both; }
         @keyframes fadeIn { from{opacity:0} to{opacity:1} }
         @keyframes fiu { from{opacity:0;transform:translateY(22px)} to{opacity:1;transform:translateY(0)} }
