@@ -6,7 +6,7 @@ const asyncHandler = require('../middleware/asyncHandler');
 
 const router = express.Router();
 
-// GET /api/certificates/me
+// GET /api/certificates/me — Kullanıcının sertifikalarını getir
 router.get('/me', authenticate, asyncHandler(async (req, res) => {
   const certificates = await Certificate.find({ userId: req.user.id })
     .sort({ createdAt: -1 })
@@ -34,7 +34,7 @@ router.post('/', authenticate, asyncHandler(async (req, res) => {
   res.status(201).json({ success: true, data: certificate });
 }));
 
-// GET /api/certificates/verify/:certId
+// GET /api/certificates/verify/:certId — Sertifika doğrulama (herkese açık)
 router.get('/verify/:certId', asyncHandler(async (req, res, next) => {
   const certificate = await Certificate.findOne({ certId: req.params.certId })
     .populate('userId', 'name')

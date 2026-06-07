@@ -1,118 +1,102 @@
 # 🎓 EduVerse — Yeni Nesil Online Eğitim & Öğrenme Platformu
 
-![EduVerse Platform](https://img.shields.io/badge/Status-Active-success)
-![Version](https://img.shields.io/badge/Version-1.0.0-blue)
-![Tech Stack](https://img.shields.io/badge/Stack-MERN_|_Vite_|_WebRTC-00d4aa)
+![Status](https://img.shields.io/badge/Status-Active-success)
+![Version](https://img.shields.io/badge/Version-1.2.0-blue)
+![Stack](https://img.shields.io/badge/Stack-MERN_|_Vite_|_WebRTC-00d4aa)
 ![License](https://img.shields.io/badge/License-ISC-purple)
 
-**EduVerse**, interaktif, gerçek zamanlı ve oyunlaştırılmış bir modern online eğitim platformudur. Standart LMS (Öğrenim Yönetim Sistemi) kalıplarını kırarak, öğrencilere ve eğitmenlere "dünya standartlarında" bir SaaS deneyimi sunmayı hedefler.
-
-Kapsamlı canlı ders altyapısı (WebRTC & Socket.io), interaktif kod laboratuvarı, çok oyunculu beyaz tahta, detaylı kariyer yol haritaları ve kurumsal B2B çözümleri ile tam donanımlı bir ekosistemdir.
+**EduVerse**, interaktif, gerçek zamanlı ve oyunlaştırılmış bir modern online eğitim platformudur. Öğrencilere ve eğitmenlere "dünya standartlarında" bir SaaS deneyimi sunmayı hedefler.
 
 ---
 
 ## ✨ Öne Çıkan Özellikler
 
 🚀 **Gerçek Zamanlı Canlı Dersler (EduFlow Live)**
-- WebRTC ve Socket.io destekli kesintisiz sesli/görüntülü yayın.
-- Öğretmen ve öğrenciler için anlık sohbet, canlı anketler ve el kaldırma modülü.
-- **Canlı Beyaz Tahta:** Eğitmenlerin ve yetki verilen öğrencilerin eşzamanlı çizim yapabileceği interaktif tahta.
-- **Canlı Kod Laboratuvarı:** Gerçek zamanlı kod yazma ve paylaşma ortamı (Code Sandbox).
+- WebRTC & Socket.io ile sesli/görüntülü yayın, anlık sohbet, el kaldırma modülü.
+- Eşzamanlı çizim destekli **Canlı Beyaz Tahta** ve **Canlı Kod Laboratuvarı**.
 
 🏆 **Oyunlaştırma (Gamification) & Topluluk**
-- Başarı sistemi: Puan (XP), seviyeler ve açılabilir rozetler (Badges).
-- Dinamik liderlik tablosu ve DiceBear destekli vektörel profiller.
-- Forum tartışmaları ve çalışma grupları ile aktif öğrenci topluluğu.
+- XP, seviyeler, rozetler ve dinamik liderlik tablosu.
+- Forum tartışmaları (Topluluk Sayfası) ile canlı gönderi, yorum ve beğeni sistemi.
 
 🗺️ **Kariyer Yol Haritaları & Planlama**
-- Öğrenciler için hedef odaklı, etkileşimli kariyer yol haritaları (Roadmaps).
-- Yapay zeka destekli Pomodoro sayacı ve kişisel çalışma takvimi (Planner).
+- Etkileşimli kariyer yol haritaları (Full Stack, Data Science, DevOps, Mobil).
+- Pomodoro sayacı ve kişisel çalışma takvimi.
+
+🛡️ **Eğitmen Doğrulama Sistemi**
+- Kullanıcılar kayıt sırasında eğitmenlik başvurusu yapabilir.
+- Yöneticiler (Admin), başvuruları inceleyerek **onaylar veya reddeder**.
+- Rol ataması tamamen güvende; kimse kendini doğrudan eğitmen yapamaz.
 
 🏢 **Kurumsal Çözümler (B2B)**
-- Şirketlere özel raporlama, SSO entegrasyonları, dedike eğitmen ve gelişmiş analitik modülü.
-- Tamamen özelleştirilebilir kurumsal arayüz.
+- Şirketlere özel raporlama, SSO entegrasyonları ve fiyatlandırma planları.
 
-🎨 **Dünya Standartlarında Modern Arayüz**
-- **Sıfırdan Tasarlanmış Vanilla CSS Design System** (Tailwind veya dış kütüphane kısıtlamaları olmadan, tamamen esnek).
-- Aydınlık ve Karanlık (Dark/Light) Mod desteği.
-- Pürüzsüz mikro-animasyonlar, Glassmorphism detayları ve `lucide-react` destekli premium ikonografi.
+🎨 **Modern Dark/Light Mode Tasarım**
+- Sıfırdan Vanilla CSS Design System, glassmorphism, mikro-animasyonlar.
 
 ---
 
-## 🛠 Teknoloji Yığını (Tech Stack)
+## 🛠 Teknoloji Yığını
 
-### 💻 Frontend (İstemci)
-- **Framework:** React 18 + Vite
-- **Styling:** Vanilla CSS (Özel Design System, CSS Variables)
-- **İkonografi:** Lucide React
-- **Durum Yönetimi (State):** React Context API (Theme, Auth, Cart)
-- **Gerçek Zamanlı İletişim:** Socket.io-client, Simple-peer (WebRTC)
-
-### ⚙️ Backend (Sunucu)
-- **Çekirdek:** Node.js, Express.js
-- **Veritabanı:** MongoDB (Mongoose)
-- **Gerçek Zamanlı İletişim:** Socket.io (Oda yönetimi, anketler, mesajlaşma)
-- **Güvenlik & Yetkilendirme:** JWT (JSON Web Token), bcrypt
+| Katman | Teknoloji |
+|:---|:---|
+| **Frontend** | React 18 + Vite, Vanilla CSS, Lucide React, Socket.io-client |
+| **Backend** | Node.js, Express.js, MongoDB (Mongoose) |
+| **Gerçek Zamanlı** | Socket.io, Simple-peer (WebRTC) |
+| **Güvenlik** | JWT, bcryptjs, Helmet, express-rate-limit, mongo-sanitize |
+| **Validasyon** | Joi (request validation middleware) |
 
 ---
 
 ## 🚀 Hızlı Başlangıç
 
-Projeyi yerel ortamınızda çalıştırmak için aşağıdaki adımları izleyin.
-
 ### Gereksinimler
-- Node.js (v18.0 veya üzeri)
-- MongoDB (v6.0 veya üzeri)
-- MongoDB Database Tools (Yedekleme scriptleri için `mongodump` / `mongorestore`)
+- Node.js `v18+`
+- MongoDB `v6+`
 
 ### 1. Backend Kurulumu
-
-Terminalinizi açın ve backend dizinine gidin:
 
 ```bash
 cd backend
 
-# Ortam değişkenleri dosyasını kopyalayın
+# Ortam değişkenlerini kopyala
 cp .env.example .env
+# .env dosyasını düzenleyip MONGO_URI ve JWT_SECRET değerlerini gir
 
-# Bağımlılıkları yükleyin
 npm install
 
-# (Opsiyonel) Test verilerini veritabanına yükleyin
+# (Opsiyonel) Test verilerini yükle
 npm run db:seed
 
-# Geliştirme sunucusunu başlatın
+# Geliştirme sunucusunu başlat
 npm run dev
+# → http://localhost:5000
 ```
 
 ### 2. Frontend Kurulumu
 
-Yeni bir terminal penceresi açın ve frontend dizinine gidin:
-
 ```bash
 cd frontend
 
-# Bağımlılıkları yükleyin
 npm install
 
-# Geliştirme sunucusunu başlatın
 npm run dev
+# → http://localhost:5173
 ```
-
-Tebrikler! Platform artık **`http://localhost:5173`** adresinde çalışıyor.
 
 ---
 
-## 🔐 Test ve Demo Hesapları
+## 🔐 Test Hesapları
 
-Uygulamayı test etmek için veritabanını seedlediyseniz (`npm run db:seed`), aşağıdaki örnek hesaplarla giriş yapabilirsiniz:
+`npm run db:seed` çalıştırdıktan sonra aşağıdaki hesaplarla giriş yapabilirsiniz:
 
 | Rol | E-posta | Şifre |
-| :--- | :--- | :--- |
+|:---|:---|:---|
+| **Admin** | `admin@demo.com` | `Demo12345!` |
 | **Eğitmen** | `teacher@demo.com` | `Demo12345!` |
 | **Öğrenci** | `student@demo.com` | `Demo12345!` |
 
-> **Canlı Ders Testi İçin:** Sisteme eğitmen veya öğrenci olarak giriş yaptıktan sonra, sol menüden "Canlı Dersler" paneline giderek test odasına katılabilir ve WebRTC/Socket özelliklerini canlı deneyebilirsiniz.
+> **Eğitmen Olmak İsteyenler:** Kayıt ekranında "Eğitmen Ol (Başvuru)" seçeneğini seçerek başvuru yapabilirsiniz. Admin hesabından giriş yapıp **Eğitmen Başvuruları** bölümünden onaylayabilirsiniz.
 
 ---
 
@@ -120,41 +104,54 @@ Uygulamayı test etmek için veritabanını seedlediyseniz (`npm run db:seed`), 
 
 ```text
 online-egitim-platformu/
-├── backend/                  # REST API & Socket Sunucusu
-│   ├── config/               # Veritabanı ve çevre yapılandırmaları
-│   ├── models/               # MongoDB şemaları (User, Course, LiveSession vb.)
-│   ├── routes/               # Express endpoint rotaları
-│   ├── socket/               # WebRTC, Chat, Whiteboard için Socket.io yöneticileri
-│   └── scripts/              # Seed (Örnek veri), Backup ve Restore betikleri
+├── backend/
+│   ├── config/         # DB ve ortam değişkeni yapılandırması
+│   ├── middleware/      # auth, asyncHandler, errorHandler, validate
+│   ├── models/          # Mongoose şemaları (User, Course, Certificate, CommunityPost…)
+│   ├── routes/          # Express rotaları (auth, admin, courses, payment, community…)
+│   ├── socket/          # Socket.io yöneticileri (chat, whiteboard, webrtc)
+│   ├── utils/           # Logger, AppError, corsOrigins
+│   └── scripts/         # Seed, backup ve restore betikleri
 │
-├── frontend/                 # React UI
-│   ├── src/components/       # Yeniden kullanılabilir global bileşenler
-│   ├── src/components/eduflow/ # Canlı ders arayüzüne özel bileşenler
-│   ├── src/context/          # Global State (Auth, Theme, Cart)
-│   ├── src/design-system/    # CSS tokenları ve tasarım rehberi
-│   ├── src/hooks/            # Özel Hooklar (useSocket, useWebRTC)
-│   └── src/views/            # Sayfa görünümleri (Home, Dashboard vb.)
-│
-└── docs/                     # Sistem mimarisi ve analiz raporları
+└── frontend/
+    └── src/
+        ├── components/      # GlobalNavbar, CartDrawer, PomodoroTimer, PageBlocks…
+        ├── context/         # ThemeContext, AuthContext, CartContext
+        ├── hooks/           # useSocket, useWebRTC
+        ├── services/        # api.js — tüm backend çağrıları tek dosyada
+        ├── views/           # Sayfa bileşenleri
+        │   ├── admin/       # AdminDashboardView
+        │   └── instructor/  # InstructorDashboardView
+        └── design-system/   # CSS token ve yardımcı sınıflar
 ```
 
 ---
 
-## 📜 NPM Script Komutları
+## 📜 NPM Komutları
 
 | Dizin | Komut | Açıklama |
-| :--- | :--- | :--- |
-| `backend` | `npm run dev` | Sunucuyu nodemon ile geliştirme modunda başlatır. |
-| `backend` | `npm run db:seed` | Veritabanını örnek verilerle doldurur (Kullanıcı, kurs vb.). |
-| `backend` | `npm run db:backup` | Veritabanının tam yedeğini alır. |
-| `frontend` | `npm run dev` | Vite geliştirme sunucusunu başlatır. |
-| `frontend` | `npm run build` | Üretime (Production) hazır optimize edilmiş bundle oluşturur. |
+|:---|:---|:---|
+| `backend` | `npm run dev` | Nodemon ile geliştirme sunucusu |
+| `backend` | `npm run db:seed` | Örnek verilerle veritabanını doldur |
+| `backend` | `npm run db:backup` | Veritabanı yedeği al |
+| `frontend` | `npm run dev` | Vite geliştirme sunucusu |
+| `frontend` | `npm run build` | Production build |
 
 ---
 
-## 📄 Lisans & Katkıda Bulunma
+## 🔒 Güvenlik Notları
 
-Bu proje **ISC** lisansı ile lisanslanmıştır. Geliştirmeler ve öneriler için `Pull Request` gönderebilir veya `Issue` açabilirsiniz. Sistem analizi detayları için `docs/` klasöründeki belgeleri ve `projeakisi.md` dosyasını inceleyebilirsiniz.
+- JWT tokenlar `15 dakika` veya yapılandırılmış süre sonra sona erer.
+- Tüm auth uç noktalarına `rate-limit` (15 dk'da 20 istek) uygulanmıştır.
+- `express-mongo-sanitize` ile NoSQL injection koruması aktif.
+- `helmet` ile güvenlik HTTP başlıkları otomatik eklenir.
+- `purchasedCourses` alanı yalnızca backend callback üzerinden güncellenir.
+
+---
+
+## 📄 Lisans
+
+**ISC** Lisansı. Katkıda bulunmak için `Pull Request` gönderin ya da `Issue` açın.
 
 ---
 *EduVerse Team tarafından sevgiyle kodlandı.* 💻🚀

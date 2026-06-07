@@ -16,8 +16,6 @@ import CheckoutView from './views/CheckoutView';
 import CoursesPage from './views/CoursesPage';
 import GamesView from './views/GamesView';
 import CourseDetailView from './views/CourseDetailView';
-import ComingSoonView from './views/ComingSoonView';
-import PomodoroTimer from './components/PomodoroTimer';
 import CertificatesView from './views/CertificatesView';
 import RoadmapsView from './views/RoadmapsView';
 import CommunityView from './views/CommunityView';
@@ -25,6 +23,7 @@ import CorporateView from './views/CorporateView';
 import PlannerPage from './views/PlannerPage';
 import MessagingPage from './views/MessagingPage';
 import SettingsView from './views/SettingsView';
+import PomodoroTimer from './components/PomodoroTimer';
 
 const GUEST_USER = {
   name: 'Misafir',
@@ -59,32 +58,32 @@ function AppContent() {
 
   let content;
   switch (page) {
-    case 'login': content = <LoginView onNavigate={navigate} />; break;
-    case 'register': content = <RegisterView onNavigate={navigate} />; break;
-    case 'courses': content = <CoursesPage onNavigate={navigate} />; break;
-    case 'games': content = <GamesView onNavigate={navigate} />; break;
+    case 'login':       content = <LoginView onNavigate={navigate} />; break;
+    case 'register':    content = <RegisterView onNavigate={navigate} />; break;
+    case 'courses':     content = <CoursesPage onNavigate={navigate} />; break;
+    case 'games':       content = <GamesView onNavigate={navigate} />; break;
     case 'course-detail': content = <CourseDetailView onNavigate={navigate} />; break;
-    case 'checkout': content = <CheckoutView onNavigate={navigate} />; break;
-    case 'assignments': content = <AssignmentsView />; break;
-    case 'calendar': content = <PlannerPage />; break;
-    case 'messages': content = <MessagingPage />; break;
+    case 'checkout':    content = <CheckoutView onNavigate={navigate} />; break;
+    case 'assignments': content = <AssignmentsView onNavigate={navigate} />; break;
+    case 'calendar':    content = <PlannerPage onNavigate={navigate} />; break;
+    case 'messages':    content = <MessagingPage onNavigate={navigate} />; break;
     case 'certificates': content = <CertificatesView onNavigate={navigate} />; break;
-    case 'h-paths': content = <RoadmapsView onNavigate={navigate} />; break;
+    case 'h-paths':     content = <RoadmapsView onNavigate={navigate} />; break;
     case 'h-community': content = <CommunityView onNavigate={navigate} />; break;
     case 'h-corporate': content = <CorporateView onNavigate={navigate} />; break;
-    case 'live': content = <LiveSessionView user={displayUser} onNavigateHome={() => navigate('home')} />; break;
-    case 'home': content = <HomeView onNavigate={navigate} />; break;
-    case 'profile': 
-      if (displayUser.role === 'admin') content = <AdminDashboardView onNavigate={navigate} />;
+    case 'live':        content = <LiveSessionView user={displayUser} onNavigateHome={() => navigate('home')} />; break;
+    case 'settings':    content = <SettingsView onNavigate={navigate} />; break;
+    case 'home':        content = <HomeView onNavigate={navigate} />; break;
+    case 'profile':
+      if (displayUser.role === 'admin')        content = <AdminDashboardView onNavigate={navigate} />;
       else if (displayUser.role === 'teacher') content = <InstructorDashboardView onNavigate={navigate} />;
-      else content = <DashboardView user={displayUser} onNavigate={navigate} />; 
+      else                                     content = <DashboardView user={displayUser} onNavigate={navigate} />;
       break;
-    case 'settings': content = <SettingsView onNavigate={navigate} />; break;
-    case 'instructor': 
+    case 'instructor':
       if (displayUser.role === 'teacher' || displayUser.role === 'admin') content = <InstructorDashboardView onNavigate={navigate} />;
       else { setPage('home'); content = <HomeView onNavigate={navigate} />; }
       break;
-    case 'admin': 
+    case 'admin':
       if (displayUser.role === 'admin') content = <AdminDashboardView onNavigate={navigate} />;
       else { setPage('home'); content = <HomeView onNavigate={navigate} />; }
       break;

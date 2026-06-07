@@ -80,7 +80,7 @@ export default function RoadmapsView({ onNavigate }) {
   return (
     <>
       <GlobalNavbar activePage="roadmaps" onNavigate={onNavigate} />
-      <div style={{ minHeight: 'calc(100vh - 80px)', background: C.pageBg, padding: '40px 5%', color: C.body, fontFamily: C.font }}>
+      <div style={{ minHeight: 'calc(100vh - 80px)', background: C.pageBg, padding: '120px 5% 60px', color: C.body, fontFamily: C.font }}>
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>
           
           <div style={{
@@ -182,7 +182,7 @@ export default function RoadmapsView({ onNavigate }) {
                               </div>
                             </div>
                             {current && (
-                              <button style={{
+                              <button onClick={() => onNavigate('courses')} style={{
                                 marginTop: 20, padding: "12px 28px", borderRadius: 12, border: "none",
                                 background: rm.color, color: "#fff", fontFamily: C.font, fontSize: 14, fontWeight: 700, cursor: "pointer",
                                 boxShadow: `0 4px 12px ${rm.color}40`, transition: 'transform 0.2s'
