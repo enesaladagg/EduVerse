@@ -199,6 +199,45 @@ export default function GlobalNavbar({ activePage, onNavigate }) {
                   display: 'flex', flexDirection: 'column', gap: 4,
                   animation: 'slideDownFade 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
                 }}>
+                  {visibleNavItems.map(({ id, icon: Icon, label }) => {
+                    const isActive = activePage === id;
+                    return (
+                      <button
+                        key={id}
+                        onClick={() => { onNavigate(id); setMenuOpen(false); }}
+                        style={{
+                          boxSizing: 'border-box',
+                          display: 'flex', alignItems: 'center', gap: 14,
+                          width: '100%', padding: '12px 16px', borderRadius: 10,
+                          border: 'none', cursor: 'pointer', textAlign: 'left',
+                          background: isActive ? 'rgba(0,212,170,0.1)' : 'transparent',
+                          color: isActive ? '#00d4aa' : (isDark ? '#cbd5e1' : '#334155'),
+                          fontWeight: isActive ? 600 : 500, fontSize: 14,
+                          transition: 'all 0.2s',
+                          position: 'relative',
+                          overflow: 'hidden'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!isActive) {
+                            e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)';
+                            e.currentTarget.style.color = isDark ? '#fff' : '#0f172a';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!isActive) {
+                            e.currentTarget.style.background = 'transparent';
+                            e.currentTarget.style.color = isDark ? '#cbd5e1' : '#334155';
+                          }
+                        }}
+                      >
+                        <Icon size={20} strokeWidth={isActive ? 2.5 : 2} style={{ color: isActive ? '#00d4aa' : (isDark ? '#94a3b8' : '#64748b'), zIndex: 2 }} />
+                        <span style={{ zIndex: 2 }}>{label}</span>
+                      </button>
+                    );
+                  })}
+
+                  <div style={{ height: 1, background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)', margin: '8px 0' }} />
+
                   {EXTRA_LINKS.map(link => (
                     <button
                       key={link.id}
@@ -255,6 +294,20 @@ export default function GlobalNavbar({ activePage, onNavigate }) {
                   color: isActive ? '#00d4aa' : (isDark ? '#8899b4' : '#64748b'),
                   transition: 'color 0.2s',
                 }}
+                onMouseEnter={(e) => {
+                  if (!isActive) {
+                    e.currentTarget.style.color = '#00d4aa';
+                    const underline = e.currentTarget.querySelector('.nav-underline-tab');
+                    if (underline) underline.style.width = '100%';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActive) {
+                    e.currentTarget.style.color = isDark ? '#8899b4' : '#64748b';
+                    const underline = e.currentTarget.querySelector('.nav-underline-tab');
+                    if (underline) underline.style.width = '0%';
+                  }
+                }}
               >
                 <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
                 <span style={{ 
@@ -266,18 +319,21 @@ export default function GlobalNavbar({ activePage, onNavigate }) {
                 </span>
                 
                 {/* Active Indicator */}
-                {isActive && (
-                  <div style={{
+                <div 
+                  className="nav-underline-tab"
+                  style={{
                     position: 'absolute',
                     bottom: 0,
-                    left: 16,
-                    right: 16,
+                    left: '50%',
+                    transform: 'translateX(-50%)',
                     height: 3,
                     background: '#00d4aa',
                     borderTopLeftRadius: 3,
-                    borderTopRightRadius: 3
-                  }} />
-                )}
+                    borderTopRightRadius: 3,
+                    transition: 'width 0.3s ease',
+                    width: isActive ? 'calc(100% - 32px)' : '0%'
+                  }} 
+                />
               </button>
             );
           })}
@@ -487,7 +543,7 @@ export default function GlobalNavbar({ activePage, onNavigate }) {
                   <button onClick={() => { onNavigate('profile'); setShowProfileMenu(false); }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '10px 16px', background: 'transparent', border: 'none', color: isDark ? '#cbd5e1' : '#334155', fontSize: 14, fontWeight: 600, cursor: 'pointer', borderRadius: 8, transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                     <User size={16} /> Profilim
                   </button>
-                  <button onClick={() => { setShowProfileMenu(false); }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '10px 16px', background: 'transparent', border: 'none', color: isDark ? '#cbd5e1' : '#334155', fontSize: 14, fontWeight: 600, cursor: 'pointer', borderRadius: 8, transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                  <button onClick={() => { onNavigate('settings'); setShowProfileMenu(false); }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '10px 16px', background: 'transparent', border: 'none', color: isDark ? '#cbd5e1' : '#334155', fontSize: 14, fontWeight: 600, cursor: 'pointer', borderRadius: 8, transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                     <Settings size={16} /> Hesap Ayarları
                   </button>
                   <button onClick={() => { logout(); setShowProfileMenu(false); }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '10px 16px', marginTop: 4, background: 'transparent', border: 'none', color: '#ef4444', fontSize: 14, fontWeight: 600, cursor: 'pointer', borderRadius: 8, transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(239, 68, 68, 0.1)' : 'rgba(239, 68, 68, 0.1)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>

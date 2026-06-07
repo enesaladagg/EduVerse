@@ -23,6 +23,7 @@ import CommunityView from './views/CommunityView';
 import CorporateView from './views/CorporateView';
 import PlannerPage from './views/PlannerPage';
 import MessagingPage from './views/MessagingPage';
+import SettingsView from './views/SettingsView';
 
 const GUEST_USER = {
   name: 'Misafir',
@@ -59,11 +60,12 @@ function AppContent() {
     case 'live': content = <LiveSessionView user={displayUser} onNavigateHome={() => navigate('home')} />; break;
     case 'home': content = <HomeView onNavigate={navigate} />; break;
     case 'profile': content = <DashboardView user={displayUser} onNavigate={navigate} />; break;
+    case 'settings': content = <SettingsView onNavigate={navigate} />; break;
     case 'instructor': content = <InstructorDashboardView onNavigate={navigate} />; break;
     default: content = <HomeView onNavigate={navigate} />;
   }
 
-  const isShellPage = !['home', 'profile', 'instructor', 'live', 'login', 'register', 'certificates', 'h-paths', 'h-community', 'h-corporate'].includes(page);
+  const isShellPage = !['home', 'profile', 'settings', 'instructor', 'live', 'login', 'register', 'certificates', 'h-paths', 'h-community', 'h-corporate'].includes(page);
 
   return (
     <>
