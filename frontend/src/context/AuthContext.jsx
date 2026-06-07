@@ -18,6 +18,8 @@ function mapUser(data) {
     avatarInitials: data.name?.split(' ').map((p) => p[0]).join('').slice(0, 2).toUpperCase(),
     demo: data.demo,
     purchasedCourses: data.purchasedCourses || [],
+    streak: data.gamification?.streak || data.streak || 1,
+    level: Math.floor((data.points ?? data.gamification?.points ?? 0) / 100) + 1,
   };
 }
 
@@ -79,7 +81,7 @@ export function AuthProvider({ children }) {
       return { success: true };
     } catch (err) {
       console.warn("Backend'e ulaşılamadı. Demo kullanıcı olarak giriş yapılıyor.");
-      const mockData = { id: "123", name: "Enes Aladağ", email, role: "student", points: 250, purchasedCourses: [] };
+      const mockData = { id: "123", name: "Enes Aladağ", email, role: "student", points: 250, xp: 250, streak: 3, purchasedCourses: [] };
       applySession("mock-token-123", mockData);
       return { success: true };
     }
@@ -118,6 +120,29 @@ export function AuthProvider({ children }) {
     });
   }, []);
 
+  const addXP = useCallback((amount) => {
+    setUser((prev) => {
+      if (!prev) return prev;
+      const newXp = (prev.xp || 0) + amount;
+      const newPoints = (prev.points || 0) + amount;
+      const newLevel = Math.floor(newXp / 100) + 1;
+      const updated = { ...prev, xp: newXp, points: newPoints, level: newLevel };
+      localStorage.setItem('user', JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
+  const unlockBadge = useCallback((badgeId) => {
+    setUser((prev) => {
+      if (!prev) return prev;
+      const earned = prev.earnedIds || [];
+      if (earned.includes(badgeId)) return prev;
+      const updated = { ...prev, earnedIds: [...earned, badgeId], badges: [...(prev.badges || []), badgeId] };
+      localStorage.setItem('user', JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
   if (loading) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -136,6 +161,8 @@ export function AuthProvider({ children }) {
       refreshProfile,
       updateUser,
       purchaseCourses,
+      addXP,
+      unlockBadge,
     }}>
       {children}
     </AuthContext.Provider>

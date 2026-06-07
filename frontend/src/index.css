@@ -34,6 +34,19 @@ body {
 
 #root { min-height: 100vh; }
 
+/* =========================================================
+   Global Scrollbar Styles (Green)
+   ========================================================= */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #00d4aa; border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: #00b38f; }
+
+html {
+  scrollbar-width: thin;
+  scrollbar-color: #00d4aa transparent;
+}
+
 /* Platform butonlarının global button stillerini ezmesini önle */
 #root button { all: unset; cursor: pointer; }
 
