@@ -211,18 +211,15 @@ export default function HomeView({ onNavigate }) {
       }
       
       const trailContainer = document.getElementById('trail-container');
-      if (trailContainer && Math.random() > 0.6) {
+      if (trailContainer && Math.random() > 0.85) {
         const p = document.createElement('div');
         p.className = 'trail-bubble';
         p.style.left = e.clientX + 'px';
         p.style.top = e.clientY + 'px';
         
-        const size = Math.random() * 15 + 10;
+        const size = Math.random() * 10 + 6;
         p.style.width = size + 'px';
         p.style.height = size + 'px';
-        
-        const tx = (Math.random() - 0.5) * 60;
-        const ty = (Math.random() - 0.5) * 60 - 30;
         
         p.style.transform = `translate(-50%, -50%) scale(1)`;
         
@@ -231,11 +228,11 @@ export default function HomeView({ onNavigate }) {
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
             p.style.opacity = '0';
-            p.style.transform = `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(0.2)`;
+            p.style.transform = `translate(-50%, -50%) scale(0.1)`;
           });
         });
         
-        setTimeout(() => p.remove(), 1000);
+        setTimeout(() => p.remove(), 600);
       }
     }; 
     window.addEventListener('mousemove', handleMouseMove); 
@@ -274,10 +271,9 @@ export default function HomeView({ onNavigate }) {
           position: absolute;
           border-radius: 50%;
           background: #00D4AA;
-          box-shadow: 0 0 12px rgba(0, 212, 170, 0.8), inset 0 0 6px rgba(255, 255, 255, 0.5);
           pointer-events: none;
-          transition: transform 1s cubic-bezier(0.1, 0.8, 0.3, 1), opacity 1s ease-out;
-          opacity: 0.9;
+          transition: transform 0.6s cubic-bezier(0.1, 0.8, 0.3, 1), opacity 0.6s ease-out;
+          opacity: 0.8;
         }
 
         .bg-light-animated {
@@ -340,9 +336,9 @@ export default function HomeView({ onNavigate }) {
         .btn-secondary { background: transparent; color: ${COLORS.accent}; border: 2px solid ${COLORS.accent}; padding: 12px 28px; border-radius: 12px; font-weight: 600; font-size: 15px; cursor: pointer; transition: all 0.3s; font-family: inherit; }
         .btn-secondary:hover { background: rgba(0,212,170,0.1); transform: translateY(-2px); }
         
-        .tab-btn { background: transparent; border: 1px solid transparent; color: ${COLORS.textMuted}; font-size: 15px; font-weight: 600; padding: 10px 24px; cursor: pointer; border-radius: 8px; transition: all 0.3s; font-family: inherit; }
-        .tab-btn.active { background: ${COLORS.surface}; color: ${COLORS.accent}; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-color: ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'}; }
-        .tab-btn:hover:not(.active) { color: ${COLORS.text}; background: ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)'}; }
+        .tab-btn { background: transparent; border: 2px solid ${COLORS.border}; color: ${COLORS.textMuted}; font-size: 15px; font-weight: 600; padding: 10px 24px; cursor: pointer; border-radius: 50px; transition: all 0.3s; font-family: inherit; }
+        .tab-btn.active { background: ${COLORS.accent}; color: #fff; border-color: ${COLORS.accent}; box-shadow: 0 4px 12px rgba(0,212,170,0.3); }
+        .tab-btn:hover:not(.active) { color: ${COLORS.text}; border-color: ${COLORS.accent}; }
         
         .testimonial-card { background: ${COLORS.surface}; border-radius: 20px; padding: 32px; border: 1px solid ${COLORS.border}; transition: all 0.4s; }
         .testimonial-card:hover { border-color: ${COLORS.accentAlt}; transform: translateY(-4px); }
@@ -443,7 +439,7 @@ export default function HomeView({ onNavigate }) {
         .stat-pill { position: absolute; backdrop-filter: blur(12px); border-radius: 50px; padding: 8px 18px 8px 10px; display: flex; align-items: center; gap: 8px; font-size: 0.78rem; font-weight: 600; z-index: 20; white-space: nowrap; }
         .stat-pill .icon { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; }
         .pill-1 { top: 18%; right: 0%; animation: ci 0.9s cubic-bezier(0.16,1,0.3,1) 1.6s both, fy 9s ease-in-out 3s infinite; }
-        .pill-2 { bottom: 15%; left: 30%; animation: ci 0.9s cubic-bezier(0.16,1,0.3,1) 1.8s both, fy2 8s ease-in-out 3.3s infinite; }
+        .pill-2 { bottom: 10%; right: 5%; left: auto; animation: ci 0.9s cubic-bezier(0.16,1,0.3,1) 1.8s both, fy2 8s ease-in-out 3.3s infinite; }
         .lines-svg { position: absolute; inset: 0; z-index: 2; pointer-events: none; animation: fadeIn 2.5s ease-out 1.5s both; }
         @keyframes fadeIn { from{opacity:0} to{opacity:1} }
         @keyframes fiu { from{opacity:0;transform:translateY(22px)} to{opacity:1;transform:translateY(0)} }
@@ -684,7 +680,7 @@ export default function HomeView({ onNavigate }) {
             </h2>
             <p style={{ color: COLORS.textMuted, fontSize: 16 }}>En çok tercih edilen ve en yüksek puanlı eğitimler</p>
           </div>
-          <div style={{ display: "flex", gap: 8, background: isDark ? 'rgba(0,0,0,0.2)' : '#f1f5f9', borderRadius: 12, padding: 6, border: `1px solid ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'}` }}>
+          <div style={{ display: "flex", gap: 12 }}>
             {[
               { key: "popular", label: "Popüler" },
               { key: "new", label: "En Yeni" },
