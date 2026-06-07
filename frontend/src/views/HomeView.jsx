@@ -211,15 +211,18 @@ export default function HomeView({ onNavigate }) {
       }
       
       const trailContainer = document.getElementById('trail-container');
-      if (trailContainer && Math.random() > 0.85) {
+      if (trailContainer && Math.random() > 0.6) {
         const p = document.createElement('div');
         p.className = 'trail-bubble';
         p.style.left = e.clientX + 'px';
         p.style.top = e.clientY + 'px';
         
-        const size = Math.random() * 10 + 6;
+        const size = Math.random() * 15 + 10;
         p.style.width = size + 'px';
         p.style.height = size + 'px';
+        
+        const tx = (Math.random() - 0.5) * 60;
+        const ty = (Math.random() - 0.5) * 60 - 30;
         
         p.style.transform = `translate(-50%, -50%) scale(1)`;
         
@@ -228,11 +231,11 @@ export default function HomeView({ onNavigate }) {
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
             p.style.opacity = '0';
-            p.style.transform = `translate(-50%, -50%) scale(0.1)`;
+            p.style.transform = `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(0.2)`;
           });
         });
         
-        setTimeout(() => p.remove(), 600);
+        setTimeout(() => p.remove(), 1000);
       }
     }; 
     window.addEventListener('mousemove', handleMouseMove); 
@@ -271,9 +274,10 @@ export default function HomeView({ onNavigate }) {
           position: absolute;
           border-radius: 50%;
           background: #00D4AA;
+          box-shadow: 0 0 12px rgba(0, 212, 170, 0.8), inset 0 0 6px rgba(255, 255, 255, 0.5);
           pointer-events: none;
-          transition: transform 0.6s cubic-bezier(0.1, 0.8, 0.3, 1), opacity 0.6s ease-out;
-          opacity: 0.8;
+          transition: transform 1s cubic-bezier(0.1, 0.8, 0.3, 1), opacity 1s ease-out;
+          opacity: 0.9;
         }
 
         .bg-light-animated {
