@@ -1,91 +1,109 @@
-<!-- ░░░░░░░░░░░░░░░░░░░░░░░░░  HERO  ░░░░░░░░░░░░░░░░░░░░░░░░░ -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!--                                  HERO                                    -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+
 <div align="center">
 
-<a href="https://github.com/enesaladagg/EduVerse">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:6366f1,50:7c3aed,100:00d4aa&height=200&section=header&text=EduVerse&fontSize=72&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Yeni%20Nesil%20Online%20E%C4%9Fitim%20Platformu&descSize=20&descAlignY=60" alt="EduVerse" width="100%"/>
-</a>
-
-<br/>
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:6366f1,50:7c3aed,100:00d4aa&height=220&section=header&text=EduVerse&fontSize=80&fontColor=ffffff&animation=fadeIn&fontAlignY=36&desc=Yeni%20Nesil%20Online%20E%C4%9Fitim%20Platformu&descSize=22&descAlignY=58" width="100%" alt="EduVerse"/>
 
 <!-- Tagline -->
-### 🎓 Canlı dersler · 🔐 Çok katmanlı kimlik doğrulama · 🏆 Oyunlaştırma · 💼 Kurumsal B2B
-
-<em>WebRTC tabanlı gerçek zamanlı eğitim deneyimini, üretim kalitesinde güvenlikle birleştiren full-stack SaaS platformu.</em>
-
-<br/><br/>
-
-<!-- Live status badges -->
 <p>
-  <img src="https://img.shields.io/badge/Versiyon-2.0.0-6366f1?style=for-the-badge&labelColor=1e1b4b" />
-  <img src="https://img.shields.io/badge/Durum-Aktif%20Geli%C5%9Ftirme-22c55e?style=for-the-badge&labelColor=14532d" />
-  <img src="https://img.shields.io/badge/Build-Pass%20(0%20hata)-00d4aa?style=for-the-badge&labelColor=0f766e" />
-  <img src="https://img.shields.io/badge/Lisans-ISC-f59e0b?style=for-the-badge&labelColor=78350f" />
+  <strong>🎥 WebRTC Canlı Dersler &nbsp;·&nbsp; 🔐 Çok Katmanlı Kimlik Doğrulama &nbsp;·&nbsp; 🏆 Oyunlaştırma &nbsp;·&nbsp; 💼 Kurumsal B2B</strong>
 </p>
 
-<!-- Tech badges -->
+<p><em>Gerçek zamanlı eğitim deneyimini üretim kalitesinde güvenlikle birleştiren full-stack SaaS platformu.</em></p>
+
+<!-- ── Status badges ── -->
 <p>
-  <img src="https://img.shields.io/badge/Node.js-18+-339933?style=flat-square&logo=nodedotjs&logoColor=white" />
-  <img src="https://img.shields.io/badge/Express-4-000000?style=flat-square&logo=express&logoColor=white" />
-  <img src="https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=black" />
-  <img src="https://img.shields.io/badge/Vite-5-646CFF?style=flat-square&logo=vite&logoColor=white" />
-  <img src="https://img.shields.io/badge/MongoDB-7-47A248?style=flat-square&logo=mongodb&logoColor=white" />
-  <img src="https://img.shields.io/badge/Socket.io-4-010101?style=flat-square&logo=socketdotio&logoColor=white" />
-  <img src="https://img.shields.io/badge/WebRTC-Live-333333?style=flat-square&logo=webrtc&logoColor=white" />
-  <img src="https://img.shields.io/badge/JWT-Auth-000000?style=flat-square&logo=jsonwebtokens&logoColor=white" />
+  <img src="https://img.shields.io/badge/VERSİYON-2.0.0-6366f1?style=for-the-badge&labelColor=1e1b4b" alt="version"/>
+  <img src="https://img.shields.io/badge/DURUM-AKTİF-22c55e?style=for-the-badge&labelColor=14532d" alt="status"/>
+  <img src="https://img.shields.io/badge/BUILD-PASSING-00d4aa?style=for-the-badge&labelColor=0f766e&logo=vercel&logoColor=white" alt="build"/>
+  <img src="https://img.shields.io/badge/LİSANS-ISC-f59e0b?style=for-the-badge&labelColor=78350f" alt="license"/>
 </p>
 
-<!-- Nav -->
+<!-- ── Nav ── -->
 <p>
-  <a href="#-neden-eduverse">Neden EduVerse?</a> &nbsp;•&nbsp;
-  <a href="#-özellikler">Özellikler</a> &nbsp;•&nbsp;
-  <a href="#-mimari">Mimari</a> &nbsp;•&nbsp;
-  <a href="#-hızlı-başlangıç">Hızlı Başlangıç</a> &nbsp;•&nbsp;
-  <a href="#-api-referansı">API</a> &nbsp;•&nbsp;
-  <a href="#-güvenlik-mimarisi">Güvenlik</a> &nbsp;•&nbsp;
-  <a href="#-test-hesapları">Test</a>
+  <a href="#-içindekiler"><img src="https://img.shields.io/badge/📖_İçindekiler-eef2ff?style=flat-square&labelColor=eef2ff&color=6366f1" alt="toc"/></a>
+  <a href="#-hızlı-başlangıç"><img src="https://img.shields.io/badge/🚀_Kurulum-eef2ff?style=flat-square&labelColor=eef2ff&color=00d4aa" alt="setup"/></a>
+  <a href="#-api-referansı"><img src="https://img.shields.io/badge/🔌_API-eef2ff?style=flat-square&labelColor=eef2ff&color=7c3aed" alt="api"/></a>
+  <a href="#-güvenlik-mimarisi"><img src="https://img.shields.io/badge/🛡️_Güvenlik-eef2ff?style=flat-square&labelColor=eef2ff&color=ef4444" alt="security"/></a>
 </p>
 
 </div>
 
 <br/>
 
-<!-- Highlight stats strip -->
+<!-- ── Highlight stats ── -->
 <div align="center">
 
 | ⚡ Gerçek Zamanlı | 🔐 Auth Yöntemi | 🛡️ Güvenlik Katmanı | 📄 Sayfa | 🔌 API Endpoint |
 |:---:|:---:|:---:|:---:|:---:|
-| WebRTC + Socket.io | **4 farklı** | **7+** | **20+** | **30+** |
+| **WebRTC + Socket.io** | **4 farklı** | **7+** | **20+** | **30+** |
 
 </div>
 
----
+<br/>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+## 📖 İçindekiler
+
+<table>
+<tr>
+<td valign="top" width="50%">
+
+1. [🌟 Neden EduVerse?](#-neden-eduverse)
+2. [✨ Özellikler](#-özellikler)
+3. [🧰 Teknoloji Yığını](#-teknoloji-yığını)
+4. [🏗 Mimari](#-mimari)
+5. [📂 Proje Yapısı](#-proje-yapısı)
+
+</td>
+<td valign="top" width="50%">
+
+6. [🚀 Hızlı Başlangıç](#-hızlı-başlangıç)
+7. [🔌 API Referansı](#-api-referansı)
+8. [🛡️ Güvenlik Mimarisi](#-güvenlik-mimarisi)
+9. [🧪 Test Hesapları](#-test-hesapları)
+10. [📜 Komutlar & Katkı](#-npm-komutları)
+
+</td>
+</tr>
+</table>
+
+<br/>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
 
 ## 🌟 Neden EduVerse?
 
-> Mevcut eğitim platformları **tek yönlü** ve **etkileşimsiz**. EduVerse bunu değiştiriyor.
+> Mevcut eğitim platformları çoğunlukla **tek yönlü** ve **etkileşimsizdir.** EduVerse bu denklemi değiştirir.
 
 <table>
 <tr>
 <td width="33%" align="center" valign="top">
 
-### 🎥
-**Gerçekten Canlı**
+<img src="https://img.shields.io/badge/-🎥-6366f1?style=for-the-badge&labelColor=6366f1" height="36"/>
+
+### Gerçekten Canlı
 
 Kayıtlı video değil — WebRTC ile **gecikmesiz** çift yönlü video, ortak beyaz tahta ve canlı kod laboratuvarı.
 
 </td>
 <td width="33%" align="center" valign="top">
 
-### 🔑
-**Erişilebilir Giriş**
+<img src="https://img.shields.io/badge/-🔑-00d4aa?style=for-the-badge&labelColor=00d4aa" height="36"/>
+
+### Erişilebilir Giriş
 
 E-posta yok mu? Sorun değil. **Telefon numarasıyla** kayıt ve şifresiz SMS girişi. Google ile tek tık.
 
 </td>
 <td width="33%" align="center" valign="top">
 
-### 🛡️
-**Güvenlik Önce**
+<img src="https://img.shields.io/badge/-🛡️-ef4444?style=for-the-badge&labelColor=ef4444" height="36"/>
+
+### Güvenlik Önce
 
 bcrypt, SHA-256 token, JWT, rate-limit, NoSQL injection koruması — **endüstri standardı** sertleştirme.
 
@@ -93,7 +111,9 @@ bcrypt, SHA-256 token, JWT, rate-limit, NoSQL injection koruması — **endüstr
 </tr>
 </table>
 
----
+<br/>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
 
 ## ✨ Özellikler
 
@@ -101,70 +121,96 @@ bcrypt, SHA-256 token, JWT, rate-limit, NoSQL injection koruması — **endüstr
 <tr>
 <td width="50%" valign="top">
 
-### 🔐 Kimlik Doğrulama &nbsp;`v2.0 YENİ`
-- 📧 **E-posta OTP** — kayıtta 6 haneli kod maile gider
-- 🔁 **Şifremi Unuttum** — SHA-256 hash'li güvenli link
-- 📱 **Telefon ile Kayıt & Giriş** — SMS OTP, şifresiz
-- 🌐 **Google / LinkedIn OAuth** — anında + hoş geldin maili
-- 🔒 **Şifre Sıfırlama Sayfası** — güç göstergesi + eşleşme
-- 🎚️ **E-posta ↔ Telefon** SVG sliding-pill seçici
+#### 🔐 Kimlik Doğrulama &nbsp; `v2.0 YENİ`
+`📧` **E-posta OTP** — kayıtta 6 haneli kod maile gider
+`🔁` **Şifremi Unuttum** — SHA-256 hash'li güvenli link
+`📱` **Telefon Kayıt & Giriş** — SMS OTP, şifresiz
+`🌐` **Google / LinkedIn OAuth** — anında + hoş geldin maili
+`🔒` **Şifre Sıfırlama** — güç göstergesi + eşleşme kontrolü
+`🎚️` **E-posta ↔ Telefon** SVG sliding-pill seçici
 
 </td>
 <td width="50%" valign="top">
 
-### 🚀 Canlı Ders Altyapısı
-- 🎥 **WebRTC + Socket.io** — düşük gecikmeli video/ses
-- 💬 Gerçek zamanlı **sohbet · anket · el kaldırma**
-- 🖊️ Çok kullanıcılı eşzamanlı **Beyaz Tahta**
-- 💻 Canlı **Kod Laboratuvarı** (JS / Python / HTML)
-- 🪄 AI destekli arka plan kaldırma & bulanıklaştırma
-- 🎤 Seminer modu: Host / Guest Speaker / Attendee
-
-</td>
-</tr>
-<tr>
-<td width="50%" valign="top">
-
-### 🏆 Oyunlaştırma & Topluluk
-- ⭐ **XP puanı**, seviye sistemi ve rozet koleksiyonu
-- 🚩 **CTF** güvenlik laboratuvarları + skor tablosu
-- 💭 Forum gönderileri, yorumlar, beğeniler
-- 📡 **Topluluk Sayfası** — gerçek zamanlı canlı akış
-
-</td>
-<td width="50%" valign="top">
-
-### 🗺️ Kariyer & Verimlilik
-- 🧭 Full Stack · Data Science · DevOps **yol haritaları**
-- ⏱️ Görev bazlı **Pomodoro** sayacı
-- 📅 **Takvim** entegrasyonlu çalışma planı
-- 🎖️ **QR doğrulamalı** tamamlama sertifikaları
+#### 🚀 Canlı Ders Altyapısı
+`🎥` **WebRTC + Socket.io** — düşük gecikmeli video/ses
+`💬` Gerçek zamanlı **sohbet · anket · el kaldırma**
+`🖊️` Çok kullanıcılı eşzamanlı **Beyaz Tahta**
+`💻` Canlı **Kod Laboratuvarı** (JS / Python / HTML)
+`🪄` AI destekli arka plan kaldırma & bulanıklaştırma
+`🎤` Seminer modu: Host / Speaker / Attendee
 
 </td>
 </tr>
 <tr>
 <td width="50%" valign="top">
 
-### 💼 Kurumsal & Ödeme
-- 🏢 **B2B kurumsal** plan & giriş sayfası
-- 🛒 Sanal ödeme akışı (sepet → checkout)
-- 📝 **Eğitmen başvuru** sistemi (admin onaylı)
-- 📈 Gelir & öğrenci takip paneli
+#### 🏆 Oyunlaştırma & Topluluk
+`⭐` **XP puanı**, seviye sistemi, rozet koleksiyonu
+`🚩` **CTF** güvenlik laboratuvarları + skor tablosu
+`💭` Forum gönderileri, yorumlar, beğeniler
+`📡` **Topluluk Sayfası** — gerçek zamanlı akış
 
 </td>
 <td width="50%" valign="top">
 
-### 🛡️ Güvenlik & Altyapı
-- 🪖 Helmet · CORS whitelist · Rate limit · sanitize
-- 🔐 **JWT** + bcrypt (salt:12) + SHA-256 hashing
-- 📜 Winston + Morgan **loglama** (14 gün rotasyon)
-- 👑 Tam **Admin Paneli** — kullanıcı, kurs, başvuru
+#### 🗺️ Kariyer & Verimlilik
+`🧭` Full Stack · Data Science · DevOps **yol haritaları**
+`⏱️` Görev bazlı **Pomodoro** sayacı
+`📅` **Takvim** entegrasyonlu çalışma planı
+`🎖️` **QR doğrulamalı** tamamlama sertifikaları
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+#### 💼 Kurumsal & Ödeme
+`🏢` **B2B kurumsal** plan & giriş sayfası
+`🛒` Sanal ödeme akışı (sepet → checkout)
+`📝` **Eğitmen başvuru** sistemi (admin onaylı)
+`📈` Gelir & öğrenci takip paneli
+
+</td>
+<td width="50%" valign="top">
+
+#### 🛡️ Güvenlik & Altyapı
+`🪖` Helmet · CORS · Rate limit · sanitize
+`🔐` **JWT** + bcrypt (salt:12) + SHA-256
+`📜` Winston + Morgan **loglama** (14 gün)
+`👑` Tam **Admin Paneli** — kullanıcı, kurs, başvuru
 
 </td>
 </tr>
 </table>
 
----
+<br/>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+## 🧰 Teknoloji Yığını
+
+<div align="center">
+
+<img src="https://skillicons.dev/icons?i=react,vite,nodejs,express,mongodb,socketio,js,html,css,git,github,vscode&theme=dark" alt="tech stack"/>
+
+</div>
+
+<br/>
+
+| Katman | Teknolojiler | Notlar |
+|:---|:---|:---|
+| 🎨 **Frontend** | ![React](https://img.shields.io/badge/-React_18-20232a?style=flat-square&logo=react) ![Vite](https://img.shields.io/badge/-Vite_5-646CFF?style=flat-square&logo=vite&logoColor=white) | Vanilla CSS design-system · Context API · Lucide React |
+| ⚙️ **Backend** | ![Node](https://img.shields.io/badge/-Node_18-339933?style=flat-square&logo=nodedotjs&logoColor=white) ![Express](https://img.shields.io/badge/-Express_4-000000?style=flat-square&logo=express) | asyncHandler · Joi validasyon · Passport.js |
+| 🍃 **Veritabanı** | ![MongoDB](https://img.shields.io/badge/-MongoDB_7-47A248?style=flat-square&logo=mongodb&logoColor=white) ![Mongoose](https://img.shields.io/badge/-Mongoose-880000?style=flat-square&logo=mongoose&logoColor=white) | Sparse unique index (email & phone) |
+| 📡 **Gerçek Zamanlı** | ![SocketIO](https://img.shields.io/badge/-Socket.io_4-010101?style=flat-square&logo=socketdotio) ![WebRTC](https://img.shields.io/badge/-WebRTC-333333?style=flat-square&logo=webrtc&logoColor=white) | Simple-peer · Perfect Negotiation pattern |
+| 📧 **E-posta / SMS** | ![Nodemailer](https://img.shields.io/badge/-Nodemailer-30B980?style=flat-square&logo=minutemailer&logoColor=white) ![Twilio](https://img.shields.io/badge/-Twilio-F22F46?style=flat-square&logo=twilio&logoColor=white) | HTML şablonlar · console-log fallback |
+| 🌐 **OAuth** | ![Google](https://img.shields.io/badge/-Google-4285F4?style=flat-square&logo=google&logoColor=white) ![LinkedIn](https://img.shields.io/badge/-LinkedIn-0A66C2?style=flat-square&logo=linkedin&logoColor=white) | Passport stratejileri · `isVerified:true` otomatik |
+| 🛡️ **Güvenlik** | ![JWT](https://img.shields.io/badge/-JWT-000000?style=flat-square&logo=jsonwebtokens) ![Helmet](https://img.shields.io/badge/-Helmet-1e293b?style=flat-square) | bcrypt · rate-limit · mongo-sanitize · SHA-256 |
+
+<br/>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
 
 ## 🏗 Mimari
 
@@ -172,45 +218,35 @@ bcrypt, SHA-256 token, JWT, rate-limit, NoSQL injection koruması — **endüstr
 
 ```mermaid
 graph TD
-    A[🌐 Tarayıcı · React 18 + Vite SPA] -->|HTTPS REST| B[⚙️ Express.js API]
-    A -->|WebSocket| C[📡 Socket.io]
-    B --> D[🛡️ Güvenlik Middleware Zinciri]
-    D --> E[(🍃 MongoDB)]
-    C --> F[🎥 WebRTC Sinyalleşme]
-    C --> G[🖊️ Beyaz Tahta · 💬 Sohbet · 📊 Anket]
-    B --> H[📧 Nodemailer · 📱 Twilio · 🔑 Passport.js]
+    A["🌐 Tarayıcı<br/>React 18 + Vite SPA"] -->|HTTPS · REST| B["⚙️ Express.js API"]
+    A -->|WebSocket| C["📡 Socket.io"]
+    B --> D["🛡️ Güvenlik Middleware Zinciri<br/>Helmet → RateLimit → CORS → Sanitize → JWT"]
+    D --> E[("🍃 MongoDB")]
+    C --> F["🎥 WebRTC Sinyalleşme"]
+    C --> G["🖊️ Tahta · 💬 Sohbet · 📊 Anket"]
+    B --> H["📧 Nodemailer · 📱 Twilio · 🔑 Passport.js"]
     H -.->|OTP / Mail / OAuth| A
 
-    style A fill:#61DAFB,stroke:#333,color:#000
-    style B fill:#339933,stroke:#333,color:#fff
-    style C fill:#010101,stroke:#333,color:#fff
-    style E fill:#47A248,stroke:#333,color:#fff
-    style D fill:#ef4444,stroke:#333,color:#fff
-    style H fill:#7c3aed,stroke:#333,color:#fff
+    style A fill:#61DAFB,stroke:#1e293b,stroke-width:2px,color:#000
+    style B fill:#339933,stroke:#1e293b,stroke-width:2px,color:#fff
+    style C fill:#010101,stroke:#1e293b,stroke-width:2px,color:#fff
+    style D fill:#ef4444,stroke:#1e293b,stroke-width:2px,color:#fff
+    style E fill:#47A248,stroke:#1e293b,stroke-width:2px,color:#fff
+    style F fill:#333333,stroke:#1e293b,stroke-width:2px,color:#fff
+    style G fill:#7c3aed,stroke:#1e293b,stroke-width:2px,color:#fff
+    style H fill:#6366f1,stroke:#1e293b,stroke-width:2px,color:#fff
 ```
 
 </div>
 
-### 🧰 Tech Stack
+<br/>
 
-| Katman | Teknoloji | Notlar |
-|:---|:---|:---|
-| 🎨 **Frontend** | React 18, Vite, Lucide React | Vanilla CSS design-system, Context API |
-| ⚙️ **Backend** | Node.js, Express.js, asyncHandler | Joi validasyon, Passport.js |
-| 🍃 **Veritabanı** | MongoDB 7, Mongoose | Sparse unique index (email & phone) |
-| 📡 **Gerçek Zamanlı** | Socket.io 4, Simple-peer (WebRTC) | Perfect Negotiation pattern |
-| 📧 **E-posta** | Nodemailer + Gmail SMTP | HTML şablonlar (OTP, reset, hoş geldin) |
-| 📱 **SMS** | Twilio SDK | Console-log fallback (dev modunda) |
-| 🌐 **OAuth** | Passport Google 2.0, LinkedIn | `isVerified:true` otomatik |
-| 🛡️ **Güvenlik** | JWT, bcryptjs, Helmet, rate-limit, sanitize | SHA-256 token hash |
-| 📜 **Loglama** | Winston (dosya rotasyonu), Morgan | 14 gün saklama |
-
----
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
 
 ## 📂 Proje Yapısı
 
 <details>
-<summary><b>📁 Klasör ağacını görüntüle</b> (tıkla)</summary>
+<summary><b>📁 Klasör ağacını görüntüle</b> &nbsp;<kbd>tıkla</kbd></summary>
 
 <br/>
 
@@ -249,7 +285,7 @@ EduVerse/
 │   └── src/
 │       ├── context/
 │       │   ├── AuthContext.jsx    # registerPhone, loginPhone, forgotPassword…
-│       │   ├── ThemeContext.jsx · CartContext.jsx · ToastContext.jsx
+│       │   └── ThemeContext · CartContext · ToastContext
 │       ├── views/
 │       │   ├── LoginView.jsx      # E-posta/Telefon tab + şifremi unuttum
 │       │   ├── RegisterView.jsx   # E-posta/Telefon tab + OTP doğrulama
@@ -271,27 +307,35 @@ EduVerse/
 
 </details>
 
----
+<br/>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
 
 ## 🚀 Hızlı Başlangıç
 
-> 📋 **Gereksinimler:** Node.js `v18+` · MongoDB `v6+` (yerel ya da Atlas) · npm `v9+`
+<div align="center">
 
-### 1️⃣ Backend
+![Node](https://img.shields.io/badge/Node.js-v18+-339933?style=flat-square&logo=nodedotjs&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-v6+-47A248?style=flat-square&logo=mongodb&logoColor=white)
+![npm](https://img.shields.io/badge/npm-v9+-CB3837?style=flat-square&logo=npm&logoColor=white)
+
+</div>
+
+#### 1️⃣ &nbsp; Backend
 
 ```bash
 cd backend
 
 cp .env.example .env          # Ortam değişkenlerini hazırla
 # .env içinde en az şunları doldur:
-#   MONGO_URI, JWT_SECRET, SMTP_USER, SMTP_PASS, CLIENT_URL
+#   MONGO_URI · JWT_SECRET · SMTP_USER · SMTP_PASS · CLIENT_URL
 
 npm install
 npm run db:seed               # örnek verilerle DB'yi doldur (önerilen)
 npm run dev                   # 🟢 http://localhost:5000
 ```
 
-### 2️⃣ Frontend
+#### 2️⃣ &nbsp; Frontend
 
 ```bash
 cd frontend
@@ -302,10 +346,10 @@ npm install
 npm run dev                   # 🟢 http://localhost:5173
 ```
 
-> ⚠️ **İki sunucu da aynı anda çalışmalıdır.** Backend `5000`, Frontend `5173` portunu kullanır.
+> ⚠️ &nbsp;**İki sunucu da aynı anda çalışmalıdır.** &nbsp;Backend `5000`, Frontend `5173` portunu kullanır.
 
 <details>
-<summary>📱 <b>SMS yapılandırması (opsiyonel — Twilio)</b></summary>
+<summary>📱 &nbsp;<b>SMS yapılandırması (opsiyonel — Twilio)</b></summary>
 
 <br/>
 
@@ -316,29 +360,31 @@ TWILIO_AUTH_TOKEN=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 TWILIO_PHONE_NUMBER=+1XXXXXXXXXX
 ```
 
-Twilio yapılandırılmadığında SMS mesajları terminale `[SMS-TEST]` olarak yazdırılır — geliştirme ortamı kesintisiz çalışmaya devam eder. Ücretsiz hesap: [twilio.com/try-twilio](https://twilio.com/try-twilio)
+Twilio yapılandırılmadığında SMS mesajları terminale `[SMS-TEST]` olarak yazdırılır — geliştirme ortamı kesintisiz çalışır. Ücretsiz hesap: **[twilio.com/try-twilio](https://twilio.com/try-twilio)**
 
 </details>
 
----
+<br/>
 
-## 📡 API Referansı
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
 
-### 🔐 Kimlik Doğrulama
+## 🔌 API Referansı
+
+#### 🔐 Kimlik Doğrulama
 
 | Method | Endpoint | Açıklama |
-|:---|:---|:---|
-| `POST` | `/api/auth/register` | E-posta ile kayıt + OTP gönderimi |
-| `POST` | `/api/auth/verify-email` | E-posta OTP doğrulama |
-| `POST` | `/api/auth/login` | E-posta / şifre girişi → JWT |
-| `POST` | `/api/auth/register-phone` | 📱 Telefon ile kayıt + SMS OTP |
-| `POST` | `/api/auth/verify-phone` | 📱 Telefon OTP doğrulama |
-| `POST` | `/api/auth/send-phone-otp` | 📱 OTP yeniden gönder |
-| `POST` | `/api/auth/login-phone` | 📱 Şifresiz telefon girişi |
-| `POST` | `/api/auth/forgot-password` | 🔁 Şifre sıfırlama maili gönder |
-| `POST` | `/api/auth/reset-password/:token` | 🔁 Yeni şifre belirle |
-| `GET`  | `/api/auth/google` | 🌐 Google OAuth başlat |
-| `GET`  | `/api/auth/linkedin` | 🌐 LinkedIn OAuth başlat |
+|:---:|:---|:---|
+| ![POST](https://img.shields.io/badge/POST-22c55e?style=flat-square) | `/api/auth/register` | E-posta ile kayıt + OTP gönderimi |
+| ![POST](https://img.shields.io/badge/POST-22c55e?style=flat-square) | `/api/auth/verify-email` | E-posta OTP doğrulama |
+| ![POST](https://img.shields.io/badge/POST-22c55e?style=flat-square) | `/api/auth/login` | E-posta / şifre girişi → JWT |
+| ![POST](https://img.shields.io/badge/POST-22c55e?style=flat-square) | `/api/auth/register-phone` | 📱 Telefon ile kayıt + SMS OTP |
+| ![POST](https://img.shields.io/badge/POST-22c55e?style=flat-square) | `/api/auth/verify-phone` | 📱 Telefon OTP doğrulama |
+| ![POST](https://img.shields.io/badge/POST-22c55e?style=flat-square) | `/api/auth/send-phone-otp` | 📱 OTP yeniden gönder |
+| ![POST](https://img.shields.io/badge/POST-22c55e?style=flat-square) | `/api/auth/login-phone` | 📱 Şifresiz telefon girişi |
+| ![POST](https://img.shields.io/badge/POST-22c55e?style=flat-square) | `/api/auth/forgot-password` | 🔁 Şifre sıfırlama maili gönder |
+| ![POST](https://img.shields.io/badge/POST-22c55e?style=flat-square) | `/api/auth/reset-password/:token` | 🔁 Yeni şifre belirle |
+| ![GET](https://img.shields.io/badge/GET-3b82f6?style=flat-square) | `/api/auth/google` | 🌐 Google OAuth başlat |
+| ![GET](https://img.shields.io/badge/GET-3b82f6?style=flat-square) | `/api/auth/linkedin` | 🌐 LinkedIn OAuth başlat |
 
 <details>
 <summary><b>📚 Kurslar · 🛠 Admin · 🌐 Topluluk endpoint'lerini görüntüle</b></summary>
@@ -348,58 +394,60 @@ Twilio yapılandırılmadığında SMS mesajları terminale `[SMS-TEST]` olarak 
 **📚 Kurslar & Kullanıcılar**
 
 | Method | Endpoint | Açıklama |
-|:---|:---|:---|
-| `GET` | `/api/courses` | Kurs listesi (filtreli & sayfalı) |
-| `GET` | `/api/users/me` | Aktif kullanıcı profili |
-| `PUT` | `/api/users/me` | Profil güncelle |
-| `POST` | `/api/upload/profile-picture` | Profil fotoğrafı yükle |
+|:---:|:---|:---|
+| ![GET](https://img.shields.io/badge/GET-3b82f6?style=flat-square) | `/api/courses` | Kurs listesi (filtreli & sayfalı) |
+| ![GET](https://img.shields.io/badge/GET-3b82f6?style=flat-square) | `/api/users/me` | Aktif kullanıcı profili |
+| ![PUT](https://img.shields.io/badge/PUT-f59e0b?style=flat-square) | `/api/users/me` | Profil güncelle |
+| ![POST](https://img.shields.io/badge/POST-22c55e?style=flat-square) | `/api/upload/profile-picture` | Profil fotoğrafı yükle |
 
 **🛠 Admin**
 
 | Method | Endpoint | Açıklama |
-|:---|:---|:---|
-| `GET` | `/api/admin/stats` | Platform istatistikleri |
-| `GET` | `/api/admin/users` | Tüm kullanıcılar |
-| `PUT` | `/api/admin/users/:id/role` | Rol değiştir |
-| `GET` | `/api/admin/applications/instructors` | Bekleyen eğitmen başvuruları |
-| `PUT` | `/api/admin/applications/instructors/:id/approve` | Başvuru onayla |
+|:---:|:---|:---|
+| ![GET](https://img.shields.io/badge/GET-3b82f6?style=flat-square) | `/api/admin/stats` | Platform istatistikleri |
+| ![GET](https://img.shields.io/badge/GET-3b82f6?style=flat-square) | `/api/admin/users` | Tüm kullanıcılar |
+| ![PUT](https://img.shields.io/badge/PUT-f59e0b?style=flat-square) | `/api/admin/users/:id/role` | Rol değiştir |
+| ![GET](https://img.shields.io/badge/GET-3b82f6?style=flat-square) | `/api/admin/applications/instructors` | Bekleyen eğitmen başvuruları |
+| ![PUT](https://img.shields.io/badge/PUT-f59e0b?style=flat-square) | `/api/admin/applications/instructors/:id/approve` | Başvuru onayla |
 
 **🌐 Topluluk & Sertifikalar**
 
 | Method | Endpoint | Açıklama |
-|:---|:---|:---|
-| `GET` | `/api/community` | Forum gönderileri |
-| `POST` | `/api/community` | Yeni gönderi |
-| `POST` | `/api/community/:id/like` | Beğen / Beğeniyi geri al |
-| `GET` | `/api/certificates/me` | Kendi sertifikalarım |
-| `GET` | `/api/certificates/verify/:certId` | QR doğrulama |
+|:---:|:---|:---|
+| ![GET](https://img.shields.io/badge/GET-3b82f6?style=flat-square) | `/api/community` | Forum gönderileri |
+| ![POST](https://img.shields.io/badge/POST-22c55e?style=flat-square) | `/api/community` | Yeni gönderi |
+| ![POST](https://img.shields.io/badge/POST-22c55e?style=flat-square) | `/api/community/:id/like` | Beğen / Beğeniyi geri al |
+| ![GET](https://img.shields.io/badge/GET-3b82f6?style=flat-square) | `/api/certificates/me` | Kendi sertifikalarım |
+| ![GET](https://img.shields.io/badge/GET-3b82f6?style=flat-square) | `/api/certificates/verify/:certId` | QR doğrulama |
 
 </details>
 
----
+<br/>
 
-## 🔒 Güvenlik Mimarisi
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+## 🛡️ Güvenlik Mimarisi
 
 Her HTTP isteği, handler'a ulaşmadan **7 katmanlı bir savunma zincirinden** geçer:
 
 ```
   📥 HTTP İstek
        │
-  ① 🪖 Helmet ─────────── 11 güvenlik başlığı (HSTS, CSP, X-Frame-Options…)
+  ①  🪖  Helmet ─────────── 11 güvenlik başlığı (HSTS, CSP, X-Frame-Options…)
        │
-  ② ⏱️ Rate Limiter ───── Global: 100/15dk  │  Auth: 20/15dk  (brute-force koruması)
+  ②  ⏱️  Rate Limiter ───── Global: 100/15dk  │  Auth: 20/15dk  (brute-force koruması)
        │
-  ③ 🌐 CORS ───────────── Yalnızca CORS_ORIGINS whitelist'indeki originler
+  ③  🌐  CORS ───────────── Yalnızca CORS_ORIGINS whitelist'indeki originler
        │
-  ④ 🧹 mongo-sanitize ─── $ ve . operatörlerini temizler (NoSQL injection)
+  ④  🧹  mongo-sanitize ─── $ ve . operatörlerini temizler (NoSQL injection)
        │
-  ⑤ ✅ Joi Validasyon ─── Şema dışı alanlar stripUnknown ile çıkarılır
+  ⑤  ✅  Joi Validasyon ─── Şema dışı alanlar stripUnknown ile çıkarılır
        │
-  ⑥ 🔑 JWT Authenticate ─ Bearer token doğrulama
+  ⑥  🔑  JWT Authenticate ─ Bearer token doğrulama
        │
-  ⑦ 👤 Role Authorize ─── student / teacher / admin erişim kontrolü
+  ⑦  👤  Role Authorize ─── student / teacher / admin erişim kontrolü
        │
-  ✨ asyncHandler ──────── Tüm async hatalar yakalanır → Global errorHandler
+  ✨  asyncHandler ───────── Tüm async hatalar yakalanır → Global errorHandler
 ```
 
 | 🔐 Özellik | Detay |
@@ -411,7 +459,9 @@ Her HTTP isteği, handler'a ulaşmadan **7 katmanlı bir savunma zincirinden** g
 | **JWT Secret** | **96 karakterlik** kriptografik rastgele değer |
 | **Ortam Ayrımı** | `.env` asla commit edilmez; `.env.example` şablon olarak takip edilir |
 
----
+<br/>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
 
 ## 🧪 Test Hesapları
 
@@ -423,11 +473,13 @@ Her HTTP isteği, handler'a ulaşmadan **7 katmanlı bir savunma zincirinden** g
 | 🎓 **Eğitmen** | `teacher@demo.com` | `Demo12345!` | Eğitmen paneli + kurs yönetimi |
 | 📖 **Öğrenci** | `student@demo.com` | `Demo12345!` | Kurslar, canlı dersler, ödevler |
 
-> 💡 **Eğitmen Başvurusu:** Kayıtta *"Eğitmen Olarak Başvur"* işaretle → admin hesabıyla onayla.  
-> 💡 **Canlı Ders Testi:** İki farklı sekme aç (biri Eğitmen, biri Öğrenci) — WebRTC otomatik bağlanır.  
-> 💡 **Telefon Girişi:** Twilio yoksa OTP terminal çıktısına yazdırılır (`[SMS-TEST]`).
+> 💡 **Eğitmen Başvurusu** &nbsp;→&nbsp; Kayıtta *"Eğitmen Olarak Başvur"* işaretle, admin hesabıyla onayla.  
+> 💡 **Canlı Ders Testi** &nbsp;→&nbsp; İki farklı sekme aç (biri Eğitmen, biri Öğrenci); WebRTC otomatik bağlanır.  
+> 💡 **Telefon Girişi** &nbsp;→&nbsp; Twilio yoksa OTP terminal çıktısına yazdırılır (`[SMS-TEST]`).
 
----
+<br/>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
 
 ## 📜 NPM Komutları
 
@@ -441,7 +493,7 @@ Her HTTP isteği, handler'a ulaşmadan **7 katmanlı bir savunma zincirinden** g
 | `frontend` | `npm run build` | 📦 Production bundle (1833 modül · 0 hata) |
 | `frontend` | `npm run preview` | 👀 Production build önizlemesi |
 
----
+<br/>
 
 ## 🤝 Katkıda Bulunma
 
@@ -451,29 +503,31 @@ git commit -m "feat: açıklama"            # 2️⃣ Değişiklikleri commit et
 git push origin feature/<ozellik-adi>     # 3️⃣ Push et ve PR aç
 ```
 
-> **Commit formatı:** `feat:` · `fix:` · `refactor:` · `docs:` · `chore:` &nbsp;|&nbsp; `main` dalı koruma altındadır.
+> **Commit formatı:** &nbsp;`feat:` · `fix:` · `refactor:` · `docs:` · `chore:` &nbsp;|&nbsp; `main` dalı koruma altındadır.
 
----
+<br/>
 
-<!-- ░░░░░░░░░░░░░░░░░░░░░░░░░  FOOTER  ░░░░░░░░░░░░░░░░░░░░░░░░░ -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!--                                 FOOTER                                   -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+
 <div align="center">
 
 <br/>
 
-### 🎓 EduVerse — *Öğrenmeyi yeniden tanımlıyoruz.*
+### 🎓 EduVerse &nbsp;—&nbsp; *Öğrenmeyi yeniden tanımlıyoruz.*
 
 <p>
   <a href="https://github.com/enesaladagg/EduVerse">
-    <img src="https://img.shields.io/badge/GitHub-enesaladagg%2FEduVerse-181717?style=for-the-badge&logo=github" />
+    <img src="https://img.shields.io/badge/GitHub-enesaladagg%2FEduVerse-181717?style=for-the-badge&logo=github" alt="github"/>
   </a>
-  <img src="https://img.shields.io/badge/Lisans-ISC-f59e0b?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Lisans-ISC-f59e0b?style=for-the-badge" alt="license"/>
+  <img src="https://img.shields.io/badge/Made_with-💜_&_☕-6366f1?style=for-the-badge" alt="made with"/>
 </p>
 
-<sub>EduVerse Ekibi tarafından ☕ ve 💜 ile inşa edildi</sub>
+<sub>EduVerse Ekibi tarafından inşa edildi · 2026</sub>
 
-<br/><br/>
-
-<a href="#-neden-eduverse"><b>⬆ Başa Dön</b></a>
+<a href="#-içindekiler"><br/><b>⬆ Başa Dön</b></a>
 
 <img src="https://capsule-render.vercel.app/api?type=waving&color=0:00d4aa,50:7c3aed,100:6366f1&height=120&section=footer" width="100%"/>
 
