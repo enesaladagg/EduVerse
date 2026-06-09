@@ -3,7 +3,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import GlobalNavbar from '../components/GlobalNavbar';
 import {
-  User, Mail, Lock, ArrowRight, Loader2, Sparkles, Eye, EyeOff, Star
+  User, Mail, Lock, ArrowRight, Loader2, Sparkles, Eye, EyeOff, Star, Phone
 } from 'lucide-react';
 
 const TESTIMONIALS = [
@@ -14,11 +14,13 @@ const TESTIMONIALS = [
 
 export default function RegisterView({ onNavigate }) {
   const { isDark } = useTheme();
-  const { register } = useAuth();
+  const { register, registerPhone, verifyPhone } = useAuth();
 
+  const [authMethod, setAuthMethod]     = useState('email'); // 'email' | 'phone'
   const [roleMode, setRoleMode]         = useState('student');
   const [name, setName]                 = useState('');
   const [email, setEmail]               = useState('');
+  const [phone, setPhone]               = useState('');
   const [password, setPassword]         = useState('');
   const [error, setError]               = useState('');
   const [loading, setLoading]           = useState(false);
@@ -26,7 +28,7 @@ export default function RegisterView({ onNavigate }) {
   const [focused, setFocused]           = useState(null);
   const [testiIdx, setTestiIdx]         = useState(0);
   const [oauthLoading, setOauthLoading] = useState('');
-  const [step, setStep]                 = useState('register'); // 'register' veya 'verify'
+  const [step, setStep]                 = useState('register'); // 'register' | 'verify' | 'verify-phone'
   const [otp, setOtp]                   = useState('');
 
   useEffect(() => { setError(''); }, [roleMode]);
@@ -46,7 +48,20 @@ export default function RegisterView({ onNavigate }) {
     e.preventDefault();
     setLoading(true);
     setError('');
-    await new Promise(r => setTimeout(r, 800));
+    await new Promise(r => setTimeout(r, 600));
+
+    if (authMethod === 'phone') {
+      const formatted = phone.startsWith('+') ? phone : `+90${phone.replace(/\D/g, '')}`;
+      const result = await registerPhone({ name, phone: formatted, password, applyInstructor: roleMode === 'teacher' });
+      setLoading(false);
+      if (result.success && result.requiresVerification) {
+        setStep('verify-phone');
+      } else if (!result.success) {
+        setError(result.message);
+      }
+      return;
+    }
+
     const result = await register({ name, email, password, applyInstructor: roleMode === 'teacher' });
     setLoading(false);
     if (result.success) {
@@ -62,7 +77,7 @@ export default function RegisterView({ onNavigate }) {
   };
 
   const { verifyEmail } = useAuth();
-  
+
   const handleVerifySubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -77,16 +92,32 @@ export default function RegisterView({ onNavigate }) {
     }
   };
 
+  const handleVerifyPhoneSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    const formatted = phone.startsWith('+') ? phone : `+90${phone.replace(/\D/g, '')}`;
+    const result = await verifyPhone(formatted, otp);
+    setLoading(false);
+    if (result.success) {
+      if (roleMode === 'teacher') alert('Eğitmenlik başvurunuz alındı. Yöneticiler onayladığında yetkileriniz tanımlanacak.');
+      onNavigate('home');
+    } else {
+      setError(result.message);
+    }
+  };
+
   const handleOAuth = async (provider) => {
+    const BASE = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/api$/, '');
     setOauthLoading(provider);
     setError('');
     try {
-      const res = await fetch(`http://localhost:5000/api/auth/${provider}`, { redirect: 'manual' });
+      const res = await fetch(`${BASE}/api/auth/${provider}`, { redirect: 'manual' });
       if (res.status === 503) {
         const data = await res.json();
         setError(data.error?.message || `${provider} girişi henüz yapılandırılmamış.`);
       } else if (res.type === 'opaqueredirect' || res.status === 302 || res.ok) {
-        window.location.href = `http://localhost:5000/api/auth/${provider}`;
+        window.location.href = `${BASE}/api/auth/${provider}`;
       } else {
         setError(`${provider} ile kayıt yapılamadı. Lütfen tekrar deneyin.`);
       }
@@ -250,38 +281,100 @@ export default function RegisterView({ onNavigate }) {
               </div>
             )}
 
+            {/* Auth Method Tabs */}
+            {step === 'register' && (
+              <div style={{
+                position: 'relative', display: 'flex',
+                background: isDark ? 'rgba(0,0,0,0.25)' : '#f1f5f9',
+                borderRadius: 14, padding: 4, marginBottom: 24,
+              }}>
+                {/* Sliding pill */}
+                <div style={{
+                  position: 'absolute', top: 4, bottom: 4,
+                  left: authMethod === 'email' ? 4 : 'calc(50% + 2px)',
+                  width: 'calc(50% - 6px)',
+                  background: isDark ? '#130e28' : '#fff',
+                  borderRadius: 10,
+                  transition: 'left 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                  boxShadow: isDark
+                    ? '0 1px 6px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(124,108,240,0.2)'
+                    : '0 2px 8px rgba(0,0,0,0.08), inset 0 0 0 1px rgba(124,108,240,0.2)',
+                }} />
+
+                {[
+                  {
+                    id: 'email',
+                    icon: (active) => (
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={active ? '#7c6cf0' : 'currentColor'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="2" y="4" width="20" height="16" rx="3"/>
+                        <polyline points="2,4 12,13 22,4"/>
+                      </svg>
+                    ),
+                    label: 'E-posta ile',
+                  },
+                  {
+                    id: 'phone',
+                    icon: (active) => (
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={active ? '#7c6cf0' : 'currentColor'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="5" y="2" width="14" height="20" rx="3"/>
+                        <circle cx="12" cy="17" r="1" fill={active ? '#7c6cf0' : 'currentColor'}/>
+                      </svg>
+                    ),
+                    label: 'Tel ile',
+                  },
+                ].map(m => {
+                  const active = authMethod === m.id;
+                  return (
+                    <button key={m.id} type="button"
+                      onClick={() => { setAuthMethod(m.id); setError(''); }}
+                      style={{
+                        position: 'relative', flex: 1, zIndex: 1,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+                        padding: '10px 0', border: 'none', background: 'transparent', cursor: 'pointer',
+                        color: active ? '#7c6cf0' : sub,
+                        fontFamily: "'Outfit', sans-serif", fontSize: 13, fontWeight: 700,
+                        transition: 'color 0.25s', letterSpacing: '0.2px',
+                      }}>
+                      {m.icon(active)}
+                      {m.label}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
             {step === 'register' ? (
               <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                 {/* Name */}
                 <div style={{ position: 'relative' }}>
-                  <User size={18} style={{
-                    position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)',
-                    color: iconColor('name'), transition: 'color 0.2s', pointerEvents: 'none',
-                  }} />
+                  <User size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: iconColor('name'), transition: 'color 0.2s', pointerEvents: 'none' }} />
                   <input className="rv-input" type="text" placeholder="Adınız Soyadınız"
                     value={name} onChange={e => setName(e.target.value)}
                     onFocus={() => setFocused('name')} onBlur={() => setFocused(null)}
                     required style={inputBase} />
                 </div>
 
-                {/* Email */}
-                <div style={{ position: 'relative' }}>
-                  <Mail size={18} style={{
-                    position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)',
-                    color: iconColor('email'), transition: 'color 0.2s', pointerEvents: 'none',
-                  }} />
-                  <input className="rv-input" type="email" placeholder="E-posta adresiniz"
-                    value={email} onChange={e => setEmail(e.target.value)}
-                    onFocus={() => setFocused('email')} onBlur={() => setFocused(null)}
-                    required style={inputBase} />
-                </div>
+                {authMethod === 'email' ? (
+                  <div style={{ position: 'relative' }}>
+                    <Mail size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: iconColor('email'), transition: 'color 0.2s', pointerEvents: 'none' }} />
+                    <input className="rv-input" type="email" placeholder="E-posta adresiniz"
+                      value={email} onChange={e => setEmail(e.target.value)}
+                      onFocus={() => setFocused('email')} onBlur={() => setFocused(null)}
+                      required style={inputBase} />
+                  </div>
+                ) : (
+                  <div style={{ position: 'relative' }}>
+                    <Phone size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: iconColor('phone'), transition: 'color 0.2s', pointerEvents: 'none' }} />
+                    <input className="rv-input" type="tel" placeholder="+90 555 123 4567"
+                      value={phone} onChange={e => setPhone(e.target.value)}
+                      onFocus={() => setFocused('phone')} onBlur={() => setFocused(null)}
+                      required style={inputBase} />
+                  </div>
+                )}
 
                 {/* Password */}
                 <div style={{ position: 'relative' }}>
-                  <Lock size={18} style={{
-                    position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)',
-                    color: iconColor('password'), transition: 'color 0.2s', pointerEvents: 'none',
-                  }} />
+                  <Lock size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: iconColor('password'), transition: 'color 0.2s', pointerEvents: 'none' }} />
                   <input className="rv-input" type={showPassword ? 'text' : 'password'} placeholder="Şifreniz (min. 8 karakter)"
                     value={password} onChange={e => setPassword(e.target.value)}
                     onFocus={() => setFocused('password')} onBlur={() => setFocused(null)}
@@ -289,43 +382,67 @@ export default function RegisterView({ onNavigate }) {
                   <button type="button" onClick={() => setShowPassword(!showPassword)} style={{
                     position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)',
                     background: 'none', border: 'none', padding: 4, cursor: 'pointer',
-                    color: isDark ? '#64748b' : '#94a3b8', display: 'flex', alignItems: 'center',
-                    transition: 'color 0.2s',
+                    color: isDark ? '#64748b' : '#94a3b8', display: 'flex', alignItems: 'center', transition: 'color 0.2s',
                   }}>
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
 
-                {/* Error */}
-                {error && (
-                  <div style={{
-                    padding: '12px 16px', borderRadius: 12,
-                    background: 'rgba(239,68,68,0.1)', borderLeft: '3px solid #ef4444',
-                    color: '#ef4444', fontSize: 14, fontWeight: 500,
-                  }}>{error}</div>
+                {authMethod === 'phone' && (
+                  <p style={{ margin: 0, color: sub, fontSize: 12, paddingLeft: 4 }}>
+                    Uluslararası format: +90 ile başlayın. Kayıt sonrası SMS ile doğrulama yapılacak.
+                  </p>
                 )}
 
-                {/* Submit */}
+                {error && (
+                  <div style={{ padding: '12px 16px', borderRadius: 12, background: 'rgba(239,68,68,0.1)', borderLeft: '3px solid #ef4444', color: '#ef4444', fontSize: 14, fontWeight: 500 }}>{error}</div>
+                )}
+
                 <button type="submit" disabled={loading} style={{
                   width: '100%', padding: '16px',
                   background: loading ? 'rgba(124,108,240,0.6)' : 'linear-gradient(135deg, #7c6cf0, #6c5ce7)',
-                  color: '#fff', border: 'none', borderRadius: 12,
-                  fontFamily: "'Outfit', sans-serif", fontWeight: 700, fontSize: 16,
-                  cursor: loading ? 'not-allowed' : 'pointer',
+                  color: '#fff', border: 'none', borderRadius: 12, fontFamily: "'Outfit', sans-serif",
+                  fontWeight: 700, fontSize: 16, cursor: loading ? 'not-allowed' : 'pointer',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                  boxShadow: '0 8px 24px rgba(124,108,240,0.3)',
-                  transition: 'transform 0.2s, box-shadow 0.2s',
-                  boxSizing: 'border-box',
+                  boxShadow: '0 8px 24px rgba(124,108,240,0.3)', transition: 'transform 0.2s, box-shadow 0.2s', boxSizing: 'border-box',
                 }}
                 onMouseEnter={e => { if(!loading) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 32px rgba(124,108,240,0.4)'; } }}
                 onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(124,108,240,0.3)'; }}
                 >
-                  {loading
-                    ? <><Loader2 size={20} className="spin" /> Hesabınız Oluşturuluyor...</>
-                    : <>Hemen Kaydol <ArrowRight size={20} /></>}
+                  {loading ? <><Loader2 size={20} className="spin" /> Hesabınız Oluşturuluyor...</> : <>Hemen Kaydol <ArrowRight size={20} /></>}
                 </button>
               </form>
+
+            ) : step === 'verify-phone' ? (
+              /* ── SMS OTP verify ── */
+              <form onSubmit={handleVerifyPhoneSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14, background: isDark ? 'rgba(124,108,240,0.05)' : '#f5f3ff', padding: 24, borderRadius: 16, border: '1px solid rgba(124,108,240,0.2)' }}>
+                <div style={{ textAlign: 'center', marginBottom: 8 }}>
+                  <Phone size={32} color="#7c6cf0" style={{ marginBottom: 12 }} />
+                  <h3 style={{ margin: '0 0 8px', color: text, fontSize: 20 }}>Telefonunuzu Doğrulayın</h3>
+                  <p style={{ margin: 0, color: sub, fontSize: 14 }}>
+                    <b>{phone}</b> numarasına 6 haneli SMS kodu gönderdik.
+                  </p>
+                </div>
+                <input type="text" placeholder="6 Haneli SMS Kodu"
+                  value={otp} onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))} required
+                  style={{ ...inputBase, textAlign: 'center', letterSpacing: '8px', fontSize: 20, fontWeight: 700, padding: '16px' }} />
+                {error && <div style={{ padding: '12px 16px', background: 'rgba(239,68,68,0.1)', borderLeft: '4px solid #ef4444', borderRadius: 12, color: '#ef4444', fontSize: 14, fontWeight: 500 }}>{error}</div>}
+                <button type="submit" disabled={loading || otp.length !== 6} style={{
+                  width: '100%', padding: '16px', marginTop: 8,
+                  background: (loading || otp.length !== 6) ? 'rgba(124,108,240,0.5)' : '#7c6cf0',
+                  color: '#fff', border: 'none', borderRadius: 12, fontFamily: "'Outfit', sans-serif",
+                  fontWeight: 700, fontSize: 16, cursor: (loading || otp.length !== 6) ? 'not-allowed' : 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                }}>
+                  {loading ? <Loader2 size={20} className="spin" /> : 'Doğrula ve Giriş Yap'}
+                </button>
+                <button type="button" onClick={() => { setStep('register'); setOtp(''); }} style={{ background: 'none', border: 'none', color: sub, cursor: 'pointer', fontSize: 13, textDecoration: 'underline', marginTop: 8 }}>
+                  Geri Dön
+                </button>
+              </form>
+
             ) : (
+              /* ── Email OTP verify ── */
               <form onSubmit={handleVerifySubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14, background: isDark ? 'rgba(0,212,170,0.05)' : '#f0fdfa', padding: 24, borderRadius: 16, border: `1px solid rgba(0,212,170,0.2)` }}>
                 <div style={{ textAlign: 'center', marginBottom: 8 }}>
                   <Mail size={32} color="#00d4aa" style={{ marginBottom: 12 }} />
@@ -334,7 +451,7 @@ export default function RegisterView({ onNavigate }) {
                     <b>{email}</b> adresine 6 haneli bir kod gönderdik. Lütfen kodu aşağıya girin.
                   </p>
                 </div>
-                
+
                 <div style={{ position: 'relative' }}>
                   <input type="text" placeholder="6 Haneli Kod"
                     value={otp} onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))} required
@@ -342,23 +459,19 @@ export default function RegisterView({ onNavigate }) {
                 </div>
 
                 {error && (
-                  <div style={{ 
-                    padding: '12px 16px', background: 'rgba(239, 68, 68, 0.1)', 
-                    borderLeft: '4px solid #ef4444', borderRadius: 12,
-                    color: '#ef4444', fontSize: 14, fontWeight: 500 
-                  }}>{error}</div>
+                  <div style={{ padding: '12px 16px', background: 'rgba(239, 68, 68, 0.1)', borderLeft: '4px solid #ef4444', borderRadius: 12, color: '#ef4444', fontSize: 14, fontWeight: 500 }}>{error}</div>
                 )}
 
                 <button type="submit" disabled={loading || otp.length !== 6} style={{
                   width: '100%', padding: '16px', marginTop: 8,
                   background: (loading || otp.length !== 6) ? 'rgba(0,212,170,0.6)' : '#00d4aa',
-                  color: '#fff', border: 'none', borderRadius: 12,
-                  fontFamily: "'Outfit', sans-serif", fontWeight: 700, fontSize: 16,
-                  cursor: (loading || otp.length !== 6) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  color: '#fff', border: 'none', borderRadius: 12, fontFamily: "'Outfit', sans-serif",
+                  fontWeight: 700, fontSize: 16, cursor: (loading || otp.length !== 6) ? 'not-allowed' : 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                 }}>
                   {loading ? <Loader2 size={20} className="spin" /> : 'Doğrula ve Giriş Yap'}
                 </button>
-                
+
                 <button type="button" onClick={() => setStep('register')} style={{ background: 'none', border: 'none', color: sub, cursor: 'pointer', fontSize: 13, textDecoration: 'underline', marginTop: 8 }}>
                   Geri Dön (E-postayı Değiştir)
                 </button>

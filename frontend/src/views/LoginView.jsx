@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import GlobalNavbar from '../components/GlobalNavbar';
-import { Mail, Lock, ArrowRight, CheckCircle2, Loader2, Sparkles, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, ArrowRight, CheckCircle2, Loader2, Sparkles, Eye, EyeOff, ArrowLeft, Send, Phone, MessageSquare } from 'lucide-react';
 
 export default function LoginView({ onNavigate }) {
   const { isDark } = useTheme();
-  const { login } = useAuth();
-  
+  const { login, forgotPassword, sendPhoneOtp, loginPhone } = useAuth();
+
+  const [authMethod, setAuthMethod] = useState('email'); // 'email' | 'phone'
   const [roleMode, setRoleMode] = useState('student');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -16,6 +17,13 @@ export default function LoginView({ onNavigate }) {
   const [rememberMe, setRememberMe] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [oauthLoading, setOauthLoading] = useState('');
+  // Phone OTP state
+  const [phoneStep, setPhoneStep] = useState('input'); // 'input' | 'otp'
+  const [phone, setPhone] = useState('');
+  const [phoneOtp, setPhoneOtp] = useState('');
+  // Forgot password state
+  const [step, setStep] = useState('login'); // 'login' | 'forgot' | 'forgot-sent'
+  const [forgotEmail, setForgotEmail] = useState('');
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -23,6 +31,47 @@ export default function LoginView({ onNavigate }) {
     setPassword('');
     setError('');
   }, [roleMode]);
+
+  const handleSendPhoneOtp = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    const formatted = phone.startsWith('+') ? phone : `+90${phone.replace(/\D/g, '')}`;
+    const result = await sendPhoneOtp(formatted);
+    setLoading(false);
+    if (result.success) {
+      setPhoneStep('otp');
+    } else {
+      setError(result.message || 'SMS gönderilemedi.');
+    }
+  };
+
+  const handlePhoneOtpLogin = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    const formatted = phone.startsWith('+') ? phone : `+90${phone.replace(/\D/g, '')}`;
+    const result = await loginPhone(formatted, phoneOtp);
+    setLoading(false);
+    if (result.success) {
+      onNavigate('home');
+    } else {
+      setError(result.message || 'Geçersiz kod.');
+    }
+  };
+
+  const handleForgotSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    const result = await forgotPassword(forgotEmail);
+    setLoading(false);
+    if (result.success) {
+      setStep('forgot-sent');
+    } else {
+      setError(result.message || 'Bir hata oluştu. Lütfen tekrar deneyin.');
+    }
+  };
 
   // Navbar'ın şeffaf kalması için body arka planını ayarla
   useEffect(() => {
@@ -43,16 +92,16 @@ export default function LoginView({ onNavigate }) {
   };
 
   const handleOAuth = async (provider) => {
+    const BASE = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/api$/, '');
     setOauthLoading(provider);
     setError('');
     try {
-      const res = await fetch(`http://localhost:5000/api/auth/${provider}`, { redirect: 'manual' });
+      const res = await fetch(`${BASE}/api/auth/${provider}`, { redirect: 'manual' });
       if (res.status === 503) {
         const data = await res.json();
         setError(data.error?.message || `${provider} girişi henüz yapılandırılmamış.`);
       } else if (res.type === 'opaqueredirect' || res.status === 302 || res.ok) {
-        // Başarılı redirect — browser'a bırak
-        window.location.href = `http://localhost:5000/api/auth/${provider}`;
+        window.location.href = `${BASE}/api/auth/${provider}`;
       } else {
         setError(`${provider} ile giriş yapılamadı. Lütfen tekrar deneyin.`);
       }
@@ -195,14 +244,175 @@ export default function LoginView({ onNavigate }) {
         {/* RIGHT SIDE - FORM */}
         <div className="split-form">
           <div className="form-inner">
+
+            {/* ── FORGOT PASSWORD ────────────────────────────── */}
+            {step === 'forgot' && (
+              <div>
+                <button type="button" onClick={() => { setStep('login'); setError(''); }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: sub, cursor: 'pointer', fontFamily: "'Outfit', sans-serif", fontSize: 14, padding: '0 0 20px 0' }}>
+                  <ArrowLeft size={16} /> Giriş Sayfasına Dön
+                </button>
+                <h2 style={{ margin: '0 0 6px', fontSize: 26, fontWeight: 900, color: text }}>Şifremi Unuttum</h2>
+                <p style={{ margin: '0 0 28px', color: sub, fontSize: 15, lineHeight: 1.6 }}>
+                  Kayıtlı e-posta adresinizi girin. Şifre sıfırlama bağlantısı göndereceğiz.
+                </p>
+                <form onSubmit={handleForgotSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                  <div style={{ position: 'relative' }}>
+                    <Mail size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: isDark ? '#64748b' : '#94a3b8' }} />
+                    <input className="custom-input" type="email" placeholder="E-posta adresiniz"
+                      value={forgotEmail} onChange={(e) => setForgotEmail(e.target.value)} required style={inputStyle} />
+                  </div>
+                  {error && (
+                    <div style={{ padding: '12px 16px', background: 'rgba(239,68,68,0.1)', borderLeft: '4px solid #ef4444', borderRadius: 12, color: '#ef4444', fontSize: 14, fontWeight: 500 }}>{error}</div>
+                  )}
+                  <button type="submit" disabled={loading} style={{
+                    width: '100%', padding: '16px', background: loading ? 'rgba(0,212,170,0.6)' : 'linear-gradient(135deg, #00d4aa, #00b38f)',
+                    color: '#fff', border: 'none', borderRadius: 12, fontFamily: "'Outfit', sans-serif", fontWeight: 700, fontSize: 16,
+                    cursor: loading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                    boxShadow: '0 8px 24px rgba(0,212,170,0.3)', boxSizing: 'border-box',
+                  }}>
+                    {loading ? <><Loader2 size={20} className="spin" /> Gönderiliyor...</> : <><Send size={18} /> Sıfırlama Bağlantısı Gönder</>}
+                  </button>
+                </form>
+              </div>
+            )}
+
+            {/* ── FORGOT SENT ────────────────────────────────── */}
+            {step === 'forgot-sent' && (
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'rgba(0,212,170,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
+                  <Mail size={36} color="#00d4aa" />
+                </div>
+                <h2 style={{ margin: '0 0 12px', fontSize: 24, fontWeight: 900, color: text }}>E-posta Gönderildi!</h2>
+                <p style={{ margin: '0 0 8px', color: sub, fontSize: 15, lineHeight: 1.7 }}>
+                  <strong style={{ color: text }}>{forgotEmail}</strong> adresine şifre sıfırlama bağlantısı gönderdik.
+                </p>
+                <p style={{ margin: '0 0 32px', color: sub, fontSize: 14 }}>
+                  Bağlantı <strong style={{ color: text }}>1 saat</strong> geçerlidir. Spam klasörünüzü kontrol etmeyi unutmayın.
+                </p>
+                <button type="button" onClick={() => { setStep('login'); setError(''); }}
+                  style={{ background: 'none', border: `1.5px solid ${isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.1)'}`, borderRadius: 12, padding: '12px 28px', color: text, fontSize: 15, fontWeight: 600, cursor: 'pointer', fontFamily: "'Outfit', sans-serif" }}>
+                  Giriş Sayfasına Dön
+                </button>
+              </div>
+            )}
+
+            {/* ── LOGIN FORM ─────────────────────────────────── */}
+            {step === 'login' && <>
             <h2 style={{ margin: '0 0 6px', fontSize: 30, fontWeight: 900, color: text, letterSpacing: '-0.5px' }}>
               Giriş Yap
             </h2>
-            <p style={{ margin: '0 0 28px', color: sub, fontSize: 15 }}>
+            <p style={{ margin: '0 0 20px', color: sub, fontSize: 15 }}>
               Öğrenmeye kaldığınız yerden devam edin
             </p>
 
-            {/* Role Segmented Control */}
+            {/* Auth Method Tabs */}
+            <div style={{
+              position: 'relative', display: 'flex',
+              background: isDark ? 'rgba(0,0,0,0.25)' : '#f1f5f9',
+              borderRadius: 14, padding: 4, marginBottom: 24,
+            }}>
+              {/* Sliding pill */}
+              <div style={{
+                position: 'absolute', top: 4, bottom: 4,
+                left: authMethod === 'email' ? 4 : 'calc(50% + 2px)',
+                width: 'calc(50% - 6px)',
+                background: isDark ? '#0f2137' : '#fff',
+                borderRadius: 10,
+                transition: 'left 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                boxShadow: isDark
+                  ? '0 1px 6px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(0,212,170,0.18)'
+                  : '0 2px 8px rgba(0,0,0,0.08), inset 0 0 0 1px rgba(0,212,170,0.2)',
+              }} />
+
+              {[
+                {
+                  id: 'email',
+                  icon: (active) => (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={active ? '#00d4aa' : 'currentColor'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="2" y="4" width="20" height="16" rx="3"/>
+                      <polyline points="2,4 12,13 22,4"/>
+                    </svg>
+                  ),
+                  label: 'E-posta',
+                },
+                {
+                  id: 'phone',
+                  icon: (active) => (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={active ? '#00d4aa' : 'currentColor'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="5" y="2" width="14" height="20" rx="3"/>
+                      <circle cx="12" cy="17" r="1" fill={active ? '#00d4aa' : 'currentColor'}/>
+                    </svg>
+                  ),
+                  label: 'Tel ile Giriş',
+                },
+              ].map(m => {
+                const active = authMethod === m.id;
+                return (
+                  <button key={m.id} type="button"
+                    onClick={() => { setAuthMethod(m.id); setError(''); setPhoneStep('input'); setPhoneOtp(''); }}
+                    style={{
+                      position: 'relative', flex: 1, zIndex: 1,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+                      padding: '10px 0', border: 'none', background: 'transparent', cursor: 'pointer',
+                      color: active ? '#00d4aa' : sub,
+                      fontFamily: "'Outfit', sans-serif", fontSize: 13, fontWeight: 700,
+                      transition: 'color 0.25s', letterSpacing: '0.2px',
+                    }}>
+                    {m.icon(active)}
+                    {m.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Phone Login Flow */}
+            {authMethod === 'phone' && (
+              phoneStep === 'input' ? (
+                <form onSubmit={handleSendPhoneOtp} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                  <div style={{ position: 'relative' }}>
+                    <Phone size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: isDark ? '#64748b' : '#94a3b8' }} />
+                    <input className="custom-input" type="tel" placeholder="+90 555 123 4567"
+                      value={phone} onChange={e => setPhone(e.target.value)} required style={inputStyle} />
+                  </div>
+                  <p style={{ margin: 0, color: sub, fontSize: 12, paddingLeft: 4 }}>Kayıtlı telefon numaranıza SMS kodu göndereceğiz.</p>
+                  {error && <div style={{ padding: '12px 16px', background: 'rgba(239,68,68,0.1)', borderLeft: '4px solid #ef4444', borderRadius: 12, color: '#ef4444', fontSize: 14, fontWeight: 500 }}>{error}</div>}
+                  <button type="submit" disabled={loading} style={{
+                    width: '100%', padding: '16px', background: loading ? 'rgba(0,212,170,0.6)' : 'linear-gradient(135deg, #00d4aa, #00b38f)',
+                    color: '#fff', border: 'none', borderRadius: 12, fontFamily: "'Outfit', sans-serif", fontWeight: 700, fontSize: 16,
+                    cursor: loading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                    boxShadow: '0 8px 24px rgba(0,212,170,0.3)', boxSizing: 'border-box',
+                  }}>
+                    {loading ? <><Loader2 size={20} className="spin" /> Gönderiliyor...</> : <><MessageSquare size={18} /> SMS Kodu Gönder</>}
+                  </button>
+                </form>
+              ) : (
+                <form onSubmit={handlePhoneOtpLogin} style={{ display: 'flex', flexDirection: 'column', gap: 14, background: isDark ? 'rgba(0,212,170,0.05)' : '#f0fdfa', padding: 20, borderRadius: 14, border: '1px solid rgba(0,212,170,0.2)' }}>
+                  <div style={{ textAlign: 'center' }}>
+                    <Phone size={28} color="#00d4aa" style={{ marginBottom: 8 }} />
+                    <p style={{ margin: 0, color: sub, fontSize: 14 }}><b style={{ color: text }}>{phone}</b> numarasına kod gönderdik.</p>
+                  </div>
+                  <input type="text" placeholder="6 Haneli SMS Kodu"
+                    value={phoneOtp} onChange={e => setPhoneOtp(e.target.value.replace(/\D/g, '').slice(0, 6))} required
+                    style={{ ...inputStyle, textAlign: 'center', letterSpacing: '8px', fontSize: 20, fontWeight: 700, padding: '16px', paddingLeft: '16px' }} />
+                  {error && <div style={{ padding: '12px 16px', background: 'rgba(239,68,68,0.1)', borderLeft: '4px solid #ef4444', borderRadius: 12, color: '#ef4444', fontSize: 14, fontWeight: 500 }}>{error}</div>}
+                  <button type="submit" disabled={loading || phoneOtp.length !== 6} style={{
+                    width: '100%', padding: '16px', background: (loading || phoneOtp.length !== 6) ? 'rgba(0,212,170,0.5)' : '#00d4aa',
+                    color: '#fff', border: 'none', borderRadius: 12, fontFamily: "'Outfit', sans-serif", fontWeight: 700, fontSize: 16,
+                    cursor: (loading || phoneOtp.length !== 6) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, boxSizing: 'border-box',
+                  }}>
+                    {loading ? <Loader2 size={20} className="spin" /> : 'Giriş Yap'}
+                  </button>
+                  <button type="button" onClick={() => { setPhoneStep('input'); setPhoneOtp(''); setError(''); }}
+                    style={{ background: 'none', border: 'none', color: sub, cursor: 'pointer', fontSize: 13, textDecoration: 'underline' }}>
+                    Farklı numara dene
+                  </button>
+                </form>
+              )
+            )}
+
+            {/* Role Segmented Control — only for email login */}
+            {authMethod === 'email' && <>
             <div style={{
               position: 'relative', display: 'flex',
               background: isDark ? 'rgba(0,0,0,0.2)' : '#f1f5f9',
@@ -267,11 +477,13 @@ export default function LoginView({ onNavigate }) {
                   <span style={{ fontSize: 14, color: sub, fontWeight: 500 }}>Beni Hatırla</span>
                 </label>
                 
-                <button type="button" style={{
-                  background: 'none', border: 'none', padding: 0,
-                  color: '#00d4aa', fontSize: 14, fontWeight: 600, cursor: 'pointer',
-                  fontFamily: "'Outfit', sans-serif"
-                }}>
+                <button type="button"
+                  onClick={() => { setStep('forgot'); setForgotEmail(email); setError(''); }}
+                  style={{
+                    background: 'none', border: 'none', padding: 0,
+                    color: '#00d4aa', fontSize: 14, fontWeight: 600, cursor: 'pointer',
+                    fontFamily: "'Outfit', sans-serif"
+                  }}>
                   Şifremi Unuttum
                 </button>
               </div>
@@ -302,6 +514,8 @@ export default function LoginView({ onNavigate }) {
                 {loading ? <><Loader2 size={20} className="spin" /> Giriş Yapılıyor...</> : <>Giriş Yap <ArrowRight size={20} /></>}
               </button>
             </form>
+            </>}
+            {/* end email auth block */}
 
             {/* Divider */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 16, margin: '24px 0' }}>
@@ -371,6 +585,9 @@ export default function LoginView({ onNavigate }) {
                 Hemen Ücretsiz Kaydolun
               </button>
             </div>
+
+            </>}
+            {/* ── END LOGIN FORM ─────────────────────────────── */}
 
           </div>
         </div>

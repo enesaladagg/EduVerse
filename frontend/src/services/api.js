@@ -51,6 +51,60 @@ export const api = {
     return parseResponse(res);
   },
 
+  async registerPhone(data) {
+    const res = await fetch(`${API_URL}/auth/register-phone`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    return parseResponse(res);
+  },
+
+  async verifyPhone(phone, code) {
+    const res = await fetch(`${API_URL}/auth/verify-phone`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone, code }),
+    });
+    return parseResponse(res);
+  },
+
+  async sendPhoneOtp(phone) {
+    const res = await fetch(`${API_URL}/auth/send-phone-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone }),
+    });
+    return parseResponse(res);
+  },
+
+  async loginPhone(phone, code) {
+    const res = await fetch(`${API_URL}/auth/login-phone`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone, code }),
+    });
+    return parseResponse(res);
+  },
+
+  async forgotPassword(email) {
+    const res = await fetch(`${API_URL}/auth/forgot-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    return parseResponse(res);
+  },
+
+  async resetPassword(token, password) {
+    const res = await fetch(`${API_URL}/auth/reset-password/${token}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password }),
+    });
+    return parseResponse(res);
+  },
+
   async getMe() {
     const res = await fetch(`${API_URL}/users/me`, { headers: authHeaders() });
     return parseResponse(res);

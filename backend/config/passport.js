@@ -3,6 +3,7 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const LinkedInStrategy = require('passport-linkedin-oauth2').Strategy;
 const crypto = require('crypto');
 const User = require('../models/User');
+const sendEmail = require('../utils/email');
 
 passport.serializeUser((user, done) => {
   done(null, user.id);
@@ -55,14 +56,26 @@ const handleOAuthUser = async (profile, provider, done) => {
       name: profile.displayName || profile.name?.givenName || 'User',
       email,
       role: 'student',
+      isVerified: true,
       profilePicture: profile.photos && profile.photos.length > 0 ? profile.photos[0].value : '',
-      // No password required for OAuth-only users
     });
 
     if (provider === 'google') newUser.googleId = profile.id;
     if (provider === 'linkedin') newUser.linkedinId = profile.id;
 
     await newUser.save();
+
+    // Send welcome email for new OAuth users
+    if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+      const providerLabel = provider === 'google' ? 'Google' : 'LinkedIn';
+      sendEmail({
+        email: newUser.email,
+        subject: `EduVerse'e Hoş Geldiniz! 🎓`,
+        template: 'welcome',
+        data: { name: newUser.name, provider: providerLabel },
+      }).catch((err) => console.error('OAuth welcome email gönderilemedi:', err.message));
+    }
+
     return done(null, newUser);
   } catch (err) {
     return done(err, null);

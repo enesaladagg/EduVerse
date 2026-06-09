@@ -9,6 +9,7 @@ import InstructorDashboardView from './views/instructor/InstructorDashboardView'
 import AdminDashboardView from './views/admin/AdminDashboardView';
 import LoginView from './views/LoginView';
 import RegisterView from './views/RegisterView';
+import ResetPasswordView from './views/ResetPasswordView';
 import AssignmentsView from './views/AssignmentsView';
 import { CartProvider } from './context/CartContext';
 import CartDrawer from './components/CartDrawer';
@@ -25,6 +26,7 @@ import MessagingPage from './views/MessagingPage';
 import SettingsView from './views/SettingsView';
 import PomodoroTimer from './components/PomodoroTimer';
 import { PomodoroProvider } from './context/PomodoroContext';
+import { ToastProvider } from './context/ToastContext';
 
 const GUEST_USER = {
   name: 'Misafir',
@@ -41,12 +43,21 @@ function AppContent() {
   const [page, setPage] = useState(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
+      if (params.get('action') === 'reset-password' && params.get('token')) return 'reset-password';
       if (params.get('page')) return params.get('page');
       if (params.get('payment') === 'success') return 'profile';
     }
     return 'home';
   });
-  const [pageParams, setPageParams] = useState(null);
+  const [pageParams, setPageParams] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('action') === 'reset-password' && params.get('token')) {
+        return { token: params.get('token') };
+      }
+    }
+    return null;
+  });
 
   // URL'yi temizle
   useEffect(() => {
@@ -63,8 +74,9 @@ function AppContent() {
 
   let content;
   switch (page) {
-    case 'login':       content = <LoginView onNavigate={navigate} />; break;
-    case 'register':    content = <RegisterView onNavigate={navigate} />; break;
+    case 'login':          content = <LoginView onNavigate={navigate} />; break;
+    case 'register':       content = <RegisterView onNavigate={navigate} />; break;
+    case 'reset-password': content = <ResetPasswordView token={pageParams?.token} onNavigate={navigate} />; break;
     case 'courses':     content = <CoursesPage onNavigate={navigate} />; break;
     case 'games':       content = <GamesView onNavigate={navigate} />; break;
     case 'course-detail': content = <CourseDetailView onNavigate={navigate} />; break;
@@ -95,7 +107,7 @@ function AppContent() {
     default: content = <HomeView onNavigate={navigate} />;
   }
 
-  const isShellPage = !['home', 'profile', 'settings', 'instructor', 'admin', 'live', 'login', 'register', 'certificates', 'h-paths', 'h-community', 'h-corporate'].includes(page);
+  const isShellPage = !['home', 'profile', 'settings', 'instructor', 'admin', 'live', 'login', 'register', 'reset-password', 'certificates', 'h-paths', 'h-community', 'h-corporate'].includes(page);
 
   return (
     <>
@@ -121,7 +133,7 @@ function AppContent() {
           content
         )}
       </div>
-      {page !== 'login' && page !== 'register' && page !== 'live' && <PomodoroTimer />}
+      {!['login', 'register', 'reset-password', 'live'].includes(page) && <PomodoroTimer />}
       <CartDrawer onNavigate={navigate} />
     </>
   );
@@ -133,7 +145,9 @@ export default function App() {
       <AuthProvider>
         <CartProvider>
           <PomodoroProvider>
-            <AppContent />
+            <ToastProvider>
+              <AppContent />
+            </ToastProvider>
           </PomodoroProvider>
         </CartProvider>
       </AuthProvider>

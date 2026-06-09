@@ -69,11 +69,12 @@ router.post(
     user.profilePicture = avatarUrl;
     await user.save();
 
+    const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000';
     return res.json({
       success: true,
       data: {
         profilePicture: avatarUrl,
-        profilePictureUrl: `http://localhost:5000${avatarUrl}`,
+        profilePictureUrl: `${backendUrl}${avatarUrl}`,
       },
     });
   })
