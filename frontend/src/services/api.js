@@ -212,6 +212,12 @@ export const api = {
     return parseResponse(res);
   },
 
+  async getAllSessions(status) {
+    const query = status ? `?status=${status}` : '';
+    const res = await fetch(`${API_URL}/sessions${query}`, { headers: authHeaders() });
+    return parseResponse(res);
+  },
+
   async getLiveSession(roomId) {
     const res = await fetch(`${API_URL}/sessions/room/${roomId}`);
     return parseResponse(res);
