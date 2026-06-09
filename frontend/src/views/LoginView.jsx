@@ -80,15 +80,35 @@ export default function LoginView({ onNavigate }) {
     return () => { document.body.style.background = ''; };
   }, [isDark]);
 
+  const [notVerifiedEmail, setNotVerifiedEmail] = useState('');
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendDone, setResendDone] = useState(false);
+  const { resendEmailOtp } = useAuth();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setNotVerifiedEmail('');
+    setResendDone(false);
     await new Promise(r => setTimeout(r, 800));
     const result = await login(email, password);
     setLoading(false);
-    if (result.success) onNavigate('home');
-    else setError(result.message);
+    if (result.success) {
+      onNavigate('home');
+    } else if (result.requiresVerification || result.error?.code === 'NOT_VERIFIED') {
+      setNotVerifiedEmail(result.email || email);
+      setError(result.message || 'Lütfen giriş yapmadan önce hesabınızı doğrulayın.');
+    } else {
+      setError(result.message);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    setResendLoading(true);
+    await resendEmailOtp(notVerifiedEmail || email);
+    setResendLoading(false);
+    setResendDone(true);
   };
 
   const handleOAuth = async (provider) => {
@@ -489,11 +509,26 @@ export default function LoginView({ onNavigate }) {
               </div>
 
               {error && (
-                <div style={{ 
-                  padding: '12px 16px', background: 'rgba(239, 68, 68, 0.1)', 
-                  borderLeft: '4px solid #ef4444', borderRadius: 12,
-                  color: '#ef4444', fontSize: 14, fontWeight: 500 
-                }}>{error}</div>
+                <div style={{ borderRadius: 12, overflow: 'hidden' }}>
+                  <div style={{
+                    padding: '12px 16px', background: 'rgba(239, 68, 68, 0.1)',
+                    borderLeft: '4px solid #ef4444',
+                    color: '#ef4444', fontSize: 14, fontWeight: 500
+                  }}>{error}</div>
+                  {(notVerifiedEmail || error.includes('doğrulayın')) && (
+                    <div style={{ padding: '10px 16px', background: 'rgba(239,68,68,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                      <span style={{ fontSize: 13, color: sub }}>Doğrulama kodunuzu almadınız mı?</span>
+                      {resendDone ? (
+                        <span style={{ fontSize: 13, color: '#10b981', fontWeight: 600 }}>✓ Kod gönderildi!</span>
+                      ) : (
+                        <button type="button" onClick={handleResendOtp} disabled={resendLoading}
+                          style={{ fontSize: 13, fontWeight: 700, color: '#7c6cf0', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+                          {resendLoading ? 'Gönderiliyor...' : 'Yeni Kod Gönder →'}
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
               )}
 
               {/* Submit Button */}
