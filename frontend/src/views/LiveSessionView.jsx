@@ -9,7 +9,7 @@ import LiveVideoPanel from '../components/eduflow/LiveVideoPanel';
 import LiveAiPanel from '../components/eduflow/LiveAiPanel';
 import api from '../services/api';
 
-import { Layers, Monitor, Share2, Sparkles, Code2, Presentation } from 'lucide-react';
+import { Layers, Monitor, Share2, Sparkles, Code2, Presentation, Video, Copy, Check, Users, ArrowRight, BookOpen } from 'lucide-react';
 
 const CodeSandbox = lazy(() => import('../components/CodeSandbox'));
 const CollaborativeWhiteboard = lazy(() => import('../components/CollaborativeWhiteboard'));
@@ -175,6 +175,188 @@ const InstructorCodePanel = memo(function InstructorCodePanel({ studentCode }) {
 });
 
 /**
+ * Eğitmenin ders oluşturduğu tam sayfa bileşeni.
+ */
+function TeacherLobby({ onJoinAsHost, onBack, p, t, isDark }) {
+  const [loading, setLoading] = useState(false);
+  const [roomCode, setRoomCode] = useState('');
+  const [sessionId, setSessionId] = useState(null);
+  const [copied, setCopied] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleCreate = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const result = await api.createLiveSession({
+        title: 'Canlı Ders',
+        courseId: '000000000000000000000000',
+        scheduledAt: new Date().toISOString(),
+        duration: 60,
+        sessionType: 'lecture',
+      });
+      setRoomCode(result.data.roomId);
+      setSessionId(result.data._id);
+    } catch {
+      const code = 'EDU-' + Math.random().toString(36).substring(2, 6).toUpperCase();
+      setRoomCode(code);
+      setSessionId(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(roomCode).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  return (
+    <div style={{
+      minHeight: '100vh', display: 'flex', flexDirection: 'column',
+      alignItems: 'center', justifyContent: 'center',
+      background: p.shell, color: p.text,
+      fontFamily: t.typography.fontFamily.base,
+      padding: 24,
+    }}>
+      <div style={{
+        background: p.panel, border: `1px solid ${p.border}`, borderRadius: 28,
+        padding: 48, maxWidth: 500, width: '100%',
+        boxShadow: '0 32px 64px rgba(0,0,0,0.25)',
+        textAlign: 'center',
+      }}>
+        {/* İkon */}
+        <div style={{
+          width: 80, height: 80, borderRadius: 24,
+          background: isDark ? 'rgba(0,212,170,0.1)' : 'rgba(0,212,170,0.15)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          margin: '0 auto 24px',
+          border: '1px solid rgba(0,212,170,0.25)',
+          boxShadow: '0 8px 32px rgba(0,212,170,0.2)',
+        }}>
+          <Video size={40} color="#00d4aa" />
+        </div>
+
+        <h2 style={{ fontSize: 28, fontWeight: 800, marginBottom: 8, letterSpacing: '-0.5px' }}>
+          Canlı Ders Başlat
+        </h2>
+        <p style={{ color: p.textMuted, fontSize: 15, marginBottom: 36, lineHeight: 1.6 }}>
+          Yeni bir ders oluştur, oda kodunu öğrencilerinle paylaş.
+        </p>
+
+        {/* Ders Oluşturulmadıysa */}
+        {!roomCode ? (
+          <button
+            onClick={handleCreate}
+            disabled={loading}
+            style={{
+              width: '100%', padding: '16px', borderRadius: 16, border: 'none',
+              background: 'linear-gradient(135deg, #00d4aa, #0bc5e8)',
+              color: '#fff', fontSize: 17, fontWeight: 800,
+              cursor: loading ? 'wait' : 'pointer',
+              opacity: loading ? 0.7 : 1,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+              boxShadow: '0 8px 24px rgba(0,212,170,0.35)',
+              transition: 'all 0.2s',
+              letterSpacing: '-0.3px',
+            }}
+            onMouseEnter={e => { if (!loading) e.currentTarget.style.transform = 'translateY(-2px)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
+          >
+            {loading ? (
+              <>Ders oluşturuluyor…</>
+            ) : (
+              <><BookOpen size={20} /> Ders Oluştur</>
+            )}
+          </button>
+        ) : (
+          /* Oda Kodu Gösterimi */
+          <div>
+            <p style={{ color: p.textMuted, fontSize: 13, marginBottom: 12 }}>
+              Öğrencilerine bu kodu ver:
+            </p>
+
+            {/* Kodu kopyala butonu */}
+            <button
+              onClick={handleCopy}
+              style={{
+                width: '100%', padding: '20px 24px', borderRadius: 18,
+                border: `2px dashed ${copied ? '#00d4aa' : p.border}`,
+                background: isDark ? (copied ? 'rgba(0,212,170,0.08)' : 'rgba(255,255,255,0.03)') : (copied ? 'rgba(0,212,170,0.06)' : '#f8fafc'),
+                cursor: 'pointer', marginBottom: 16,
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
+                transition: 'all 0.2s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = '#00d4aa'; e.currentTarget.style.background = isDark ? 'rgba(0,212,170,0.08)' : 'rgba(0,212,170,0.05)'; }}
+              onMouseLeave={e => { if (!copied) { e.currentTarget.style.borderColor = p.border; e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.03)' : '#f8fafc'; } }}
+            >
+              <span style={{ fontSize: 11, fontWeight: 600, color: p.textMuted, textTransform: 'uppercase', letterSpacing: 2 }}>
+                Oda Kodu
+              </span>
+              <span style={{
+                fontFamily: 'monospace', fontSize: 38, fontWeight: 900,
+                color: '#00d4aa', letterSpacing: 6,
+              }}>
+                {roomCode}
+              </span>
+              <span style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                fontSize: 13, fontWeight: 600,
+                color: copied ? '#00d4aa' : p.textMuted,
+              }}>
+                {copied ? <><Check size={14} /> Kopyalandı!</> : <><Copy size={14} /> Kopyalamak için tıkla</>}
+              </span>
+            </button>
+
+            {/* Derse Gir */}
+            <button
+              onClick={() => onJoinAsHost(roomCode, sessionId)}
+              style={{
+                width: '100%', padding: '15px', borderRadius: 14, border: 'none',
+                background: 'linear-gradient(135deg, #00d4aa, #0bc5e8)',
+                color: '#fff', fontSize: 16, fontWeight: 700,
+                cursor: 'pointer', marginBottom: 10,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                boxShadow: '0 6px 20px rgba(0,212,170,0.3)',
+                transition: 'all 0.2s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
+            >
+              <Users size={18} /> Derse Gir (Host) <ArrowRight size={18} />
+            </button>
+
+            <button
+              onClick={() => { setRoomCode(''); setSessionId(null); }}
+              style={{
+                width: '100%', padding: '10px', background: 'transparent',
+                border: 'none', color: p.textMuted, fontSize: 13, cursor: 'pointer',
+              }}
+            >
+              Yeni kod oluştur
+            </button>
+          </div>
+        )}
+
+        {error && <p style={{ color: '#ef4444', fontSize: 13, marginTop: 12 }}>{error}</p>}
+
+        <button
+          onClick={onBack}
+          style={{
+            marginTop: 20, background: 'transparent', border: 'none',
+            color: p.textMuted, fontSize: 14, cursor: 'pointer',
+          }}
+        >
+          ← Geri dön
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/**
  * Öğrencinin oda kodunu girdiği tam sayfa bileşeni.
  * Kod backend'e doğrulandıktan sonra onJoin(roomCode) çağrılır.
  */
@@ -280,6 +462,9 @@ function RoomCodeEntry({ onJoin, onBack, p, t }) {
 const LiveSessionView = memo(function LiveSessionView({ user, isAuthenticated, onNavigateHome, onNavigate, params }) {
   const { isDark, palette: p, tokens: t } = useTheme();
   const [joinedRoomCode, setJoinedRoomCode] = useState(params?.roomCode || null);
+  const [hostSessionId, setHostSessionId] = useState(params?.sessionId || null);
+
+  const isTeacher = user?.role === 'teacher' || user?.role === 'admin';
 
   if (!isAuthenticated) {
     return (
@@ -297,8 +482,24 @@ const LiveSessionView = memo(function LiveSessionView({ user, isAuthenticated, o
     );
   }
 
-  // Eğer öğrenci direkt geldi ve oda kodu yoksa, önce kodu girmesi gerekir
-  if (!params?.isHost && !joinedRoomCode) {
+  // Eğitmen → henüz oda kodu yoksa TeacherLobby göster
+  if (isTeacher && !params?.isHost && !joinedRoomCode) {
+    return (
+      <TeacherLobby
+        p={p}
+        t={t}
+        isDark={isDark}
+        onJoinAsHost={(code, sid) => {
+          setJoinedRoomCode(code);
+          setHostSessionId(sid);
+        }}
+        onBack={onNavigateHome}
+      />
+    );
+  }
+
+  // Öğrenci → oda kodu girme ekranı
+  if (!isTeacher && !params?.isHost && !joinedRoomCode) {
     return (
       <RoomCodeEntry
         p={p}
@@ -310,10 +511,10 @@ const LiveSessionView = memo(function LiveSessionView({ user, isAuthenticated, o
   }
 
   const effectiveParams = joinedRoomCode
-    ? { ...params, roomCode: joinedRoomCode }
+    ? { ...params, roomCode: joinedRoomCode, isHost: isTeacher || params?.isHost }
     : params;
 
-  const viewRole = effectiveParams?.isHost ? 'teacher' : 'student';
+  const viewRole = (effectiveParams?.isHost || isTeacher) ? 'teacher' : 'student';
 
   const session = useLiveSession({
     user,
@@ -504,8 +705,8 @@ const LiveSessionView = memo(function LiveSessionView({ user, isAuthenticated, o
         }
       `}</style>
       <SessionTopBar
-        courseTitle={`Canlı Ders ${effectiveParams?.roomCode ? `(Oda: ${effectiveParams.roomCode})` : ''}`}
-        moduleTitle={effectiveParams?.isHost ? "Senin Dersin — Host" : "Sınıftasın"}
+        courseTitle={`Canlı Ders ${joinedRoomCode ? `· ${joinedRoomCode}` : ''}`}
+        moduleTitle={viewRole === 'teacher' ? "Senin Dersin — Host" : "Sınıftasın"}
         sessionTimer={session.timerLabel}
         viewRole={viewRole}
         participantCount={session.participants.length || 1}
