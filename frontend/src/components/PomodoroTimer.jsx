@@ -377,16 +377,8 @@ export default function PomodoroTimer() {
                         <div
                           key={opt.value}
                           onClick={() => {
-                            const val = opt.value;
-                            if (val === 'custom') {
-                              setFocusTime('custom');
-                              setTimeLeft(customFocus * 60);
-                            } else {
-                              setFocusTime(val);
-                              setTimeLeft(val * 60);
-                            }
-                    setIsDropdownOpen(false);
-                            changeFocusTime(opt.value === 'custom' ? 'custom' : opt.value);
+                            changeFocusTime(opt.value);
+                            setIsDropdownOpen(false);
                           }}
                           onMouseEnter={(e) => {
                             if (focusTime !== opt.value) e.currentTarget.style.background = `rgba(${parseInt(primaryColor.slice(1,3),16)},${parseInt(primaryColor.slice(3,5),16)},${parseInt(primaryColor.slice(5,7),16)}, 0.1)`;
