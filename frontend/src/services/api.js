@@ -42,6 +42,15 @@ export const api = {
     return parseResponse(res);
   },
 
+  async verifyEmail(email, code) {
+    const res = await fetch(`${API_URL}/auth/verify-email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, code }),
+    });
+    return parseResponse(res);
+  },
+
   async getMe() {
     const res = await fetch(`${API_URL}/users/me`, { headers: authHeaders() });
     return parseResponse(res);
@@ -251,6 +260,16 @@ export const api = {
       method: 'POST',
       headers: authHeaders(),
       body: JSON.stringify({ content })
+    });
+    return parseResponse(res);
+  },
+
+  // AI Mentor API
+  async sendMessageToAI(messages) {
+    const res = await fetch(`${API_URL}/ai/chat`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ messages })
     });
     return parseResponse(res);
   },

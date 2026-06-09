@@ -124,7 +124,7 @@ export default function RoadmapsView({ onNavigate }) {
                         <span style={{display: 'flex', alignItems: 'center', gap: 6}}><Users size={16} /> {rmItem.enrolled.toLocaleString("tr-TR")}</span>
                         <span style={{display: 'flex', alignItems: 'center', gap: 6}}><Star size={16} fill="currentColor" color={C.gold || '#f59e0b'} /> {rmItem.rating}</span>
                       </div>
-                      <button style={{ padding: "10px 20px", borderRadius: 12, border: "none", background: rmItem.color, color: "#fff", fontFamily: C.font, fontSize: 14, fontWeight: 700, cursor: "pointer", transition: 'transform 0.2s' }} onMouseEnter={e=>e.currentTarget.style.transform='scale(1.05)'} onMouseLeave={e=>e.currentTarget.style.transform='scale(1)'}>İncele →</button>
+                      <button onClick={() => onNavigate('courses')} style={{ padding: "10px 20px", borderRadius: 12, border: "none", background: rmItem.color, color: "#fff", fontFamily: C.font, fontSize: 14, fontWeight: 700, cursor: "pointer", transition: 'transform 0.2s' }} onMouseEnter={e=>e.currentTarget.style.transform='scale(1.05)'} onMouseLeave={e=>e.currentTarget.style.transform='scale(1)'}>İncele →</button>
                     </div>
                   </div>
                 </Card>

@@ -86,20 +86,42 @@ export function AuthProvider({ children }) {
 
   const login = useCallback(async (email, password) => {
     try {
-      const { token, data } = await api.login(email, password);
-      applySession(token, data);
-      return { success: true };
+      const res = await api.login(email, password);
+      if (res.success && res.token) {
+        applySession(res.token, res.data);
+        return { success: true };
+      }
+      return res; // E.g. requiresVerification case
     } catch (err) {
       console.error("Giriş başarısız:", err.message);
+      // Backend error format matches err.message but we might have a custom object if we throw custom
+      // Actually api.login throws Error. Let's return message or the error object if it has properties.
       return { success: false, message: err.message };
     }
   }, [applySession]);
 
   const register = useCallback(async (payload) => {
     try {
-      const { token, data } = await api.register(payload);
-      applySession(token, data);
-      return { success: true };
+      const res = await api.register(payload);
+      if (res.success && res.token) {
+        applySession(res.token, res.data);
+        return { success: true };
+      }
+      return res; // E.g. requiresVerification case
+    } catch (err) {
+      console.error("Kayıt başarısız:", err.message);
+      return { success: false, message: err.message };
+    }
+  }, [applySession]);
+
+  const verifyEmail = useCallback(async (email, code) => {
+    try {
+      const res = await api.verifyEmail(email, code);
+      if (res.success && res.token) {
+        applySession(res.token, res.data);
+        return { success: true };
+      }
+      return res;
     } catch (err) {
       return { success: false, message: err.message };
     }
@@ -167,6 +189,7 @@ export function AuthProvider({ children }) {
       register,
       logout,
       refreshProfile,
+      verifyEmail,
       updateUser,
       purchaseCourses,
       addXP,

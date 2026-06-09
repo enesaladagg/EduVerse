@@ -1,13 +1,21 @@
-import React from 'react';
-import { Users, Wallet, Star, BookOpen, TrendingUp, Zap, BarChart2, MessageCircle, Mail } from 'lucide-react';
+import React, { useState } from 'react';
+import { Users, Wallet, Star, BookOpen, TrendingUp, Zap, BarChart2, MessageCircle, Mail, Video, X } from 'lucide-react';
 import { C, font, mono, INSTRUCTOR_DATA, Card, SectionTitle, MiniChart, Badge, Stars } from '../components/EduVerseShared';
 
-export default function InstructorView() {
+export default function InstructorView({ onNavigate }) {
   const d = INSTRUCTOR_DATA;
+  const [liveModal, setLiveModal] = useState(false);
+  const [roomCode, setRoomCode] = useState('');
+
+  const handleCreateLive = () => {
+    const code = 'EDU-' + Math.random().toString(36).substring(2, 6).toUpperCase();
+    setRoomCode(code);
+    setLiveModal(true);
+  };
 
   return (
-    <div style={{ fontFamily: "'DM Sans', 'Outfit', sans-serif", background: C.bg, color: C.text, minHeight: '100vh' }}>
-      <div style={{ maxWidth: 1280, margin: "0 auto", padding: "32px 5%" }}>
+    <div style={{ boxSizing: 'border-box', fontFamily: "'DM Sans', 'Outfit', sans-serif", background: C.bg, color: C.text, minHeight: '100vh', position: 'relative' }}>
+      <div style={{ maxWidth: 1280, margin: "0 auto", padding: "32px 5%", boxSizing: 'border-box' }}>
         {/* Header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 36, flexWrap: "wrap", gap: 16 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
@@ -17,7 +25,14 @@ export default function InstructorView() {
               <p style={{ color: C.textSec, fontSize: 14 }}>Hoş geldin, {d.instructor.name}</p>
             </div>
           </div>
-          <button style={{ padding: "12px 28px", borderRadius: 14, border: "none", background: C.gradAccent, color: "white", fontFamily: font, fontSize: 14, fontWeight: 700, cursor: "pointer" }}>+ Yeni Kurs Oluştur</button>
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+            <button onClick={handleCreateLive} style={{ padding: "12px 20px", borderRadius: 14, border: `1px solid ${C.accent}`, background: `${C.accent}15`, color: C.accent, fontFamily: font, fontSize: 14, fontWeight: 700, cursor: "pointer", display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Video size={18} /> Canlı Ders Başlat
+            </button>
+            <button onClick={() => alert("Kurs oluşturma modülü yapım aşamasındadır.")} style={{ padding: "12px 28px", borderRadius: 14, border: "none", background: C.gradAccent, color: "white", fontFamily: font, fontSize: 14, fontWeight: 700, cursor: "pointer" }}>
+              + Yeni Kurs Oluştur
+            </button>
+          </div>
         </div>
 
         {/* Stats grid */}
@@ -52,8 +67,9 @@ export default function InstructorView() {
 
             {/* Courses table */}
             <SectionTitle sub="Kurslarını yönet ve performansını takip et">Kurslarım</SectionTitle>
-            <div style={{ borderRadius: 18, border: `1px solid ${C.border}`, overflow: "hidden", marginBottom: 28 }}>
-              {/* Table header */}
+            <div style={{ borderRadius: 18, border: `1px solid ${C.border}`, overflowX: "auto", marginBottom: 28 }}>
+              <div style={{ minWidth: 600 }}>
+                {/* Table header */}
               <div style={{ display: "grid", gridTemplateColumns: "2.5fr 1fr 0.8fr 1fr 0.8fr", gap: 12, padding: "14px 20px", background: C.surface, fontSize: 12, fontWeight: 600, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.5 }}>
                 <span>Kurs</span><span>Öğrenci</span><span>Puan</span><span>Gelir</span><span>Durum</span>
               </div>
@@ -69,6 +85,7 @@ export default function InstructorView() {
                   <Badge color={course.status === "active" ? C.green : C.textDim}>{course.status === "active" ? "Yayında" : "Taslak"}</Badge>
                 </div>
               ))}
+              </div>
             </div>
           </div>
 
@@ -88,7 +105,7 @@ export default function InstructorView() {
                     <p style={{ fontSize: 13, color: C.textSec, lineHeight: 1.5, marginBottom: 8 }}>{rev.text}</p>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <Stars r={rev.rating} size={10} />
-                      {rev.replied ? <Badge color={C.green}>Yanıtlandı</Badge> : <button style={{ padding: "4px 12px", borderRadius: 8, border: `1px solid ${C.accent}`, background: "transparent", color: C.accent, fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: font }}>Yanıtla</button>}
+                      {rev.replied ? <Badge color={C.green}>Yanıtlandı</Badge> : <button onClick={() => alert("Yanıt gönderme işlevi yapım aşamasındadır.")} style={{ padding: "4px 12px", borderRadius: 8, border: `1px solid ${C.accent}`, background: "transparent", color: C.accent, fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: font }}>Yanıtla</button>}
                     </div>
                   </div>
                 ))}
@@ -119,6 +136,34 @@ export default function InstructorView() {
           </div>
         </div>
       </div>
+
+      {/* Live Class Modal */}
+      {liveModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: 20 }}>
+          <div style={{ background: C.card, padding: 32, borderRadius: 24, maxWidth: 400, width: '100%', border: `1px solid ${C.border}`, position: 'relative' }}>
+            <button onClick={() => setLiveModal(false)} style={{ position: 'absolute', top: 16, right: 16, background: 'transparent', border: 'none', color: C.textDim, cursor: 'pointer' }}><X size={20} /></button>
+            <div style={{ width: 64, height: 64, borderRadius: '50%', background: `${C.accent}15`, color: C.accent, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
+              <Video size={32} />
+            </div>
+            <h2 style={{ fontFamily: font, fontSize: 24, fontWeight: 800, marginBottom: 8 }}>Canlı Ders Oluşturuldu</h2>
+            <p style={{ color: C.textSec, fontSize: 15, marginBottom: 24, lineHeight: 1.5 }}>Öğrencilerin derse katılabilmesi için aşağıdaki kodu onlarla paylaşın.</p>
+            
+            <div style={{ background: C.surface, border: `1px dashed ${C.accent}`, padding: 16, borderRadius: 12, textAlign: 'center', marginBottom: 24 }}>
+              <div style={{ fontSize: 12, color: C.textDim, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>Oda Kodu</div>
+              <div style={{ fontFamily: mono, fontSize: 32, fontWeight: 800, color: C.accent, letterSpacing: 4 }}>{roomCode}</div>
+            </div>
+
+            <button 
+              onClick={() => {
+                setLiveModal(false);
+                if (onNavigate) onNavigate('live', { roomCode, isHost: true });
+              }} 
+              style={{ width: '100%', padding: '16px', borderRadius: 14, border: 'none', background: C.gradAccent, color: '#fff', fontSize: 16, fontWeight: 700, cursor: 'pointer' }}>
+              Derse Katıl
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

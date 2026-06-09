@@ -15,6 +15,8 @@ export default function SettingsView({ onNavigate }) {
   const [activeTab, setActiveTab] = useState('personal');
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [avatarError, setAvatarError] = useState('');
 
   // Form states
   const [formData, setFormData] = useState({
@@ -46,19 +48,44 @@ export default function SettingsView({ onNavigate }) {
 
   const handleAvatarChange = async (e) => {
     const file = e.target.files[0];
-    if (file && updateUser) {
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        try {
-          const response = await api.updateMe({ profilePicture: reader.result });
-          if (response.success) {
-            updateUser({ avatar: response.data.profilePicture });
-          }
-        } catch (err) {
-          console.error("Avatar upload error:", err);
+    if (!file) return;
+
+    // Dosya boyutu kontrolü (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setAvatarError('Dosya boyutu 5MB\'ı geçemez.');
+      return;
+    }
+
+    setAvatarUploading(true);
+    setAvatarError('');
+
+    try {
+      const formData = new FormData();
+      formData.append('avatar', file);
+
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:5000/api/upload/avatar', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        const fullUrl = result.data.profilePictureUrl;
+        if (updateUser) {
+          updateUser({ avatar: fullUrl, profilePicture: fullUrl });
         }
-      };
-      reader.readAsDataURL(file);
+      } else {
+        setAvatarError(result.error?.message || 'Yükleme başarısız.');
+      }
+    } catch (err) {
+      console.error('Avatar upload error:', err);
+      setAvatarError('Bağlantı hatası. Lütfen tekrar deneyin.');
+    } finally {
+      setAvatarUploading(false);
+      // Input'u sıfırla (aynı dosyayı tekrar seçebilmek için)
+      e.target.value = '';
     }
   };
 
@@ -78,7 +105,8 @@ export default function SettingsView({ onNavigate }) {
     color: isDark ? '#fff' : '#1e293b',
     fontSize: 15,
     fontFamily: '"Inter", sans-serif',
-    marginTop: 6
+    marginTop: 6,
+    boxSizing: 'border-box'
   };
 
   const labelStyle = {
@@ -94,14 +122,15 @@ export default function SettingsView({ onNavigate }) {
       minHeight: '100vh',
       background: isDark ? '#0f172a' : '#f8fafc',
       color: isDark ? '#f8fafc' : '#0f172a',
-      fontFamily: '"Outfit", sans-serif'
+      fontFamily: '"Outfit", sans-serif',
+      boxSizing: 'border-box'
     }}>
       <GlobalNavbar activePage="settings" onNavigate={onNavigate} />
 
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '120px 24px 60px', display: 'flex', gap: 40 }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '120px 24px 60px', display: 'flex', gap: 40, flexWrap: 'wrap', boxSizing: 'border-box' }}>
         
         {/* SIDEBAR TABS */}
-        <div style={{ width: 280, flexShrink: 0 }}>
+        <div style={{ width: '100%', maxWidth: 280, flexShrink: 0, boxSizing: 'border-box' }}>
           <h1 style={{ fontSize: 28, fontWeight: 800, marginBottom: 32 }}>Ayarlar</h1>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {tabs.map(tab => (
@@ -132,12 +161,13 @@ export default function SettingsView({ onNavigate }) {
 
         {/* CONTENT AREA */}
         <div style={{ 
-          flex: 1, 
+          flex: 1, minWidth: 300,
           background: isDark ? '#1e293b' : '#fff',
           borderRadius: 24,
-          padding: 40,
+          padding: '40px 5%',
           boxShadow: isDark ? '0 10px 40px rgba(0,0,0,0.2)' : '0 10px 40px rgba(0,0,0,0.04)',
-          border: `1px solid ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'}`
+          border: `1px solid ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'}`,
+          boxSizing: 'border-box'
         }}>
           
           {/* PERSONAL TAB */}
@@ -151,7 +181,8 @@ export default function SettingsView({ onNavigate }) {
                 <div style={{
                   width: 100, height: 100, borderRadius: '50%',
                   background: '#00d4aa', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 36, fontWeight: 800, color: '#fff', position: 'relative'
+                  fontSize: 36, fontWeight: 800, color: '#fff', position: 'relative',
+                  opacity: avatarUploading ? 0.6 : 1, transition: 'opacity 0.2s'
                 }}>
                   {user?.avatar ? (
                     <img src={user.avatar} alt="Avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
@@ -161,29 +192,40 @@ export default function SettingsView({ onNavigate }) {
                   <input 
                     type="file" 
                     id="avatar-upload" 
-                    accept="image/*" 
+                    accept="image/jpeg,image/jpg,image/png,image/webp" 
                     style={{ display: 'none' }} 
                     onChange={handleAvatarChange} 
                   />
                   <button 
                     onClick={() => document.getElementById('avatar-upload').click()}
+                    disabled={avatarUploading}
                     style={{
                     position: 'absolute', bottom: 0, right: 0,
                     width: 32, height: 32, borderRadius: '50%',
-                    background: '#1e293b', border: '2px solid #fff',
+                    background: avatarUploading ? '#64748b' : '#1e293b', border: '2px solid #fff',
                     color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    cursor: 'pointer'
+                    cursor: avatarUploading ? 'not-allowed' : 'pointer'
                   }}>
-                    <Camera size={14} />
+                    {avatarUploading ? (
+                      <div style={{ width: 12, height: 12, border: '2px solid #fff', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+                    ) : (
+                      <Camera size={14} />
+                    )}
                   </button>
                 </div>
                 <div>
                   <h3 style={{ fontSize: 18, fontWeight: 700, margin: '0 0 4px 0' }}>Profil Fotoğrafı</h3>
-                  <p style={{ margin: 0, color: isDark ? '#94a3b8' : '#64748b', fontSize: 14 }}>PNG veya JPG. Max 2MB.</p>
+                  <p style={{ margin: '0 0 6px 0', color: isDark ? '#94a3b8' : '#64748b', fontSize: 14 }}>JPG, PNG veya WEBP. Max 5MB.</p>
+                  {avatarError && (
+                    <p style={{ margin: 0, color: '#ef4444', fontSize: 13, fontWeight: 600 }}>{avatarError}</p>
+                  )}
+                  {avatarUploading && (
+                    <p style={{ margin: 0, color: '#00d4aa', fontSize: 13, fontWeight: 600 }}>Yükleniyor...</p>
+                  )}
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 24 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 24, marginBottom: 24 }}>
                 <div>
                   <label style={labelStyle}>Ad Soyad</label>
                   <input type="text" style={inputStyle} value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
@@ -248,6 +290,33 @@ export default function SettingsView({ onNavigate }) {
                   }}>Aktifleştir</button>
                 </div>
               </div>
+
+              {/* Danger Zone: Hesabı Sil */}
+              <div style={{ marginTop: 40, paddingTop: 32, borderTop: `1px solid ${isDark ? 'rgba(239,68,68,0.2)' : 'rgba(239,68,68,0.1)'}` }}>
+                <h3 style={{ fontSize: 18, fontWeight: 700, color: '#ef4444', marginBottom: 8 }}>Tehlikeli Bölge</h3>
+                <p style={{ fontSize: 14, color: isDark ? '#94a3b8' : '#64748b', marginBottom: 16 }}>
+                  Hesabınızı sildiğinizde geri dönüşü yoktur. Tüm ilerlemeleriniz, kurslarınız ve verileriniz kalıcı olarak silinecektir.
+                </p>
+                <button 
+                  onClick={() => {
+                    const pass = prompt("Hesabınızı silmek istediğinize emin misiniz? Devam etmek için şifrenizi girin:");
+                    if (pass) {
+                      alert("Hesap silme işlemi başlatıldı."); // Burada gerçek silme servisi çağrılabilir.
+                      // api.deleteAccount({ password: pass }); 
+                    }
+                  }}
+                  style={{
+                    background: 'transparent', color: '#ef4444', border: '1px solid #ef4444',
+                    padding: '10px 20px', borderRadius: 8, fontWeight: 600, cursor: 'pointer',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.background = '#ef4444'; e.currentTarget.style.color = '#fff'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#ef4444'; }}
+                >
+                  Hesabı Kalıcı Olarak Sil
+                </button>
+              </div>
+
             </div>
           )}
 
@@ -272,7 +341,7 @@ export default function SettingsView({ onNavigate }) {
               </div>
 
               <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>Fatura Adresi</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 24 }}>
                 <div style={{ gridColumn: '1 / -1' }}>
                   <label style={labelStyle}>Adres</label>
                   <textarea style={{...inputStyle, height: 80, resize: 'vertical'}} placeholder="Açık adresiniz..."></textarea>

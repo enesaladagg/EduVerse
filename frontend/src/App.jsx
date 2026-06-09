@@ -24,6 +24,7 @@ import PlannerPage from './views/PlannerPage';
 import MessagingPage from './views/MessagingPage';
 import SettingsView from './views/SettingsView';
 import PomodoroTimer from './components/PomodoroTimer';
+import { PomodoroProvider } from './context/PomodoroContext';
 
 const GUEST_USER = {
   name: 'Misafir',
@@ -45,6 +46,7 @@ function AppContent() {
     }
     return 'home';
   });
+  const [pageParams, setPageParams] = useState(null);
 
   // URL'yi temizle
   useEffect(() => {
@@ -53,7 +55,10 @@ function AppContent() {
     }
   }, []);
 
-  const navigate = useCallback((id) => setPage(id), []);
+  const navigate = useCallback((id, params = null) => {
+    setPage(id);
+    setPageParams(params);
+  }, []);
   const displayUser = user || GUEST_USER;
 
   let content;
@@ -71,7 +76,7 @@ function AppContent() {
     case 'h-paths':     content = <RoadmapsView onNavigate={navigate} />; break;
     case 'h-community': content = <CommunityView onNavigate={navigate} />; break;
     case 'h-corporate': content = <CorporateView onNavigate={navigate} />; break;
-    case 'live':        content = <LiveSessionView user={displayUser} isAuthenticated={isAuthenticated} onNavigateHome={() => navigate('home')} onNavigate={navigate} />; break;
+    case 'live':        content = <LiveSessionView user={displayUser} isAuthenticated={isAuthenticated} onNavigateHome={() => navigate('home')} onNavigate={navigate} params={pageParams} />; break;
     case 'settings':    content = <SettingsView onNavigate={navigate} />; break;
     case 'home':        content = <HomeView onNavigate={navigate} />; break;
     case 'profile':
@@ -127,7 +132,9 @@ export default function App() {
     <ThemeProvider>
       <AuthProvider>
         <CartProvider>
-          <AppContent />
+          <PomodoroProvider>
+            <AppContent />
+          </PomodoroProvider>
         </CartProvider>
       </AuthProvider>
     </ThemeProvider>

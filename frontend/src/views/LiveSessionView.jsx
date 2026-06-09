@@ -173,7 +173,7 @@ const InstructorCodePanel = memo(function InstructorCodePanel({ studentCode }) {
   );
 });
 
-const LiveSessionView = memo(function LiveSessionView({ user, isAuthenticated, onNavigateHome, onNavigate }) {
+const LiveSessionView = memo(function LiveSessionView({ user, isAuthenticated, onNavigateHome, onNavigate, params }) {
   const { palette: p, tokens: t } = useTheme();
 
   if (!isAuthenticated) {
@@ -192,7 +192,7 @@ const LiveSessionView = memo(function LiveSessionView({ user, isAuthenticated, o
     );
   }
 
-  const viewRole = user?.role === 'teacher' || user?.role === 'admin' ? 'teacher' : 'student';
+  const viewRole = params?.isHost ? 'teacher' : 'student';
 
   const session = useLiveSession({
     user,
@@ -383,8 +383,8 @@ const LiveSessionView = memo(function LiveSessionView({ user, isAuthenticated, o
         }
       `}</style>
       <SessionTopBar
-        courseTitle="React 101 — Modül 4"
-        moduleTitle="State Yönetimi & Hooks — Global Akademi"
+        courseTitle={`Canlı Ders ${params?.roomCode ? `(Oda: ${params.roomCode})` : ''}`}
+        moduleTitle={params?.isHost ? "Senin Dersin — Host" : "Sınıftasın"}
         sessionTimer={session.timerLabel}
         viewRole={viewRole}
         participantCount={session.participants.length || 1}
