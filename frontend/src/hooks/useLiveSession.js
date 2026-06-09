@@ -23,7 +23,7 @@ function formatTimer(seconds) {
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 
-export function useLiveSession({ user, viewRole, onLeave, roomId: roomIdProp }) {
+export function useLiveSession({ user, viewRole, onLeave, roomId: roomIdProp, enabled = true }) {
   const ROOM_ID = roomIdProp || 'live-default';
   const [sessionReady, setSessionReady] = useState(false);
   const [sessionError, setSessionError] = useState(null);
@@ -53,6 +53,7 @@ export function useLiveSession({ user, viewRole, onLeave, roomId: roomIdProp }) 
   const apiRole = viewRole === 'teacher' ? 'teacher' : 'student';
 
   useEffect(() => {
+    if (!enabled) return;
     let cancelled = false;
     setSessionReady(false);
     setSessionError(null);
@@ -78,7 +79,7 @@ export function useLiveSession({ user, viewRole, onLeave, roomId: roomIdProp }) 
       });
 
     return () => { cancelled = true; };
-  }, [displayName, apiRole]);
+  }, [displayName, apiRole, enabled]);
 
   const {
     socket, connected, connectError, self, participants, emit, on,

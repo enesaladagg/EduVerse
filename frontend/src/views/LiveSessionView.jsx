@@ -463,9 +463,34 @@ const LiveSessionView = memo(function LiveSessionView({ user, isAuthenticated, o
   const { isDark, palette: p, tokens: t } = useTheme();
   const [joinedRoomCode, setJoinedRoomCode] = useState(params?.roomCode || null);
   const [hostSessionId, setHostSessionId] = useState(params?.sessionId || null);
+  const [showEndModal, setShowEndModal] = useState(false);
+  const [mountedModes, setMountedModes] = useState(new Set(['slide']));
 
   const isTeacher = user?.role === 'teacher' || user?.role === 'admin';
+  const inLobby = !joinedRoomCode && !params?.isHost;
+  const viewRole = (isTeacher || params?.isHost) ? 'teacher' : 'student';
 
+  // Tüm hook'lar koşulsuz — React Rules of Hooks
+  const session = useLiveSession({
+    user,
+    viewRole,
+    onLeave: onNavigateHome,
+    roomId: joinedRoomCode || params?.roomCode || null,
+    enabled: !inLobby && isAuthenticated,
+  });
+
+  useEffect(() => {
+    if (inLobby) return;
+    setMountedModes(prev => new Set(prev).add(session.activeMode));
+  }, [session.activeMode, inLobby]);
+
+  useEffect(() => {
+    if (inLobby) return;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
+  }, [inLobby]);
+
+  // --- Render koşulları (hook'lardan sonra) ---
   if (!isAuthenticated) {
     return (
       <div style={{
@@ -482,8 +507,8 @@ const LiveSessionView = memo(function LiveSessionView({ user, isAuthenticated, o
     );
   }
 
-  // Eğitmen → henüz oda kodu yoksa TeacherLobby göster
-  if (isTeacher && !params?.isHost && !joinedRoomCode) {
+  // Eğitmen → Lobby
+  if (isTeacher && inLobby) {
     return (
       <TeacherLobby
         p={p}
@@ -498,8 +523,8 @@ const LiveSessionView = memo(function LiveSessionView({ user, isAuthenticated, o
     );
   }
 
-  // Öğrenci → oda kodu girme ekranı
-  if (!isTeacher && !params?.isHost && !joinedRoomCode) {
+  // Öğrenci → Oda kodu girme
+  if (!isTeacher && inLobby) {
     return (
       <RoomCodeEntry
         p={p}
@@ -509,32 +534,6 @@ const LiveSessionView = memo(function LiveSessionView({ user, isAuthenticated, o
       />
     );
   }
-
-  const effectiveParams = joinedRoomCode
-    ? { ...params, roomCode: joinedRoomCode, isHost: isTeacher || params?.isHost }
-    : params;
-
-  const viewRole = (effectiveParams?.isHost || isTeacher) ? 'teacher' : 'student';
-
-  const session = useLiveSession({
-    user,
-    viewRole,
-    onLeave: onNavigateHome,
-    roomId: joinedRoomCode || effectiveParams?.roomCode,
-  });
-
-  const [showEndModal, setShowEndModal] = useState(false);
-
-  const [mountedModes, setMountedModes] = useState(new Set(['slide']));
-
-  useEffect(() => {
-    setMountedModes(prev => new Set(prev).add(session.activeMode));
-  }, [session.activeMode]);
-
-  useEffect(() => {
-    document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = ''; };
-  }, []);
 
   if (session.sessionError) {
     return (
