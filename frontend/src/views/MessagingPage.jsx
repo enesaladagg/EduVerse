@@ -18,6 +18,10 @@ export default function MessagingPage() {
   const [showNewChatMenu, setShowNewChatMenu] = useState(false);
   const [showChatOptions, setShowChatOptions] = useState(false);
   const [attachedFile, setAttachedFile] = useState(null);
+  const [showUserSearch, setShowUserSearch] = useState(false);
+  const [userSearchQuery, setUserSearchQuery] = useState('');
+  const [userSearchResults, setUserSearchResults] = useState([]);
+  const [userSearchLoading, setUserSearchLoading] = useState(false);
   
   const emojiRef = useRef(null);
   const attachRef = useRef(null);
@@ -46,6 +50,35 @@ export default function MessagingPage() {
     ]
   });
   const [loadingChannels, setLoadingChannels] = useState(true);
+
+  const handleUserSearch = async (q) => {
+    setUserSearchQuery(q);
+    if (!q.trim()) { setUserSearchResults([]); return; }
+    setUserSearchLoading(true);
+    try {
+      const res = await api.searchUsers(q);
+      if (res.success) setUserSearchResults(res.data);
+    } catch (_) {}
+    finally { setUserSearchLoading(false); }
+  };
+
+  const handleStartDM = async (targetUser) => {
+    try {
+      const res = await api.createConversation(targetUser._id);
+      if (res.success) {
+        const conv = res.data;
+        const channel = {
+          id: conv._id,
+          type: 'dm',
+          name: targetUser.name,
+          status: 'online',
+        };
+        setChannels(prev => prev.find(c => c.id === conv._id) ? prev : [...prev, channel]);
+        setActiveChannel(conv._id);
+      }
+    } catch (err) { console.error('DM oluşturulamadı:', err); }
+    finally { setShowUserSearch(false); }
+  };
 
   useEffect(() => {
     async function fetchConvs() {
@@ -245,8 +278,8 @@ export default function MessagingPage() {
                   <button onClick={() => setShowNewChatMenu(false)} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: 12, background: 'transparent', border: 'none', color: p.text, borderRadius: 12, cursor: 'pointer' }} onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.05)' : '#f8fafc'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                     <Users size={16} color={p.accent} /> <span style={{ fontWeight: 600 }}>Yeni Grup Oluştur</span>
                   </button>
-                  <button onClick={() => setShowNewChatMenu(false)} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: 12, background: 'transparent', border: 'none', color: p.text, borderRadius: 12, cursor: 'pointer' }} onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.05)' : '#f8fafc'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                    <UserPlus size={16} color={p.accent} /> <span style={{ fontWeight: 600 }}>Yeni Arkadaş Ekle</span>
+                  <button onClick={() => { setShowNewChatMenu(false); setShowUserSearch(true); setUserSearchQuery(''); setUserSearchResults([]); }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: 12, background: 'transparent', border: 'none', color: p.text, borderRadius: 12, cursor: 'pointer' }} onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.05)' : '#f8fafc'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                    <UserPlus size={16} color={p.accent} /> <span style={{ fontWeight: 600 }}>Yeni Mesaj Gönder</span>
                   </button>
                 </div>
               )}
@@ -571,6 +604,46 @@ export default function MessagingPage() {
         </div>
 
       </div>
+
+      {/* Kullanıcı Arama Modalı */}
+      {showUserSearch && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+          <div style={{ background: isDark ? '#0f172a' : '#fff', borderRadius: 20, padding: 24, width: '100%', maxWidth: 420, border: `1px solid ${p.border}` }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>Yeni Mesaj</h3>
+              <button onClick={() => setShowUserSearch(false)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: p.textMuted, fontSize: 20 }}>✕</button>
+            </div>
+            <input
+              autoFocus
+              type="text"
+              placeholder="İsim ile ara..."
+              value={userSearchQuery}
+              onChange={e => handleUserSearch(e.target.value)}
+              style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: `1px solid ${p.border}`, background: isDark ? 'rgba(255,255,255,0.05)' : '#f8fafc', color: p.text, outline: 'none', fontSize: 15, boxSizing: 'border-box', marginBottom: 12 }}
+            />
+            <div style={{ maxHeight: 280, overflowY: 'auto' }}>
+              {userSearchLoading && <p style={{ color: p.textMuted, textAlign: 'center', padding: 16 }}>Aranıyor…</p>}
+              {!userSearchLoading && userSearchResults.length === 0 && userSearchQuery && (
+                <p style={{ color: p.textMuted, textAlign: 'center', padding: 16 }}>Kullanıcı bulunamadı.</p>
+              )}
+              {userSearchResults.map(u => (
+                <button key={u._id} onClick={() => handleStartDM(u)}
+                  style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', borderRadius: 12, border: 'none', background: 'transparent', color: p.text, cursor: 'pointer', textAlign: 'left' }}
+                  onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.07)' : '#f1f5f9'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                  <div style={{ width: 40, height: 40, borderRadius: '50%', background: p.accent + '30', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, color: p.accent, fontSize: 16, flexShrink: 0 }}>
+                    {u.profilePicture ? <img src={u.profilePicture} alt="" style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover' }} /> : u.name[0].toUpperCase()}
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: 15 }}>{u.name}</div>
+                    <div style={{ fontSize: 12, color: p.textMuted }}>{u.role === 'teacher' ? 'Eğitmen' : u.role === 'admin' ? 'Yönetici' : 'Öğrenci'}</div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
