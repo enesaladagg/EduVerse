@@ -1,16 +1,15 @@
 const nodemailer = require('nodemailer');
 
 function createTransporter() {
+  // Brevo (Sendinblue) SMTP — cloud sunuculardan çalışır, 300 email/gün ücretsiz
+  // Render free tier Gmail SMTP'yi bloke ettiği için Brevo kullanıyoruz
   return nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true, // TLS
+    host: process.env.SMTP_HOST || 'smtp-relay.brevo.com',
+    port: parseInt(process.env.SMTP_PORT || '587'),
+    secure: false, // Brevo port 587 STARTTLS kullanır
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
-    },
-    tls: {
-      rejectUnauthorized: false,
     },
   });
 }
