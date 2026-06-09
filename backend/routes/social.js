@@ -62,6 +62,7 @@ router.get('/friends', authenticate, asyncHandler(async (req, res) => {
   res.json({ success: true, data: currentUser.friends });
 }));
 
+
 // Yeni DM Konuşması Oluştur (veya varsa getir)
 router.post('/conversations', authenticate, asyncHandler(async (req, res, next) => {
   const { userId } = req.body;

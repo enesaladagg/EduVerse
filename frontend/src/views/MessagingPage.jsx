@@ -125,6 +125,7 @@ export default function MessagingPage() {
     finally { setGroupCreating(false); }
   };
 
+
   const handleUserSearch = async (q) => {
     setUserSearchQuery(q);
     if (!q.trim()) { setUserSearchResults([]); return; }
@@ -786,6 +787,7 @@ export default function MessagingPage() {
           </div>
         </div>
       )}
+
 
       {/* Kullanıcı Arama Modalı */}
       {showUserSearch && (
