@@ -4,7 +4,7 @@ import GlobalNavbar from '../../components/GlobalNavbar';
 import {
   Users, BookOpen, DollarSign, TrendingUp,
   MessageCircle, Star, Video, Activity,
-  Clock, CheckCircle, ChevronRight
+  Clock, CheckCircle, ChevronRight, Copy, StopCircle, X
 } from 'lucide-react';
 
 // Statik kısımlar bileşen içine taşınacak
@@ -29,6 +29,42 @@ export default function InstructorDashboardView({ onNavigate }) {
   
   const [statsData, setStatsData] = useState({ totalStudents: 0, totalCourses: 0, monthlyRevenue: 0, averageRating: 0 });
   const [loading, setLoading] = useState(true);
+  const [liveModal, setLiveModal] = useState(false);
+  const [roomCode, setRoomCode] = useState('');
+  const [sessionId, setSessionId] = useState(null);
+  const [createLoading, setCreateLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const handleCreateLive = async () => {
+    setCreateLoading(true);
+    try {
+      const result = await api.createLiveSession({
+        title: 'Canlı Ders',
+        courseId: '000000000000000000000000',
+        scheduledAt: new Date().toISOString(),
+        duration: 60,
+        sessionType: 'lecture',
+      });
+      setRoomCode(result.data.roomId);
+      setSessionId(result.data._id);
+    } catch (err) {
+      const code = 'EDU-' + Math.random().toString(36).substring(2, 6).toUpperCase();
+      setRoomCode(code);
+      setSessionId(null);
+    } finally {
+      setCreateLoading(false);
+      setLiveModal(true);
+    }
+  };
+
+  const handleEndSession = async () => {
+    if (sessionId) { try { await api.endLiveSession(sessionId); } catch (_) {} }
+    setLiveModal(false); setSessionId(null); setRoomCode('');
+  };
+
+  const handleCopyCode = () => {
+    navigator.clipboard.writeText(roomCode).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
+  };
 
   React.useEffect(() => {
     async function fetchStats() {
@@ -91,13 +127,13 @@ export default function InstructorDashboardView({ onNavigate }) {
               Hoş geldin, {user?.name || 'Eğitmen'}! İşte genel performans özetin.
             </p>
           </div>
-          <button style={{
+          <button onClick={handleCreateLive} disabled={createLoading} style={{
             background: `linear-gradient(135deg, ${p.accent}, #0bc5e8)`,
             color: '#fff', border: 'none', padding: '12px 24px', borderRadius: 12,
-            fontWeight: 600, fontSize: 15, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8,
-            boxShadow: `0 8px 24px ${p.accent}40`
+            fontWeight: 600, fontSize: 15, cursor: createLoading ? 'wait' : 'pointer', display: 'flex', alignItems: 'center', gap: 8,
+            boxShadow: `0 8px 24px ${p.accent}40`, opacity: createLoading ? 0.7 : 1
           }}>
-            <Video size={18} /> Yeni Canlı Ders Oluştur
+            <Video size={18} /> {createLoading ? 'Oluşturuluyor…' : 'Yeni Canlı Ders Oluştur'}
           </button>
         </div>
 
@@ -221,6 +257,33 @@ export default function InstructorDashboardView({ onNavigate }) {
         </div>
 
       </main>
+
+      {/* Canlı Ders Modal */}
+      {liveModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+          <div style={{ background: p.surface, borderRadius: 24, padding: 32, width: '100%', maxWidth: 400, border: `1px solid ${p.border}` }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+              <h2 style={{ fontSize: 22, fontWeight: 800, margin: 0 }}>Canlı Ders Oluşturuldu</h2>
+              <button onClick={handleEndSession} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: p.textMuted }}><X size={20} /></button>
+            </div>
+            <p style={{ color: p.textMuted, fontSize: 14, marginBottom: 24 }}>Öğrencilerinizle bu kodu paylaşın.</p>
+            <div style={{ background: isDark ? 'rgba(0,212,170,0.08)' : '#f0fdf9', border: `2px dashed ${p.accent}`, borderRadius: 16, padding: 20, textAlign: 'center', marginBottom: 16 }}>
+              <div style={{ fontSize: 11, color: p.textMuted, textTransform: 'uppercase', letterSpacing: 2, marginBottom: 8 }}>Oda Kodu</div>
+              <div style={{ fontFamily: 'monospace', fontSize: 36, fontWeight: 900, color: p.accent, letterSpacing: 6 }}>{roomCode}</div>
+            </div>
+            <button onClick={handleCopyCode} style={{ width: '100%', padding: 12, borderRadius: 12, border: `1px solid ${p.border}`, background: 'transparent', color: copied ? p.accent : p.textMuted, fontSize: 14, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 12 }}>
+              <Copy size={15} /> {copied ? 'Kopyalandı!' : 'Kodu Kopyala'}
+            </button>
+            <button onClick={() => { setLiveModal(false); if (onNavigate) onNavigate('live', { roomCode, isHost: true, sessionId }); }}
+              style={{ width: '100%', padding: 14, borderRadius: 14, border: 'none', background: `linear-gradient(135deg, ${p.accent}, #0bc5e8)`, color: '#fff', fontSize: 15, fontWeight: 700, cursor: 'pointer', marginBottom: 10 }}>
+              Derse Katıl (Host) →
+            </button>
+            <button onClick={handleEndSession} style={{ width: '100%', padding: 12, borderRadius: 14, border: '1px solid #ef4444', background: 'transparent', color: '#ef4444', fontSize: 14, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+              <StopCircle size={16} /> Dersi Bitir
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -39,6 +39,16 @@ router.put('/tasks/:id', authenticate, async (req, res, next) => {
 });
 
 // Pomodoro Session Kaydet
+// Görev Sil
+router.delete('/tasks/:id', authenticate, async (req, res, next) => {
+  try {
+    await PlannerTask.findOneAndDelete({ _id: req.params.id, user: req.user.id });
+    res.json({ success: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.post('/pomodoro', authenticate, async (req, res, next) => {
   try {
     const { duration, taskRef, status } = req.body;
