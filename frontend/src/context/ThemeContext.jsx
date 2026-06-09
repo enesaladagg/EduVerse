@@ -48,7 +48,7 @@ export function getEduFlowPalette(isDark) {
 export function ThemeProvider({ children }) {
   const [isDark, setIsDark] = useState(() => {
     const saved = localStorage.getItem('eduflow-theme');
-    return saved ? saved === 'dark' : true;
+    return saved ? saved === 'dark' : false;
   });
 
   useEffect(() => {
