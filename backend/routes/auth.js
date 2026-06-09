@@ -15,7 +15,7 @@ const router = express.Router();
 const signToken = (user) =>
   jwt.sign({ sub: user._id, role: user.role }, env.jwtSecret, { expiresIn: env.jwtExpiresIn });
 
-const smtpReady = () => !!(process.env.SMTP_USER && process.env.SMTP_PASS);
+const smtpReady = () => !!(process.env.BREVO_API_KEY || (process.env.SMTP_USER && process.env.SMTP_PASS));
 
 // ─── Register ────────────────────────────────────────────────────────────────
 router.post('/register', validate(schemas.register), asyncHandler(async (req, res, next) => {
