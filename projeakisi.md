@@ -1202,6 +1202,9 @@ commit: fix: register community & certificates routes, add purchasedCourses
 | 🔑 Şifre sıfırlama | SHA-256 hash'li güvenli token akışı |
 | 🎨 UI/UX | SVG tab seçici, ResetPasswordView (yeni sayfa) |
 | 🛡️ Güvenlik | 7+ sertleştirme adımı, URL'ler env var'a taşındı |
-| 📄 Dokümantasyon | README v2.0, ekip belgesi, sunum rehberi |
+| 📄 Dokümantasyon | README v2.0 (canlı & profesyonel format), projeakisi güncellendi |
 | 🔀 Git | PR #62 açıldı — merge için hazır |
+
+> **Not:** Ekip için hazırlanan detaylı teknik rehber ve hoca sunumu konuşma metni
+> repoya dahil edilmemiştir; ekip içinde ayrıca paylaşılmıştır.
 
