@@ -94,8 +94,10 @@ export function AuthProvider({ children }) {
       return res; // E.g. requiresVerification case
     } catch (err) {
       console.error("Giriş başarısız:", err.message);
-      // Backend error format matches err.message but we might have a custom object if we throw custom
-      // Actually api.login throws Error. Let's return message or the error object if it has properties.
+      // NOT_VERIFIED hatası için requiresVerification bilgisini koru
+      if (err.message?.includes('doğrulayın') || err.message?.includes('verify')) {
+        return { success: false, message: err.message, requiresVerification: true, email };
+      }
       return { success: false, message: err.message };
     }
   }, [applySession]);
