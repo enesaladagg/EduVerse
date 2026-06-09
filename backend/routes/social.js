@@ -50,6 +50,39 @@ router.post('/friends/accept/:id', authenticate, asyncHandler(async (req, res, n
   res.json({ success: true, message: 'Arkadaşlık isteği kabul edildi.' });
 }));
 
+// Gelen Arkadaşlık İsteklerini Listele
+router.get('/friends/requests', authenticate, asyncHandler(async (req, res) => {
+  const currentUser = await User.findById(req.user.id).populate('friendRequests', 'name profilePicture role');
+  res.json({ success: true, data: currentUser.friendRequests });
+}));
+
+// Arkadaş Listesi
+router.get('/friends', authenticate, asyncHandler(async (req, res) => {
+  const currentUser = await User.findById(req.user.id).populate('friends', 'name profilePicture role');
+  res.json({ success: true, data: currentUser.friends });
+}));
+
+// Yeni DM Konuşması Oluştur (veya varsa getir)
+router.post('/conversations', authenticate, asyncHandler(async (req, res, next) => {
+  const { userId } = req.body;
+  if (!userId) return next(new AppError('userId gerekli.', 400));
+  if (userId === req.user.id) return next(new AppError('Kendinizle konuşma başlatamazsınız.', 400));
+  const targetUser = await User.findById(userId);
+  if (!targetUser) return next(new AppError('Kullanıcı bulunamadı.', 404));
+
+  // Zaten var mı?
+  let conv = await Conversation.findOne({
+    isGroup: false,
+    participants: { $all: [req.user.id, userId], $size: 2 }
+  }).populate('participants', 'name profilePicture role');
+
+  if (!conv) {
+    conv = await Conversation.create({ isGroup: false, participants: [req.user.id, userId] });
+    conv = await Conversation.findById(conv._id).populate('participants', 'name profilePicture role');
+  }
+  res.json({ success: true, data: conv });
+}));
+
 // Konuşmaları Getir
 router.get('/conversations', authenticate, asyncHandler(async (req, res) => {
   const convs = await Conversation.find({ participants: req.user.id })

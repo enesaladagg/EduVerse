@@ -271,6 +271,13 @@ export const api = {
     });
     return parseResponse(res);
   },
+  async deletePlannerTask(id) {
+    const res = await fetch(`${API_URL}/planner/tasks/${id}`, {
+      method: 'DELETE',
+      headers: authHeaders(),
+    });
+    return parseResponse(res);
+  },
 
   // Messaging APIs
   async getConversations() {
@@ -286,6 +293,50 @@ export const api = {
       method: 'POST',
       headers: authHeaders(),
       body: JSON.stringify({ content })
+    });
+    return parseResponse(res);
+  },
+  async createConversation(userId) {
+    const res = await fetch(`${API_URL}/social/conversations`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ userId })
+    });
+    return parseResponse(res);
+  },
+  async searchUsers(q) {
+    const res = await fetch(`${API_URL}/social/users/search?q=${encodeURIComponent(q)}`, { headers: authHeaders() });
+    return parseResponse(res);
+  },
+  async sendFriendRequest(userId) {
+    const res = await fetch(`${API_URL}/social/friends/request/${userId}`, { method: 'POST', headers: authHeaders() });
+    return parseResponse(res);
+  },
+  async acceptFriendRequest(userId) {
+    const res = await fetch(`${API_URL}/social/friends/accept/${userId}`, { method: 'POST', headers: authHeaders() });
+    return parseResponse(res);
+  },
+  async getFriendRequests() {
+    const res = await fetch(`${API_URL}/social/friends/requests`, { headers: authHeaders() });
+    return parseResponse(res);
+  },
+  async getFriends() {
+    const res = await fetch(`${API_URL}/social/friends`, { headers: authHeaders() });
+    return parseResponse(res);
+  },
+  async createGroup(name, description, participantIds) {
+    const res = await fetch(`${API_URL}/social/groups`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ name, description, studentIds: participantIds })
+    });
+    return parseResponse(res);
+  },
+  async uploadAvatarBase64(imageBase64) {
+    const res = await fetch(`${API_URL}/upload/avatar/base64`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ imageBase64 })
     });
     return parseResponse(res);
   },

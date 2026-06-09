@@ -60,23 +60,31 @@ export default function SettingsView({ onNavigate }) {
     setAvatarError('');
 
     try {
-      const formData = new FormData();
-      formData.append('avatar', file);
-
-      const token = localStorage.getItem('token');
-      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-      const response = await fetch(`${API_BASE}/upload/avatar`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
+      // Canvas ile 200x200px'e sıkıştır → base64 → MongoDB'e kaydet (Render filesystem yok)
+      const imageBase64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = 200; canvas.height = 200;
+            const ctx = canvas.getContext('2d');
+            // Kare kırpma (merkez)
+            const size = Math.min(img.width, img.height);
+            const sx = (img.width - size) / 2, sy = (img.height - size) / 2;
+            ctx.drawImage(img, sx, sy, size, size, 0, 0, 200, 200);
+            resolve(canvas.toDataURL('image/jpeg', 0.85));
+          };
+          img.onerror = reject;
+          img.src = ev.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
       });
 
-      const result = await response.json();
+      const result = await api.uploadAvatarBase64(imageBase64);
       if (result.success) {
-        const fullUrl = result.data.profilePictureUrl;
-        if (updateUser) {
-          updateUser({ avatar: fullUrl, profilePicture: fullUrl });
-        }
+        if (updateUser) updateUser({ avatar: imageBase64, profilePicture: imageBase64 });
       } else {
         setAvatarError(result.error?.message || 'Yükleme başarısız.');
       }
@@ -85,7 +93,6 @@ export default function SettingsView({ onNavigate }) {
       setAvatarError('Bağlantı hatası. Lütfen tekrar deneyin.');
     } finally {
       setAvatarUploading(false);
-      // Input'u sıfırla (aynı dosyayı tekrar seçebilmek için)
       e.target.value = '';
     }
   };

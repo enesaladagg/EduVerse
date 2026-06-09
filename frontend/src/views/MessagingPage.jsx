@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTheme } from '../context/ThemeContext';
-import { Send, Bot, Hash, User, Code2, Plus, Paperclip, MoreVertical, Smile, Image, FileText, Users, UserPlus, MicOff, LogOut, X, Trash2 } from 'lucide-react';
+import { Send, Bot, Hash, User, Plus, Paperclip, MoreVertical, Smile, Image, FileText, Users, UserPlus, MicOff, LogOut, X, Trash2, Bell, Check } from 'lucide-react';
 import Button from '../components/Button';
 
 import api from '../services/api';
@@ -18,11 +18,31 @@ export default function MessagingPage() {
   const [showNewChatMenu, setShowNewChatMenu] = useState(false);
   const [showChatOptions, setShowChatOptions] = useState(false);
   const [attachedFile, setAttachedFile] = useState(null);
+  const [showUserSearch, setShowUserSearch] = useState(false);
+  const [userSearchQuery, setUserSearchQuery] = useState('');
+  const [userSearchResults, setUserSearchResults] = useState([]);
+  const [userSearchLoading, setUserSearchLoading] = useState(false);
+
+  // Arkadaş sistemi
+  const [friendRequests, setFriendRequests] = useState([]);
+  const [showFriendRequests, setShowFriendRequests] = useState(false);
+  const [friendRequestSent, setFriendRequestSent] = useState({});
+  const friendReqRef = useRef(null);
+
+  // Grup oluşturma
+  const [showGroupModal, setShowGroupModal] = useState(false);
+  const [groupName, setGroupName] = useState('');
+  const [groupDesc, setGroupDesc] = useState('');
+  const [groupSearch, setGroupSearch] = useState('');
+  const [groupSearchResults, setGroupSearchResults] = useState([]);
+  const [groupMembers, setGroupMembers] = useState([]);
+  const [groupCreating, setGroupCreating] = useState(false);
   
   const emojiRef = useRef(null);
   const attachRef = useRef(null);
   const newChatRef = useRef(null);
   const chatOptionsRef = useRef(null);
+  const groupModalRef = useRef(null);
 
   const EMOJIS = ['😀', '😂', '😍', '😎', '😭', '😡', '👍', '🙏', '🎉', '🔥', '❤️', '💯', '🤔', '🙌', '✨', '🚀', '💡', '✅', '⭐', '🎈'];
 
@@ -32,6 +52,7 @@ export default function MessagingPage() {
       if (attachRef.current && !attachRef.current.contains(e.target)) setShowAttachmentMenu(false);
       if (newChatRef.current && !newChatRef.current.contains(e.target)) setShowNewChatMenu(false);
       if (chatOptionsRef.current && !chatOptionsRef.current.contains(e.target)) setShowChatOptions(false);
+      if (friendReqRef.current && !friendReqRef.current.contains(e.target)) setShowFriendRequests(false);
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -46,6 +67,92 @@ export default function MessagingPage() {
     ]
   });
   const [loadingChannels, setLoadingChannels] = useState(true);
+
+  // Arkadaş isteklerini yükle
+  useEffect(() => {
+    async function loadFriendRequests() {
+      try {
+        const res = await api.getFriendRequests();
+        if (res.success) setFriendRequests(res.data || []);
+      } catch (_) {}
+    }
+    if (user?.id) loadFriendRequests();
+  }, [user?.id]);
+
+  const handleSendFriendRequest = async (targetUser) => {
+    try {
+      await api.sendFriendRequest(targetUser._id);
+      setFriendRequestSent(prev => ({ ...prev, [targetUser._id]: true }));
+    } catch (_) {}
+  };
+
+  const handleAcceptFriendRequest = async (senderId) => {
+    try {
+      await api.acceptFriendRequest(senderId);
+      setFriendRequests(prev => prev.filter(u => u._id !== senderId));
+    } catch (_) {}
+  };
+
+  // Grup oluşturma
+  const handleGroupSearch = async (q) => {
+    setGroupSearch(q);
+    if (!q.trim()) { setGroupSearchResults([]); return; }
+    try {
+      const res = await api.searchUsers(q);
+      if (res.success) setGroupSearchResults(res.data);
+    } catch (_) {}
+  };
+
+  const toggleGroupMember = (u) => {
+    setGroupMembers(prev => prev.find(m => m._id === u._id) ? prev.filter(m => m._id !== u._id) : [...prev, u]);
+  };
+
+  const handleCreateGroup = async (e) => {
+    e.preventDefault();
+    if (!groupName.trim() || groupMembers.length === 0) return;
+    setGroupCreating(true);
+    try {
+      const res = await api.createGroup(groupName, groupDesc, groupMembers.map(m => m._id));
+      if (res.success) {
+        const conv = res.data.conversation;
+        const channel = { id: conv._id, type: 'group', name: groupName, status: 'online' };
+        setChannels(prev => [...prev, channel]);
+        setActiveChannel(conv._id);
+        setShowGroupModal(false);
+        setGroupName(''); setGroupDesc(''); setGroupMembers([]); setGroupSearch('');
+      }
+    } catch (_) {}
+    finally { setGroupCreating(false); }
+  };
+
+  const handleUserSearch = async (q) => {
+    setUserSearchQuery(q);
+    if (!q.trim()) { setUserSearchResults([]); return; }
+    setUserSearchLoading(true);
+    try {
+      const res = await api.searchUsers(q);
+      if (res.success) setUserSearchResults(res.data);
+    } catch (_) {}
+    finally { setUserSearchLoading(false); }
+  };
+
+  const handleStartDM = async (targetUser) => {
+    try {
+      const res = await api.createConversation(targetUser._id);
+      if (res.success) {
+        const conv = res.data;
+        const channel = {
+          id: conv._id,
+          type: 'dm',
+          name: targetUser.name,
+          status: 'online',
+        };
+        setChannels(prev => prev.find(c => c.id === conv._id) ? prev : [...prev, channel]);
+        setActiveChannel(conv._id);
+      }
+    } catch (err) { console.error('DM oluşturulamadı:', err); }
+    finally { setShowUserSearch(false); }
+  };
 
   useEffect(() => {
     async function fetchConvs() {
@@ -236,20 +343,58 @@ export default function MessagingPage() {
         <div style={{ padding: '24px', borderBottom: `1px solid ${p.border}` }}>
           <h2 style={{ fontSize: 24, fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             Mesajlar
-            <div style={{ position: 'relative' }} ref={newChatRef}>
-              <button onClick={() => setShowNewChatMenu(!showNewChatMenu)} style={{ background: p.accent, color: '#fff', border: 'none', width: 36, height: 36, borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: `0 4px 12px ${p.accent}40` }}>
-                <Plus size={20} />
-              </button>
-              {showNewChatMenu && (
-                <div style={{ position: 'absolute', top: '100%', left: 0, marginTop: 8, width: 220, background: isDark ? '#0f172a' : '#fff', borderRadius: 16, padding: 8, boxShadow: t.shadows.md, border: `1px solid ${p.border}`, zIndex: 10 }}>
-                  <button onClick={() => setShowNewChatMenu(false)} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: 12, background: 'transparent', border: 'none', color: p.text, borderRadius: 12, cursor: 'pointer' }} onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.05)' : '#f8fafc'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                    <Users size={16} color={p.accent} /> <span style={{ fontWeight: 600 }}>Yeni Grup Oluştur</span>
-                  </button>
-                  <button onClick={() => setShowNewChatMenu(false)} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: 12, background: 'transparent', border: 'none', color: p.text, borderRadius: 12, cursor: 'pointer' }} onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.05)' : '#f8fafc'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                    <UserPlus size={16} color={p.accent} /> <span style={{ fontWeight: 600 }}>Yeni Arkadaş Ekle</span>
-                  </button>
-                </div>
-              )}
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              {/* Arkadaşlık İstekleri Bildirimi */}
+              <div style={{ position: 'relative' }} ref={friendReqRef}>
+                <button
+                  onClick={() => setShowFriendRequests(v => !v)}
+                  style={{ background: friendRequests.length > 0 ? 'rgba(239,68,68,0.1)' : p.panelElevated, color: friendRequests.length > 0 ? '#ef4444' : p.textMuted, border: `1px solid ${friendRequests.length > 0 ? 'rgba(239,68,68,0.3)' : p.border}`, width: 36, height: 36, borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', position: 'relative' }}>
+                  <Bell size={16} />
+                  {friendRequests.length > 0 && (
+                    <span style={{ position: 'absolute', top: -4, right: -4, background: '#ef4444', color: '#fff', borderRadius: '50%', width: 16, height: 16, fontSize: 10, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {friendRequests.length}
+                    </span>
+                  )}
+                </button>
+                {showFriendRequests && (
+                  <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: 8, width: 280, background: isDark ? '#0f172a' : '#fff', borderRadius: 16, padding: 12, boxShadow: t.shadows.md, border: `1px solid ${p.border}`, zIndex: 20 }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: p.textMuted, marginBottom: 10 }}>Arkadaşlık İstekleri</div>
+                    {friendRequests.length === 0 ? (
+                      <div style={{ color: p.textMuted, fontSize: 13, textAlign: 'center', padding: '12px 0' }}>Bekleyen istek yok.</div>
+                    ) : friendRequests.map(u => (
+                      <div key={u._id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: `1px solid ${p.border}` }}>
+                        <div style={{ width: 36, height: 36, borderRadius: '50%', background: p.accent + '25', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, color: p.accent, flexShrink: 0, fontSize: 14 }}>
+                          {u.profilePicture ? <img src={u.profilePicture} alt="" style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover' }} /> : u.name[0]}
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontWeight: 600, fontSize: 14 }}>{u.name}</div>
+                          <div style={{ fontSize: 12, color: p.textMuted }}>{u.role === 'teacher' ? 'Eğitmen' : 'Öğrenci'}</div>
+                        </div>
+                        <button onClick={() => handleAcceptFriendRequest(u._id)} style={{ background: '#00d4aa', color: '#fff', border: 'none', borderRadius: 8, padding: '5px 10px', fontSize: 12, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <Check size={12} /> Kabul
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Yeni Sohbet Menüsü */}
+              <div style={{ position: 'relative' }} ref={newChatRef}>
+                <button onClick={() => setShowNewChatMenu(!showNewChatMenu)} style={{ background: p.accent, color: '#fff', border: 'none', width: 36, height: 36, borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: `0 4px 12px ${p.accent}40` }}>
+                  <Plus size={20} />
+                </button>
+                {showNewChatMenu && (
+                  <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: 8, width: 220, background: isDark ? '#0f172a' : '#fff', borderRadius: 16, padding: 8, boxShadow: t.shadows.md, border: `1px solid ${p.border}`, zIndex: 10 }}>
+                    <button onClick={() => { setShowNewChatMenu(false); setShowGroupModal(true); }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: 12, background: 'transparent', border: 'none', color: p.text, borderRadius: 12, cursor: 'pointer' }} onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.05)' : '#f8fafc'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                      <Users size={16} color={p.accent} /> <span style={{ fontWeight: 600 }}>Yeni Grup Oluştur</span>
+                    </button>
+                    <button onClick={() => { setShowNewChatMenu(false); setShowUserSearch(true); setUserSearchQuery(''); setUserSearchResults([]); }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: 12, background: 'transparent', border: 'none', color: p.text, borderRadius: 12, cursor: 'pointer' }} onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.05)' : '#f8fafc'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                      <UserPlus size={16} color={p.accent} /> <span style={{ fontWeight: 600 }}>Yeni Mesaj Gönder</span>
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </h2>
           <input 
@@ -571,6 +716,125 @@ export default function MessagingPage() {
         </div>
 
       </div>
+
+      {/* Grup Oluşturma Modalı */}
+      {showGroupModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+          <div ref={groupModalRef} style={{ background: isDark ? '#0f172a' : '#fff', borderRadius: 20, padding: 28, width: '100%', maxWidth: 480, border: `1px solid ${p.border}`, boxShadow: t.shadows.md }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <h3 style={{ margin: 0, fontSize: 20, fontWeight: 800, color: p.text }}>Yeni Grup Oluştur</h3>
+              <button onClick={() => setShowGroupModal(false)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: p.textMuted, fontSize: 20, lineHeight: 1 }}>✕</button>
+            </div>
+            <form onSubmit={handleCreateGroup}>
+              <input
+                autoFocus
+                type="text"
+                placeholder="Grup adı *"
+                value={groupName}
+                onChange={e => setGroupName(e.target.value)}
+                style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: `1px solid ${p.border}`, background: isDark ? 'rgba(255,255,255,0.05)' : '#f8fafc', color: p.text, outline: 'none', fontSize: 15, boxSizing: 'border-box', marginBottom: 10 }}
+              />
+              <input
+                type="text"
+                placeholder="Açıklama (isteğe bağlı)"
+                value={groupDesc}
+                onChange={e => setGroupDesc(e.target.value)}
+                style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: `1px solid ${p.border}`, background: isDark ? 'rgba(255,255,255,0.05)' : '#f8fafc', color: p.text, outline: 'none', fontSize: 15, boxSizing: 'border-box', marginBottom: 14 }}
+              />
+              <div style={{ marginBottom: 10, fontWeight: 700, fontSize: 13, color: p.textMuted }}>Üye Ekle</div>
+              <input
+                type="text"
+                placeholder="Kullanıcı ara..."
+                value={groupSearch}
+                onChange={e => handleGroupSearch(e.target.value)}
+                style={{ width: '100%', padding: '10px 16px', borderRadius: 12, border: `1px solid ${p.border}`, background: isDark ? 'rgba(255,255,255,0.05)' : '#f8fafc', color: p.text, outline: 'none', fontSize: 14, boxSizing: 'border-box', marginBottom: 8 }}
+              />
+              {groupMembers.length > 0 && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
+                  {groupMembers.map(m => (
+                    <span key={m._id} style={{ background: p.accent + '20', color: p.accent, borderRadius: 20, padding: '4px 12px', fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
+                      {m.name}
+                      <button type="button" onClick={() => toggleGroupMember(m)} style={{ background: 'transparent', border: 'none', color: p.accent, cursor: 'pointer', padding: 0, lineHeight: 1 }}>✕</button>
+                    </span>
+                  ))}
+                </div>
+              )}
+              <div style={{ maxHeight: 180, overflowY: 'auto', marginBottom: 16 }}>
+                {groupSearchResults.filter(u => !groupMembers.find(m => m._id === u._id)).map(u => (
+                  <button type="button" key={u._id} onClick={() => toggleGroupMember(u)}
+                    style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '8px 12px', borderRadius: 12, border: 'none', background: 'transparent', color: p.text, cursor: 'pointer', textAlign: 'left' }}
+                    onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.07)' : '#f1f5f9'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                    <div style={{ width: 36, height: 36, borderRadius: '50%', background: p.accent + '25', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, color: p.accent, flexShrink: 0 }}>
+                      {u.name[0].toUpperCase()}
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 600, fontSize: 14 }}>{u.name}</div>
+                      <div style={{ fontSize: 12, color: p.textMuted }}>{u.role === 'teacher' ? 'Eğitmen' : 'Öğrenci'}</div>
+                    </div>
+                    <Plus size={16} style={{ marginLeft: 'auto', color: p.accent }} />
+                  </button>
+                ))}
+              </div>
+              <button
+                type="submit"
+                disabled={!groupName.trim() || groupMembers.length === 0 || groupCreating}
+                style={{ width: '100%', padding: '14px', background: (!groupName.trim() || groupMembers.length === 0) ? p.border : 'linear-gradient(135deg, #00d4aa, #00b894)', color: '#fff', border: 'none', borderRadius: 14, fontWeight: 800, fontSize: 16, cursor: (!groupName.trim() || groupMembers.length === 0) ? 'not-allowed' : 'pointer' }}>
+                {groupCreating ? 'Oluşturuluyor...' : `Grubu Oluştur (${groupMembers.length} üye)`}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Kullanıcı Arama Modalı */}
+      {showUserSearch && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+          <div style={{ background: isDark ? '#0f172a' : '#fff', borderRadius: 20, padding: 24, width: '100%', maxWidth: 420, border: `1px solid ${p.border}` }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>Yeni Mesaj</h3>
+              <button onClick={() => setShowUserSearch(false)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: p.textMuted, fontSize: 20 }}>✕</button>
+            </div>
+            <input
+              autoFocus
+              type="text"
+              placeholder="İsim ile ara..."
+              value={userSearchQuery}
+              onChange={e => handleUserSearch(e.target.value)}
+              style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: `1px solid ${p.border}`, background: isDark ? 'rgba(255,255,255,0.05)' : '#f8fafc', color: p.text, outline: 'none', fontSize: 15, boxSizing: 'border-box', marginBottom: 12 }}
+            />
+            <div style={{ maxHeight: 280, overflowY: 'auto' }}>
+              {userSearchLoading && <p style={{ color: p.textMuted, textAlign: 'center', padding: 16 }}>Aranıyor…</p>}
+              {!userSearchLoading && userSearchResults.length === 0 && userSearchQuery && (
+                <p style={{ color: p.textMuted, textAlign: 'center', padding: 16 }}>Kullanıcı bulunamadı.</p>
+              )}
+              {userSearchResults.map(u => (
+                <div key={u._id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 4px', borderRadius: 12 }}>
+                  <button onClick={() => handleStartDM(u)}
+                    style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 12, padding: '8px 12px', borderRadius: 12, border: 'none', background: 'transparent', color: p.text, cursor: 'pointer', textAlign: 'left' }}
+                    onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.07)' : '#f1f5f9'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                    <div style={{ width: 40, height: 40, borderRadius: '50%', background: p.accent + '30', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, color: p.accent, fontSize: 16, flexShrink: 0 }}>
+                      {u.profilePicture ? <img src={u.profilePicture} alt="" style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover' }} /> : u.name[0].toUpperCase()}
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 600, fontSize: 15 }}>{u.name}</div>
+                      <div style={{ fontSize: 12, color: p.textMuted }}>{u.role === 'teacher' ? 'Eğitmen' : u.role === 'admin' ? 'Yönetici' : 'Öğrenci'}</div>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => handleSendFriendRequest(u)}
+                    disabled={!!friendRequestSent[u._id]}
+                    title={friendRequestSent[u._id] ? 'İstek gönderildi' : 'Arkadaş ekle'}
+                    style={{ background: friendRequestSent[u._id] ? 'rgba(0,212,170,0.15)' : p.panelElevated, color: friendRequestSent[u._id] ? '#00d4aa' : p.textMuted, border: `1px solid ${p.border}`, borderRadius: 8, padding: '6px 10px', cursor: friendRequestSent[u._id] ? 'default' : 'pointer', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 600 }}>
+                    {friendRequestSent[u._id] ? <><Check size={12} /> Gönderildi</> : <><UserPlus size={12} /> Arkadaş Ekle</>}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

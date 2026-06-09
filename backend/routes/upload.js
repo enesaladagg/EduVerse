@@ -41,6 +41,22 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
 });
 
+// POST /api/upload/avatar/base64 — Render filesystem'e gerek yok, direkt DB'de saklar
+router.post('/avatar/base64', authenticate, asyncHandler(async (req, res, next) => {
+  const { imageBase64 } = req.body;
+  if (!imageBase64 || !imageBase64.startsWith('data:image/')) {
+    return next(new AppError('Geçersiz resim formatı.', 400));
+  }
+  if (imageBase64.length > 700000) {
+    return next(new AppError('Resim çok büyük. Maksimum 500KB.', 400));
+  }
+  const user = await User.findById(req.user.id);
+  if (!user) return next(new AppError('Kullanıcı bulunamadı.', 404));
+  user.profilePicture = imageBase64;
+  await user.save({ validateBeforeSave: false });
+  return res.json({ success: true, data: { profilePicture: imageBase64, profilePictureUrl: imageBase64 } });
+}));
+
 // POST /api/upload/avatar
 router.post(
   '/avatar',
