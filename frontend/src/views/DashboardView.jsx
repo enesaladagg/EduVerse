@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
+import { usePomodoro } from "../context/PomodoroContext";
 import GlobalNavbar from "../components/GlobalNavbar";
-import { User, Code2, Atom, Palette, Target, PartyPopper, Flame, MessageCircle, CircleDot, PlayCircle, Brain, Globe, ShieldCheck, Calendar, BookOpen, Coffee, Activity, Camera, X, Upload } from 'lucide-react';
+import api from "../services/api";
+import { User, Code2, Atom, Palette, Target, PartyPopper, Flame, MessageCircle, CircleDot, PlayCircle, Brain, Globe, ShieldCheck, Calendar, BookOpen, Coffee, Activity, Camera, X, Upload, Video } from 'lucide-react';
 
 /*
  ╔══════════════════════════════════════════════════════════════════╗
@@ -174,18 +176,29 @@ function AIMentor({ T, expanded, onToggle }) {
   const [chatHistory, setChatHistory] = useState([]);
   const msg = AI_MESSAGES[msgIndex];
 
-  const handleSend = () => {
-    if (!chatInput.trim()) return;
-    setChatHistory(prev => [...prev, { role: "user", text: chatInput }]);
+  const handleSend = async () => {
+    if (!chatInput.trim() || typing) return;
+    const userMessage = chatInput;
     setChatInput("");
+    setChatHistory(prev => [...prev, { role: "user", text: userMessage }]);
     setTyping(true);
-    setTimeout(() => {
-      setChatHistory(prev => [...prev, {
-        role: "ai",
-        text: "Harika bir soru! Python'da Inheritance (Kalıtım) konusunu daha iyi anlamak için 3. modüldeki uygulamalı örneği tekrar izlemeni öneririm."
-      }]);
+    
+    try {
+      const messagesPayload = chatHistory.map(m => ({ role: m.role === 'ai' ? 'model' : 'user', content: m.text }));
+      messagesPayload.push({ role: 'user', content: userMessage });
+      
+      const res = await api.sendMessageToAI(messagesPayload);
+      if (res.success) {
+        setChatHistory(prev => [...prev, { role: "ai", text: res.text }]);
+      } else {
+        setChatHistory(prev => [...prev, { role: "ai", text: res.message || "Bir hata oluştu, lütfen API anahtarınızı kontrol edin." }]);
+      }
+    } catch (err) {
+      console.error(err);
+      setChatHistory(prev => [...prev, { role: "ai", text: "Bağlantı hatası oluştu. Lütfen tekrar deneyin." }]);
+    } finally {
       setTyping(false);
-    }, 1500);
+    }
   };
 
   return (
@@ -244,32 +257,19 @@ function AIMentor({ T, expanded, onToggle }) {
 }
 
 function FocusMode({ T }) {
-  const [active, setActive] = useState(false);
-  const [seconds, setSeconds] = useState(25 * 60);
-  const [mode, setMode] = useState("focus");
-  const totalSec = mode === "focus" ? 25 * 60 : 5 * 60;
+  const {
+    isActive, toggleTimer, resetTimer,
+    timeLeft, mode, setMode, setTimeLeft,
+    activeTotal, formatTime,
+  } = usePomodoro();
 
-  useEffect(() => {
-    if (!active) return;
-    const timer = setInterval(() => {
-      setSeconds(s => {
-        if (s <= 0) {
-          setActive(false);
-          setMode(m => m === "focus" ? "break" : "focus");
-          return mode === "focus" ? 5 * 60 : 25 * 60;
-        }
-        return s - 1;
-      });
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [active, mode]);
-  const min = String(Math.floor(seconds / 60)).padStart(2, "0");
-  const sec = String(seconds % 60).padStart(2, "0");
-  const pct = ((totalSec - seconds) / totalSec) * 100;
+  const pct = activeTotal ? ((activeTotal - timeLeft) / activeTotal) * 100 : 0;
+  const min = String(Math.floor(timeLeft / 60)).padStart(2, '0');
+  const sec = String(timeLeft % 60).padStart(2, '0');
 
   return (
-    <div style={{ padding: 24, borderRadius: T.r3, background: active ? `linear-gradient(165deg, ${T.bg2}, rgba(14,240,178,0.03))` : T.gCard, border: `1px solid ${active ? T.b3 : T.b1}`, textAlign: "center", transition: "all 0.5s", position: "relative", overflow: "hidden" }}>
-      {active && <Glow T={T} color={T.cyan} size={180} x="50%" y="30%" opacity={0.05} />}
+    <div style={{ padding: 24, borderRadius: T.r3, background: isActive ? `linear-gradient(165deg, ${T.bg2}, rgba(14,240,178,0.03))` : T.gCard, border: `1px solid ${isActive ? T.b3 : T.b1}`, textAlign: "center", transition: "all 0.5s", position: "relative", overflow: "hidden" }}>
+      {isActive && <Glow T={T} color={T.cyan} size={180} x="50%" y="30%" opacity={0.05} />}
       <div style={{ fontFamily: T.display, fontSize: 14, fontWeight: 700, color: T.t2, marginBottom: 16, textTransform: "uppercase", letterSpacing: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
         {mode === "focus" ? <><Target size={16} /> ODAKLANMA MODU</> : <><Coffee size={16} /> MOLA</>}
       </div>
@@ -277,8 +277,20 @@ function FocusMode({ T }) {
         <div style={{ fontFamily: T.mono, fontSize: 28, fontWeight: 800, color: T.t1, letterSpacing: 2 }}>{min}:{sec}</div>
       </ProgressRing>
       <div style={{ marginTop: 16, display: "flex", gap: 8, justifyContent: "center" }}>
-        <button onClick={() => { setActive(!active); if (!active && seconds === 0) setSeconds(totalSec); }} style={{ padding: "10px 24px", borderRadius: 12, border: "none", background: active ? T.roseDim : T.gCyan, color: active ? T.rose : "#000", fontFamily: T.body, fontSize: 13, fontWeight: 700, cursor: "pointer" }}>{active ? "Durdur" : "Başla"}</button>
-        {!active && <button onClick={() => { setSeconds(totalSec); setMode("focus"); }} style={{ padding: "10px 16px", borderRadius: 12, border: `1px solid ${T.b2}`, background: "transparent", color: T.t2, fontFamily: T.body, fontSize: 13, fontWeight: 600, cursor: "pointer" }}>Sıfırla</button>}
+        <button
+          onClick={toggleTimer}
+          style={{ padding: "10px 24px", borderRadius: 12, border: "none", background: isActive ? T.roseDim : T.gCyan, color: isActive ? T.rose : "#000", fontFamily: T.body, fontSize: 13, fontWeight: 700, cursor: "pointer" }}
+        >
+          {isActive ? "Durdur" : "Başlat"}
+        </button>
+        {!isActive && (
+          <button
+            onClick={resetTimer}
+            style={{ padding: "10px 16px", borderRadius: 12, border: `1px solid ${T.b2}`, background: "transparent", color: T.t2, fontFamily: T.body, fontSize: 13, fontWeight: 600, cursor: "pointer" }}
+          >
+            Sıfırla
+          </button>
+        )}
       </div>
     </div>
   );
@@ -290,6 +302,8 @@ export default function DashboardView({ user, onNavigate }) {
   const T = isDark ? T_DARK : T_LIGHT;
   const [activeCourse, setActiveCourse] = useState(0);
   const [mentorOpen, setMentorOpen] = useState(true);
+  const [joinModal, setJoinModal] = useState(false);
+  const [roomCode, setRoomCode] = useState('');
   
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const fileInputRef = useRef(null);
@@ -338,7 +352,10 @@ export default function DashboardView({ user, onNavigate }) {
             <h1 style={{ fontFamily: T.display, fontSize: 32, fontWeight: 900, marginBottom: 8, letterSpacing: -0.5 }}>Tekrar Hoş Geldin, {authUser?.name || user?.name}</h1>
             <p style={{ color: T.t2, fontSize: 16 }}>Bugün harika şeyler öğrenmek için mükemmel bir gün!</p>
           </div>
-          <div style={{ display: "flex", gap: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: 'wrap' }}>
+            <button onClick={() => setJoinModal(true)} style={{ padding: "12px 20px", borderRadius: 14, border: `1px solid ${T.violetMid}`, background: `${T.violetDim}`, color: T.violet, fontFamily: T.display, fontSize: 14, fontWeight: 700, cursor: "pointer", display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Video size={18} /> Canlı Derse Katıl
+            </button>
             <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 20px", borderRadius: T.r2, background: T.bg2, border: `1px solid ${T.b1}` }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Flame size={26} color={T.amber} strokeWidth={2.5} />
@@ -432,7 +449,7 @@ export default function DashboardView({ user, onNavigate }) {
                             </ProgressRing>
                           </div>
                           <Bar T={T} value={c.progress} max={100} color={c.color} h={8} />
-                          <button style={{ width: "100%", marginTop: 24, padding: 16, borderRadius: T.r2, border: "none", background: c.color, color: "#000", fontFamily: T.display, fontSize: 15, fontWeight: 800, cursor: "pointer", transition: "all 0.3s" }}>▶ Derse Devam Et</button>
+                          <button onClick={() => onNavigate('course-detail')} style={{ width: "100%", marginTop: 24, padding: 16, borderRadius: T.r2, border: "none", background: c.color, color: "#000", fontFamily: T.display, fontSize: 15, fontWeight: 800, cursor: "pointer", transition: "all 0.3s" }}>▶ Derse Devam Et</button>
                         </div>
                       </div>
                     );
@@ -582,19 +599,51 @@ export default function DashboardView({ user, onNavigate }) {
                 style={{ 
                   width: '100%', padding: '16px', borderRadius: 16, border: `2px dashed ${T.b2}`,
                   background: T.bg1, color: T.cyan, display: 'flex', flexDirection: 'column',
-                  alignItems: 'center', gap: 8, cursor: 'pointer', transition: 'all 0.2s'
+                  alignItems: 'center', gap: 8, cursor: 'pointer', transition: 'all 0.2s',
+                  boxSizing: 'border-box',
                 }}
                 onMouseEnter={e => { e.currentTarget.style.borderColor = T.cyan; e.currentTarget.style.background = `${T.cyan}10`; }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor = T.b2; e.currentTarget.style.background = T.bg1; }}
               >
                 <Upload size={24} />
-                <span style={{ fontSize: 14, fontWeight: 600 }}>Bilgisayardan Seç</span>
+                <span style={{ fontSize: 14, fontWeight: 600 }}>Dosya Yükle</span>
               </button>
               <input 
-                type="file" ref={fileInputRef} onChange={handleFileUpload} accept="image/*" 
+                type="file" ref={fileInputRef} onChange={handleFileUpload} accept="image/jpeg,image/jpg,image/png,image/webp" 
                 style={{ display: 'none' }} 
               />
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Join Live Class Modal */}
+      {joinModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: 20 }}>
+          <div style={{ background: T.bg2, padding: 32, borderRadius: 24, maxWidth: 400, width: '100%', border: `1px solid ${T.b2}`, position: 'relative' }}>
+            <button onClick={() => setJoinModal(false)} style={{ position: 'absolute', top: 16, right: 16, background: 'transparent', border: 'none', color: T.t2, cursor: 'pointer' }}><X size={20} /></button>
+            <div style={{ width: 64, height: 64, borderRadius: '50%', background: T.violetDim, color: T.violet, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
+              <Video size={32} />
+            </div>
+            <h2 style={{ fontFamily: T.display, fontSize: 24, fontWeight: 800, marginBottom: 8 }}>Canlı Derse Katıl</h2>
+            <p style={{ color: T.t2, fontSize: 15, marginBottom: 24, lineHeight: 1.5 }}>Eğitmeninizin paylaştığı canlı ders kodunu girin.</p>
+            
+            <input 
+              value={roomCode}
+              onChange={e => setRoomCode(e.target.value.toUpperCase())}
+              placeholder="Örn: EDU-ABCD"
+              style={{ width: '100%', padding: '16px', borderRadius: 14, border: `1px solid ${T.b2}`, background: T.bg1, color: T.t1, fontSize: 16, fontFamily: T.mono, outline: 'none', textAlign: 'center', letterSpacing: 2, marginBottom: 24, textTransform: 'uppercase', boxSizing: 'border-box' }}
+            />
+
+            <button 
+              disabled={!roomCode || roomCode.length < 4}
+              onClick={() => {
+                setJoinModal(false);
+                onNavigate('live', { roomCode, isHost: false });
+              }} 
+              style={{ width: '100%', padding: '16px', borderRadius: 14, border: 'none', background: T.gViolet, color: '#fff', fontSize: 16, fontWeight: 700, cursor: (!roomCode || roomCode.length < 4) ? 'not-allowed' : 'pointer', opacity: (!roomCode || roomCode.length < 4) ? 0.5 : 1, boxSizing: 'border-box' }}>
+              Derse Katıl
+            </button>
           </div>
         </div>
       )}

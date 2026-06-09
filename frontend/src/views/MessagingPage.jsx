@@ -135,18 +135,42 @@ export default function MessagingPage() {
         console.error('Mesaj gönderilemedi', err);
       }
     } else {
-      // Simulate Bot Response
-      setTimeout(() => {
+      // Gerçek EduBot (Gemini) Entegrasyonu
+      try {
+        // Hazırlık: Mevcut edubot mesajlarını formata uygun hale getir
+        const history = (messages['edubot'] || []).map(m => ({
+          role: m.sender === 'me' ? 'user' : 'model',
+          content: m.text
+        }));
+        
+        // Yeni mesajı da ekle
+        history.push({ role: 'user', content: textToSend });
+
+        const res = await api.sendMessageToAI(history);
+        
+        if (res.success) {
+          setMessages(prev => ({
+            ...prev,
+            edubot: [...(prev.edubot || []), {
+              id: Date.now() + 1,
+              sender: 'edubot',
+              text: res.text,
+              time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
+            }]
+          }));
+        }
+      } catch (err) {
+        console.error('EduBot hatası:', err);
         setMessages(prev => ({
           ...prev,
           edubot: [...(prev.edubot || []), {
             id: Date.now() + 1,
             sender: 'edubot',
-            text: 'Anlıyorum. Bir AI entegrasyonu olarak backend henüz bağlanmadı ama çok yakında sana gerçek cevaplar vereceğim!',
+            text: 'Üzgünüm, şu an bağlantı kuramıyorum. Lütfen daha sonra tekrar dene.',
             time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
           }]
         }));
-      }, 1000);
+      }
     }
   };
 
@@ -472,15 +496,33 @@ export default function MessagingPage() {
             border: `1px solid ${p.border}`, boxShadow: t.shadows.sm
           }}>
             <div style={{ position: 'relative' }} ref={attachRef}>
+              <input 
+                type="file" 
+                id="message-file-upload" 
+                style={{ display: 'none' }} 
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    const isImage = file.type.startsWith('image/');
+                    setAttachedFile({
+                      type: isImage ? 'image' : 'doc',
+                      name: file.name,
+                      file: file
+                    });
+                  }
+                  setShowAttachmentMenu(false);
+                  e.target.value = null; // reset
+                }}
+              />
               <button type="button" onClick={() => setShowAttachmentMenu(!showAttachmentMenu)} style={{ background: 'transparent', border: 'none', color: p.textMuted, cursor: 'pointer', padding: 8, borderRadius: '50%' }}>
                 <Paperclip size={20} />
               </button>
               {showAttachmentMenu && (
                 <div style={{ position: 'absolute', bottom: '100%', left: 0, marginBottom: 8, width: 200, background: isDark ? '#0f172a' : '#fff', borderRadius: 16, padding: 8, boxShadow: t.shadows.md, border: `1px solid ${p.border}`, zIndex: 10 }}>
-                  <button type="button" onClick={() => { setAttachedFile({ type: 'image', name: 'ekran_goruntusu.png' }); setShowAttachmentMenu(false); }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: 12, background: 'transparent', border: 'none', color: p.text, borderRadius: 12, cursor: 'pointer' }} onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.05)' : '#f8fafc'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                  <button type="button" onClick={() => { document.getElementById('message-file-upload').setAttribute('accept', 'image/*'); document.getElementById('message-file-upload').click(); }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: 12, background: 'transparent', border: 'none', color: p.text, borderRadius: 12, cursor: 'pointer' }} onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.05)' : '#f8fafc'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                     <Image size={16} color="#3b82f6" /> <span style={{ fontWeight: 600 }}>Fotoğraf / Video</span>
                   </button>
-                  <button type="button" onClick={() => { setAttachedFile({ type: 'doc', name: 'proje_raporu.pdf' }); setShowAttachmentMenu(false); }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: 12, background: 'transparent', border: 'none', color: p.text, borderRadius: 12, cursor: 'pointer' }} onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.05)' : '#f8fafc'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                  <button type="button" onClick={() => { document.getElementById('message-file-upload').setAttribute('accept', '*/*'); document.getElementById('message-file-upload').click(); }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: 12, background: 'transparent', border: 'none', color: p.text, borderRadius: 12, cursor: 'pointer' }} onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.05)' : '#f8fafc'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                     <FileText size={16} color="#10b981" /> <span style={{ fontWeight: 600 }}>Belge Ekle</span>
                   </button>
                 </div>

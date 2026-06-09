@@ -1,24 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
+import { usePomodoro } from '../context/PomodoroContext';
 import { Play, Square, RotateCcw, Target, Coffee, ChevronRight, Timer, Settings2 } from 'lucide-react';
 
 export default function PomodoroTimer() {
   const { palette: p, tokens: t } = useTheme();
-  const [focusTime, setFocusTime] = useState(25);
-  const [customFocus, setCustomFocus] = useState(25);
-  const [customBreak, setCustomBreak] = useState(5);
-  const [timeLeft, setTimeLeft] = useState(25 * 60);
-  const [isActive, setIsActive] = useState(false);
-  const [mode, setMode] = useState('focus'); // 'focus' | 'break'
+
+  // --- Global Pomodoro State (Context) ---
+  const {
+    focusTime, changeFocusTime,
+    customFocus, setCustomFocus,
+    customBreak, setCustomBreak,
+    timeLeft, setTimeLeft,
+    isActive,
+    mode, setMode,
+    activeTotal, pct,
+    toggleTimer, resetTimer, formatTime,
+  } = usePomodoro();
+
+  // --- Local UI State (sadece bu widget'a özgü) ---
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
-
-  // Yeni Ayarlar State'leri
   const [showSettings, setShowSettings] = useState(false);
   const [themeColor, setThemeColor] = useState('#00D4AA');
-  const [clockStyle, setClockStyle] = useState('modern'); // 'modern' | 'digital' | 'neon'
+  const [clockStyle, setClockStyle] = useState('modern');
 
-  // Sürükleme (Drag) State'leri
+  // Sürükleme
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const dragRef = React.useRef({ startX: 0, startY: 0, initialOffsetX: 0, initialOffsetY: 0 });
@@ -78,50 +85,8 @@ export default function PomodoroTimer() {
     { value: 'custom', label: 'Özel Seçim' },
   ];
 
-  const activeTotal = mode === 'focus' 
-    ? (focusTime === 'custom' ? customFocus : focusTime) * 60 
-    : (focusTime === 'custom' ? customBreak : (focusTime > 25 ? 10 : 5)) * 60;
-
-  useEffect(() => {
-    let interval = null;
-    if (isActive && timeLeft > 0) {
-      interval = setInterval(() => {
-        setTimeLeft((time) => time - 1);
-      }, 1000);
-    } else if (timeLeft === 0 && isActive) {
-      setIsActive(false);
-      if (mode === 'focus') {
-        setMode('break');
-        if (focusTime === 'custom') {
-          setTimeLeft(customBreak * 60);
-        } else {
-          setTimeLeft((focusTime > 25 ? 10 : 5) * 60);
-        }
-      } else {
-        setMode('focus');
-        setTimeLeft((focusTime === 'custom' ? customFocus : focusTime) * 60);
-      }
-    }
-    return () => clearInterval(interval);
-  }, [isActive, timeLeft, mode, focusTime, customFocus, customBreak]);
-
-  const toggleTimer = () => setIsActive(!isActive);
-
-  const resetTimer = () => {
-    setIsActive(false);
-    const activeFocus = focusTime === 'custom' ? customFocus : focusTime;
-    const activeBrk = focusTime === 'custom' ? customBreak : (focusTime > 25 ? 10 : 5);
-    setTimeLeft(mode === 'focus' ? activeFocus * 60 : activeBrk * 60);
-  };
-
-  const formatTime = (seconds) => {
-    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
-    const s = (seconds % 60).toString().padStart(2, '0');
-    return `${m}:${s}`;
-  };
-
-  const pct = activeTotal ? (timeLeft / activeTotal) : 0;
-  const r = 68; // Artırıldı (Eski: 54)
+  const activeTotal_used = activeTotal;
+  const r = 68;
   const circ = 2 * Math.PI * r;
   const strokeOffset = circ - (pct * circ);
 
@@ -420,7 +385,8 @@ export default function PomodoroTimer() {
                               setFocusTime(val);
                               setTimeLeft(val * 60);
                             }
-                            setIsDropdownOpen(false);
+                    setIsDropdownOpen(false);
+                            changeFocusTime(opt.value === 'custom' ? 'custom' : opt.value);
                           }}
                           onMouseEnter={(e) => {
                             if (focusTime !== opt.value) e.currentTarget.style.background = `rgba(${parseInt(primaryColor.slice(1,3),16)},${parseInt(primaryColor.slice(3,5),16)},${parseInt(primaryColor.slice(5,7),16)}, 0.1)`;

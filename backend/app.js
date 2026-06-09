@@ -23,6 +23,8 @@ const plannerRoutes = require('./routes/planner');
 const paymentRoutes = require('./routes/payment');
 const certificatesRoutes = require('./routes/certificates');
 const communityRoutes = require('./routes/community');
+const uploadRoutes = require('./routes/upload');
+const aiRoutes = require('./routes/ai');
 const { notFoundHandler, errorHandler } = require('./middleware/errorHandler');
 const { isOriginAllowed } = require('./utils/corsOrigins');
 
@@ -66,10 +68,13 @@ const authLimiter = rateLimit({
 });
 
 app.use(globalLimiter);
-app.use(express.json({ limit: '50kb' }));
-app.use(express.urlencoded({ extended: true, limit: '50kb' }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(mongoSanitize());
 app.use(morgan('combined', { stream: logger.stream }));
+
+// Static file serving for uploads
+app.use('/uploads', express.static(require('path').join(__dirname, 'uploads')));
 
 app.use(session({
   secret: process.env.JWT_SECRET || 'fallback_secret',
@@ -98,6 +103,8 @@ app.use('/api/planner', plannerRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/certificates', certificatesRoutes);
 app.use('/api/community', communityRoutes);
+app.use('/api/upload', uploadRoutes);
+app.use('/api/ai', aiRoutes);
 
 app.get('/', (req, res) => {
   return res.json({

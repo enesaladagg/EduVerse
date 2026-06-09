@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
-import { Calendar as CalendarIcon, CheckCircle2, Circle, Clock, Play, Plus, MoreHorizontal, Target } from 'lucide-react';
+import { Calendar as CalendarIcon, CheckCircle2, Circle, Clock, Play, Plus, MoreHorizontal, Target, Trash2 } from 'lucide-react';
 import Button from '../components/Button';
 
 import api from '../services/api';
@@ -12,6 +12,8 @@ export default function PlannerPage() {
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState('');
+  const [viewMode, setViewMode] = useState('month'); // 'month' or 'week'
+  const [selectedDate, setSelectedDate] = useState(6); // 6'sını bugün olarak mockluyoruz
 
   React.useEffect(() => {
     async function fetchTasks() {
@@ -54,6 +56,16 @@ export default function PlannerPage() {
     }
   };
 
+  const handleDeleteTask = async (id) => {
+    if (!window.confirm("Bu görevi silmek istediğinize emin misiniz?")) return;
+    setTasks(tasks.filter(t => (t._id || t.id) !== id));
+    try {
+      await api.deletePlannerTask(id);
+    } catch (err) {
+      console.error('Görev silinirken hata:', err);
+    }
+  };
+
   const handleStartFocus = (taskTitle) => {
     // Pomodoro timer'ı açması için alert/toast. (İleride global state veya custom event ile entegre edilebilir)
     alert(`"${taskTitle}" görevi için Pomodoro odaklanma modu başlatıldı! Sağ alttaki sayacı kontrol edin.`);
@@ -92,7 +104,7 @@ export default function PlannerPage() {
               type="text" 
               value={newTaskTitle} 
               onChange={e => setNewTaskTitle(e.target.value)} 
-              placeholder="Görev adı..." 
+              placeholder={`${selectedDate} Haziran için görev adı...`} 
               style={{ flex: 1, padding: '10px 16px', borderRadius: 12, border: `1px solid ${p.border}`, background: p.background, color: p.text, outline: 'none' }} 
               autoFocus
             />
@@ -132,8 +144,16 @@ export default function PlannerPage() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
             <h2 style={{ fontSize: 20, fontWeight: 800, margin: 0, color: p.text }}>Haziran 2026</h2>
             <div style={{ display: 'flex', gap: 8 }}>
-              <button style={{ background: p.panelElevated, border: `1px solid ${p.border}`, borderRadius: '8px', padding: '6px 12px', color: p.text, cursor: 'pointer' }}>Aylık</button>
-              <button style={{ background: p.accent, border: 'none', borderRadius: '8px', padding: '6px 12px', color: '#fff', fontWeight: 700, cursor: 'pointer' }}>Haftalık</button>
+              <button 
+                onClick={() => setViewMode('month')} 
+                style={{ background: viewMode === 'month' ? p.accent : p.panelElevated, border: viewMode === 'month' ? 'none' : `1px solid ${p.border}`, borderRadius: '8px', padding: '6px 12px', color: viewMode === 'month' ? '#fff' : p.text, fontWeight: viewMode === 'month' ? 700 : 500, cursor: 'pointer' }}>
+                Aylık
+              </button>
+              <button 
+                onClick={() => setViewMode('week')} 
+                style={{ background: viewMode === 'week' ? p.accent : p.panelElevated, border: viewMode === 'week' ? 'none' : `1px solid ${p.border}`, borderRadius: '8px', padding: '6px 12px', color: viewMode === 'week' ? '#fff' : p.text, fontWeight: viewMode === 'week' ? 700 : 500, cursor: 'pointer' }}>
+                Haftalık
+              </button>
             </div>
           </div>
           
@@ -146,13 +166,13 @@ export default function PlannerPage() {
               const hasEvent = d === 6 || d === 12 || d === 18 || d === 24;
 
               return (
-                <div key={i} style={{ 
+                <div key={i} onClick={() => isCurrentMonth && setSelectedDate(d)} style={{ 
                   aspectRatio: '1', borderRadius: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                  background: isToday ? p.accent : (isDark ? 'rgba(255,255,255,0.03)' : '#f8fafc'),
-                  border: isToday ? 'none' : `1px solid ${p.border}`,
-                  color: isToday ? '#fff' : (isCurrentMonth ? p.text : p.border),
-                  fontWeight: isToday ? 800 : 600,
-                  fontSize: 16, cursor: 'pointer', transition: 'all 0.2s', position: 'relative'
+                  background: isToday ? p.accent : (selectedDate === d ? (isDark ? 'rgba(0,212,170,0.2)' : '#e6fcf7') : (isDark ? 'rgba(255,255,255,0.03)' : '#f8fafc')),
+                  border: isToday || selectedDate === d ? 'none' : `1px solid ${p.border}`,
+                  color: isToday ? '#fff' : (selectedDate === d ? p.accent : (isCurrentMonth ? p.text : p.border)),
+                  fontWeight: isToday || selectedDate === d ? 800 : 600,
+                  fontSize: 16, cursor: isCurrentMonth ? 'pointer' : 'default', transition: 'all 0.2s', position: 'relative'
                 }}>
                   {d > 0 && d <= 30 ? d : (d <= 0 ? 31 + d : d - 30)}
                   {hasEvent && !isToday && (
@@ -213,8 +233,8 @@ export default function PlannerPage() {
           border: `1px solid ${p.border}`, padding: '24px', boxShadow: t.shadows.md, flex: 1
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-            <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: p.text }}>Günün Ajandası</h3>
-            <button style={{ background: 'transparent', border: 'none', color: p.textMuted, cursor: 'pointer' }}><MoreHorizontal size={20} /></button>
+            <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: p.text }}>{selectedDate} Haziran Ajandası</h3>
+            <button onClick={() => alert("Ajanda ayarları yakında!")} style={{ background: 'transparent', border: 'none', color: p.textMuted, cursor: 'pointer' }}><MoreHorizontal size={20} /></button>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -233,7 +253,7 @@ export default function PlannerPage() {
                     <button onClick={() => toggleTask(task._id || task.id)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, color: task.status === 'completed' ? p.accent : p.textMuted, marginTop: 2 }}>
                       {task.status === 'completed' ? <CheckCircle2 size={22} /> : <Circle size={22} />}
                     </button>
-                    <div>
+                    <div style={{ flex: 1 }}>
                       <div style={{ fontSize: 15, fontWeight: 700, color: p.text, textDecoration: task.status === 'completed' ? 'line-through' : 'none' }}>
                         {task.title}
                       </div>
@@ -242,6 +262,9 @@ export default function PlannerPage() {
                       </div>
                     </div>
                   </div>
+                  <button onClick={() => handleDeleteTask(task._id || task.id)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px', color: p.textMuted, opacity: 0.5, transition: 'opacity 0.2s' }} onMouseEnter={e => e.currentTarget.style.opacity = 1} onMouseLeave={e => e.currentTarget.style.opacity = 0.5}>
+                    <Trash2 size={18} color="#ef4444" />
+                  </button>
                 </div>
                 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: `1px solid ${p.border}`, paddingTop: 12 }}>

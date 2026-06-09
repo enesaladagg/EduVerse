@@ -112,7 +112,19 @@ const CoursesPage = memo(function CoursesPage({ onNavigate }) {
   const [selectedLevels, setSelectedLevels] = useState([]);
   const [selectedPrices, setSelectedPrices] = useState([]);
 
-  const [wishlist, setWishlist] = useState([]);
+  const [wishlist, setWishlist] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('eduverse_wishlist') || '[]');
+    } catch {
+      return [];
+    }
+  });
+
+  const [showFavorites, setShowFavorites] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem('eduverse_wishlist', JSON.stringify(wishlist));
+  }, [wishlist]);
   const [sortBy, setSortBy] = useState('popular');
 
   const toggleFilter = (state, setState, val) => {
@@ -134,6 +146,7 @@ const CoursesPage = memo(function CoursesPage({ onNavigate }) {
       if (selectedPrices.includes('Ücretsiz') && !isFree) return false;
       if (selectedPrices.includes('Ücretli') && isFree) return false;
     }
+    if (showFavorites && !wishlist.includes(c._id)) return false;
     return true;
   });
 
@@ -165,8 +178,8 @@ const CoursesPage = memo(function CoursesPage({ onNavigate }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px', color: p.text }}>
             <Filter size={20} color={p.accent} />
             <h3 style={{ fontSize: '18px', fontWeight: 700 }}>Filtreler</h3>
-            {(selectedCats.length > 0 || selectedLevels.length > 0 || selectedPrices.length > 0) && (
-              <button onClick={() => { setSelectedCats([]); setSelectedLevels([]); setSelectedPrices([]); }}
+            {(selectedCats.length > 0 || selectedLevels.length > 0 || selectedPrices.length > 0 || showFavorites) && (
+              <button onClick={() => { setSelectedCats([]); setSelectedLevels([]); setSelectedPrices([]); setShowFavorites(false); }}
                 style={{ marginLeft: 'auto', background: 'none', border: 'none', color: p.textMuted, fontSize: '12px', cursor: 'pointer', textDecoration: 'underline' }}>Temizle</button>
             )}
           </div>
@@ -175,11 +188,23 @@ const CoursesPage = memo(function CoursesPage({ onNavigate }) {
             <input 
               value={search} onChange={e => setSearch(e.target.value)}
               placeholder="Kurs ara..."
-              style={{ width: '100%', padding: '14px 14px 14px 44px', borderRadius: '14px', border: `2px solid ${p.border}`, background: p.background, color: p.text, fontSize: '14px', outline: 'none', transition: 'border-color 0.2s' }}
-              onFocus={e => e.target.style.borderColor = p.accent}
-              onBlur={e => e.target.style.borderColor = p.border}
+              style={{ width: '100%', padding: '14px 14px 14px 44px', borderRadius: '14px', border: `2px solid ${p.border}`, background: isDark ? 'rgba(255,255,255,0.03)' : '#f8fafc', color: p.text, fontSize: '14px', outline: 'none', transition: 'border-color 0.2s, box-shadow 0.2s' }}
+              onFocus={e => { e.target.style.borderColor = p.accent; e.target.style.boxShadow = `0 0 0 4px ${p.accent}20`; }}
+              onBlur={e => { e.target.style.borderColor = p.border; e.target.style.boxShadow = 'none'; }}
             />
             <Search size={18} color={p.textMuted} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)' }} />
+          </div>
+
+          <div style={{ marginBottom: '32px' }}>
+            <div style={{ padding: '16px', borderRadius: '16px', background: showFavorites ? `${p.accent}15` : (isDark ? 'rgba(255,255,255,0.03)' : '#f8fafc'), border: `1px solid ${showFavorites ? p.accent : p.border}`, transition: 'all 0.2s', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }} onClick={() => setShowFavorites(!showFavorites)}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Heart size={20} fill={showFavorites ? p.accent : 'none'} color={showFavorites ? p.accent : p.textMuted} />
+                <span style={{ fontSize: '15px', fontWeight: showFavorites ? 700 : 600, color: showFavorites ? p.accent : p.text }}>Sadece Favoriler</span>
+              </div>
+              <div style={{ width: '36px', height: '20px', borderRadius: '10px', background: showFavorites ? p.accent : p.border, position: 'relative', transition: 'background 0.2s' }}>
+                <div style={{ width: '16px', height: '16px', borderRadius: '50%', background: '#fff', position: 'absolute', top: '2px', left: showFavorites ? '18px' : '2px', transition: 'left 0.2s', boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }} />
+              </div>
+            </div>
           </div>
 
           <div style={{ marginBottom: '32px' }}>
@@ -224,8 +249,11 @@ const CoursesPage = memo(function CoursesPage({ onNavigate }) {
           {/* Top Controls: Active Filters & Sort */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
-              {(selectedCats.length > 0 || selectedLevels.length > 0 || selectedPrices.length > 0) && (
+              {(selectedCats.length > 0 || selectedLevels.length > 0 || selectedPrices.length > 0 || showFavorites) && (
                 <span style={{ fontSize: '14px', color: p.textMuted, fontWeight: 600, marginRight: '4px' }}>Aktif Filtreler:</span>
+              )}
+              {showFavorites && (
+                <span onClick={() => setShowFavorites(false)} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: `${p.accent}15`, color: p.accent, padding: '4px 10px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Favoriler ✕</span>
               )}
               {selectedCats.map(cat => (
                 <span key={cat} onClick={() => toggleFilter(selectedCats, setSelectedCats, cat)} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: `${p.accent}15`, color: p.accent, padding: '4px 10px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>{cat} ✕</span>
@@ -357,8 +385,8 @@ const CoursesPage = memo(function CoursesPage({ onNavigate }) {
                       
                       <button 
                         onClick={(e) => toggleWishlist(c._id, e)}
-                        style={{ position: 'absolute', top: '12px', right: '12px', background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(4px)', border: 'none', width: '32px', height: '32px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 10, boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
-                        <Heart size={16} fill={wishlist.includes(c._id) ? "#ef4444" : "transparent"} color={wishlist.includes(c._id) ? "#ef4444" : "#64748b"} />
+                        style={{ position: 'absolute', top: '12px', right: '12px', background: isDark ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.9)', backdropFilter: 'blur(4px)', border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'transparent'}`, width: '32px', height: '32px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 10, boxShadow: '0 4px 12px rgba(0,0,0,0.1)', transition: 'all 0.2s' }}>
+                        <Heart size={16} fill={wishlist.includes(c._id) ? "#ef4444" : "transparent"} color={wishlist.includes(c._id) ? "#ef4444" : (isDark ? "#94a3b8" : "#64748b")} />
                       </button>
                       
                       <div style={{ position: 'absolute', bottom: '12px', right: '12px', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', fontSize: '12px', fontWeight: 600, padding: '4px 10px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: '0 4px 12px rgba(0,0,0,0.2)' }}>

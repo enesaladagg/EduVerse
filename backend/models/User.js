@@ -25,6 +25,14 @@ const UserSchema = new mongoose.Schema(
       minlength: 8,
       select: false,
     },
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
+    verificationCode: {
+      type: String,
+      select: false,
+    },
     googleId: {
       type: String,
       unique: true,
