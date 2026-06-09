@@ -44,10 +44,15 @@ export default function RegisterView({ onNavigate }) {
     return () => { document.body.style.background = ''; };
   }, [isDark]);
 
+  const [slowWarning, setSlowWarning] = useState(false);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setSlowWarning(false);
     setError('');
+    // 5 saniye sonra "sunucu uyanıyor" mesajı göster
+    const slowTimer = setTimeout(() => setSlowWarning(true), 5000);
     await new Promise(r => setTimeout(r, 600));
 
     if (authMethod === 'phone') {
@@ -63,6 +68,8 @@ export default function RegisterView({ onNavigate }) {
     }
 
     const result = await register({ name, email, password, applyInstructor: roleMode === 'teacher' });
+    clearTimeout(slowTimer);
+    setSlowWarning(false);
     setLoading(false);
     if (result.success) {
       if (result.requiresVerification) {
@@ -394,6 +401,11 @@ export default function RegisterView({ onNavigate }) {
                   </p>
                 )}
 
+                {slowWarning && (
+                  <div style={{ padding: '12px 16px', borderRadius: 12, background: 'rgba(245,158,11,0.1)', borderLeft: '3px solid #f59e0b', color: '#f59e0b', fontSize: 13, fontWeight: 500 }}>
+                    ⏳ Sunucu ilk açılışta 30-60 saniye sürebilir. Lütfen bekleyin...
+                  </div>
+                )}
                 {error && (
                   <div style={{ padding: '12px 16px', borderRadius: 12, background: 'rgba(239,68,68,0.1)', borderLeft: '3px solid #ef4444', color: '#ef4444', fontSize: 14, fontWeight: 500 }}>{error}</div>
                 )}
