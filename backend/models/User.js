@@ -43,6 +43,10 @@ const UserSchema = new mongoose.Schema(
       type: String,
       select: false,
     },
+    verificationCodeExpires: {
+      type: Date,
+      select: false,
+    },
     phoneOtp: {
       type: String,
       select: false,

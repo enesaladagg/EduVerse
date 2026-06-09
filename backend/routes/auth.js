@@ -28,6 +28,7 @@ router.post('/register', validate(schemas.register), asyncHandler(async (req, re
 
   const instructorStatus = applyInstructor ? 'pending' : 'none';
   const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+  const verificationCodeExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 dakika
 
   const user = await User.create({
     name,
@@ -36,6 +37,7 @@ router.post('/register', validate(schemas.register), asyncHandler(async (req, re
     role: 'student',
     instructorStatus,
     verificationCode,
+    verificationCodeExpires,
     isVerified: false,
   });
 
@@ -67,21 +69,60 @@ router.post('/verify-email', asyncHandler(async (req, res, next) => {
   const { email, code } = req.body;
   if (!email || !code) return next(new AppError('Email ve kod gereklidir.', 400));
 
-  const user = await User.findOne({ email }).select('+verificationCode');
+  const user = await User.findOne({ email }).select('+verificationCode +verificationCodeExpires');
   if (!user) return next(new AppError('Kullanıcı bulunamadı.', 404));
 
   if (user.isVerified) return res.json({ success: true, message: 'Zaten doğrulandı.' });
 
-  if (user.verificationCode !== code) {
+  if (!user.verificationCode || user.verificationCode !== code) {
     return next(new AppError('Geçersiz doğrulama kodu.', 400));
+  }
+
+  if (!user.verificationCodeExpires || user.verificationCodeExpires < Date.now()) {
+    return next(new AppError('Doğrulama kodunun süresi dolmuş. Lütfen yeni bir kod isteyin.', 400, 'CODE_EXPIRED'));
   }
 
   user.isVerified = true;
   user.verificationCode = undefined;
+  user.verificationCodeExpires = undefined;
   await user.save();
 
   const token = signToken(user);
   return res.json({ success: true, token, data: user.toSafeObject() });
+}));
+
+// ─── Resend Email Verification Code ────────────────────────────────────────────
+router.post('/resend-email-otp', asyncHandler(async (req, res, next) => {
+  const { email } = req.body;
+  if (!email) return next(new AppError('E-posta adresi gereklidir.', 400));
+
+  const user = await User.findOne({ email }).select('+verificationCode +verificationCodeExpires');
+  // Always return 200 to prevent email enumeration
+  if (!user || user.isVerified) {
+    return res.json({ success: true, message: 'Eğer hesap doğrulama bekliyorsa yeni bir kod gönderildi.' });
+  }
+
+  const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+  user.verificationCode = verificationCode;
+  user.verificationCodeExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 dakika
+  await user.save({ validateBeforeSave: false });
+
+  if (smtpReady()) {
+    try {
+      await sendEmail({
+        email: user.email,
+        subject: 'EduVerse - Yeni Doğrulama Kodunuz',
+        template: 'verifyEmail',
+        data: { name: user.name, code: verificationCode },
+      });
+    } catch (err) {
+      console.error('Email gönderilemedi:', err.message);
+    }
+  } else {
+    console.log(`[TEST] Yeni OTP for ${email}: ${verificationCode}`);
+  }
+
+  return res.json({ success: true, message: 'Yeni doğrulama kodu e-postanıza gönderildi.' });
 }));
 
 // ─── Login ────────────────────────────────────────────────────────────────────

@@ -127,6 +127,14 @@ export function AuthProvider({ children }) {
     }
   }, [applySession]);
 
+  const resendEmailOtp = useCallback(async (email) => {
+    try {
+      return await api.resendEmailOtp(email);
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  }, []);
+
   const registerPhone = useCallback(async (payload) => {
     try {
       const res = await api.registerPhone(payload);
@@ -255,6 +263,7 @@ export function AuthProvider({ children }) {
       logout,
       refreshProfile,
       verifyEmail,
+      resendEmailOtp,
       registerPhone,
       verifyPhone,
       sendPhoneOtp,
