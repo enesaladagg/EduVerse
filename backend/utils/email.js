@@ -6,7 +6,7 @@ async function sendBrevoEmail({ to, toName, subject, html }) {
   if (!apiKey) throw new Error('BREVO_API_KEY env eksik');
 
   const body = JSON.stringify({
-    sender: { name: 'EduVerse', email: process.env.SMTP_FROM || 'noreply@eduverse.app' },
+    sender: { name: 'EduVerse', email: process.env.SMTP_FROM || 'aladag.ahmet.enes27@gmail.com' },
     to: [{ email: to, name: toName || to }],
     subject,
     htmlContent: html,
