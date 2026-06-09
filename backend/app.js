@@ -89,6 +89,27 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+// GEÇICI DEBUG: SMTP bağlantı testi — route'lardan önce, auth gerektirmez
+app.get('/api/debug/smtp', async (req, res) => {
+  const nodemailer = require('nodemailer');
+  const transporter = nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
+    tls: { rejectUnauthorized: false },
+  });
+  try {
+    await transporter.verify();
+    res.json({ ok: true, user: process.env.SMTP_USER, passLen: process.env.SMTP_PASS?.length });
+  } catch (err) {
+    res.json({ ok: false, error: err.message, code: err.code, user: process.env.SMTP_USER, passLen: process.env.SMTP_PASS?.length });
+  }
+});
+
 app.use('/api', healthRoutes);
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api', usersRoutes);
@@ -111,27 +132,6 @@ app.get('/', (req, res) => {
     success: true,
     message: 'Online egitim platformu backend is running',
   });
-});
-
-// GEÇICI DEBUG: SMTP bağlantı testi (canlıya alındıktan sonra kaldırılacak)
-app.get('/api/debug/smtp', async (req, res) => {
-  const nodemailer = require('nodemailer');
-  const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-    tls: { rejectUnauthorized: false },
-  });
-  try {
-    await transporter.verify();
-    res.json({ ok: true, user: process.env.SMTP_USER, passLen: process.env.SMTP_PASS?.length });
-  } catch (err) {
-    res.json({ ok: false, error: err.message, code: err.code, user: process.env.SMTP_USER, passLen: process.env.SMTP_PASS?.length });
-  }
 });
 
 app.use(notFoundHandler);
