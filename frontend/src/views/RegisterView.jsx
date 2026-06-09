@@ -12,9 +12,44 @@ const TESTIMONIALS = [
   { name: 'Selin Koç',   role: 'UX Designer @ Insider',         text: '"Sertifikamı LinkedIn\'e ekledim, bir hafta içinde işe alım teklifi aldım!"', avatar: 'SK', color: '#f59e0b' },
 ];
 
+function ResendOtpButton({ email, sub, resendEmailOtp }) {
+  const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [countdown, setCountdown] = useState(0);
+
+  const handleResend = async () => {
+    setLoading(true);
+    await resendEmailOtp(email);
+    setLoading(false);
+    setSent(true);
+    setCountdown(60);
+  };
+
+  React.useEffect(() => {
+    if (countdown <= 0) return;
+    const t = setTimeout(() => setCountdown(c => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [countdown]);
+
+  return (
+    <div style={{ textAlign: 'center', marginTop: 4 }}>
+      {sent && countdown > 0 ? (
+        <span style={{ fontSize: 13, color: '#10b981', fontWeight: 600 }}>
+          ✓ Kod gönderildi! ({countdown}s sonra tekrar gönderebilirsiniz)
+        </span>
+      ) : (
+        <button type="button" onClick={handleResend} disabled={loading || countdown > 0}
+          style={{ fontSize: 13, color: sub, background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}>
+          {loading ? 'Gönderiliyor...' : 'Kodu almadınız mı? Tekrar gönder'}
+        </button>
+      )}
+    </div>
+  );
+}
+
 export default function RegisterView({ onNavigate }) {
   const { isDark } = useTheme();
-  const { register, registerPhone, verifyPhone } = useAuth();
+  const { register, registerPhone, verifyPhone, resendEmailOtp } = useAuth();
 
   const [authMethod, setAuthMethod]     = useState('email'); // 'email' | 'phone'
   const [roleMode, setRoleMode]         = useState('student');
@@ -459,14 +494,24 @@ export default function RegisterView({ onNavigate }) {
                 <div style={{ textAlign: 'center', marginBottom: 8 }}>
                   <Mail size={32} color="#00d4aa" style={{ marginBottom: 12 }} />
                   <h3 style={{ margin: '0 0 8px', color: text, fontSize: 20 }}>E-postanızı Doğrulayın</h3>
-                  <p style={{ margin: 0, color: sub, fontSize: 14 }}>
-                    <b>{email}</b> adresine 6 haneli bir kod gönderdik. Lütfen kodu aşağıya girin.
+                  <p style={{ margin: 0, color: sub, fontSize: 14, lineHeight: 1.6 }}>
+                    <b style={{ color: text }}>{email}</b> adresine 6 haneli bir kod gönderdik.
                   </p>
+                </div>
+
+                {/* Yanlış mail uyarısı */}
+                <div style={{ background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)', borderRadius: 10, padding: '10px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                  <span style={{ fontSize: 12, color: sub }}>Yanlış e-posta mı girdiniz?</span>
+                  <button type="button" onClick={() => { setStep('register'); setOtp(''); setError(''); }}
+                    style={{ fontSize: 12, fontWeight: 700, color: '#7c6cf0', background: 'none', border: 'none', cursor: 'pointer', padding: 0, whiteSpace: 'nowrap' }}>
+                    ← Düzelt
+                  </button>
                 </div>
 
                 <div style={{ position: 'relative' }}>
                   <input type="text" placeholder="6 Haneli Kod"
                     value={otp} onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))} required
+                    autoFocus
                     style={{ ...inputBase, textAlign: 'center', letterSpacing: '8px', fontSize: 20, fontWeight: 700, padding: '16px' }} />
                 </div>
 
@@ -475,7 +520,7 @@ export default function RegisterView({ onNavigate }) {
                 )}
 
                 <button type="submit" disabled={loading || otp.length !== 6} style={{
-                  width: '100%', padding: '16px', marginTop: 8,
+                  width: '100%', padding: '16px', marginTop: 4,
                   background: (loading || otp.length !== 6) ? 'rgba(0,212,170,0.6)' : '#00d4aa',
                   color: '#fff', border: 'none', borderRadius: 12, fontFamily: "'Outfit', sans-serif",
                   fontWeight: 700, fontSize: 16, cursor: (loading || otp.length !== 6) ? 'not-allowed' : 'pointer',
@@ -484,9 +529,8 @@ export default function RegisterView({ onNavigate }) {
                   {loading ? <Loader2 size={20} className="spin" /> : 'Doğrula ve Giriş Yap'}
                 </button>
 
-                <button type="button" onClick={() => setStep('register')} style={{ background: 'none', border: 'none', color: sub, cursor: 'pointer', fontSize: 13, textDecoration: 'underline', marginTop: 8 }}>
-                  Geri Dön (E-postayı Değiştir)
-                </button>
+                {/* Kod gelmedi mi? */}
+                <ResendOtpButton email={email} sub={sub} resendEmailOtp={resendEmailOtp} />
               </form>
             )}
 
