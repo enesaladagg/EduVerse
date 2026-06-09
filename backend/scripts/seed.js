@@ -57,10 +57,11 @@ async function upsertUser({ name, email, role, points = 0, badges = [] }) {
     existing.points = points;
     existing.badges = badges;
     existing.password = DEMO_PASSWORD;
+    existing.isVerified = true;
     await existing.save();
     return existing;
   }
-  return User.create({ name, email, password: DEMO_PASSWORD, role, points, badges });
+  return User.create({ name, email, password: DEMO_PASSWORD, role, points, badges, isVerified: true });
 }
 
 async function seed() {
