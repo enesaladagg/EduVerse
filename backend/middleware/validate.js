@@ -21,6 +21,21 @@ const schemas = {
     applyInstructor: Joi.boolean().optional()
   }),
 
+  registerPhone: Joi.object({
+    name: Joi.string().min(2).max(100).required(),
+    phone: Joi.string().pattern(/^\+[1-9]\d{7,14}$/).required().messages({
+      'string.pattern.base': 'Telefon numarası +90XXXXXXXXXX formatında olmalıdır.'
+    }),
+    password: Joi.string().min(8).max(128).required(),
+    applyInstructor: Joi.boolean().optional()
+  }),
+
+  sendPhoneOtp: Joi.object({
+    phone: Joi.string().pattern(/^\+[1-9]\d{7,14}$/).required().messages({
+      'string.pattern.base': 'Telefon numarası +90XXXXXXXXXX formatında olmalıdır.'
+    }),
+  }),
+
   login: Joi.object({
     email: Joi.string().email().required(),
     password: Joi.string().required(),

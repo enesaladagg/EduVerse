@@ -36,8 +36,9 @@ router.post('/checkout', authenticate, asyncHandler(async (req, res, next) => {
   // Burada normalde `iyzipay.checkoutFormInitialize.create({...})` çağrılır.
   // Ancak demo amaçlı bir sahte Iyzico formu (token) döndürüyoruz.
   
+  const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000';
   const mockToken = `IYZICO_TOKEN_${Date.now()}`;
-  const paymentPageUrl = `http://localhost:5000/api/payment/mock-iyzico-page?token=${mockToken}&userId=${req.user.id}&courses=${newCourseIds.join(',')}&price=${totalPrice}`;
+  const paymentPageUrl = `${backendUrl}/api/payment/mock-iyzico-page?token=${mockToken}&userId=${req.user.id}&courses=${newCourseIds.join(',')}&price=${totalPrice}`;
 
   // Frontend'e Iyzico Checkout Form snippet'i veya URL'si döner
   res.json({
@@ -125,8 +126,10 @@ router.post('/callback', asyncHandler(async (req, res) => {
     const courseArray = courses ? courses.split(',') : [];
 
     const user = await User.findById(userId);
+    const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+
     if (!user) {
-      return res.redirect('http://localhost:5173/?page=checkout&payment=failed');
+      return res.redirect(`${clientUrl}/?page=checkout&payment=failed`);
     }
 
     for (const cid of courseArray) {
@@ -137,13 +140,12 @@ router.post('/callback', asyncHandler(async (req, res) => {
 
     await user.save();
 
-    // Satın alma başarılı ekranına yönlendir
-    // Frontend portu 5173
-    res.redirect('http://localhost:5173/?payment=success');
+    res.redirect(`${clientUrl}/?payment=success`);
 
   } catch (err) {
     console.error(err);
-    res.redirect('http://localhost:5173/?page=checkout&payment=failed');
+    const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+    res.redirect(`${clientUrl}/?page=checkout&payment=failed`);
   }
 }));
 

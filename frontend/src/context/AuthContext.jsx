@@ -127,6 +127,71 @@ export function AuthProvider({ children }) {
     }
   }, [applySession]);
 
+  const registerPhone = useCallback(async (payload) => {
+    try {
+      const res = await api.registerPhone(payload);
+      return res;
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  }, []);
+
+  const verifyPhone = useCallback(async (phone, code) => {
+    try {
+      const res = await api.verifyPhone(phone, code);
+      if (res.success && res.token) {
+        applySession(res.token, res.data);
+        return { success: true };
+      }
+      return res;
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  }, [applySession]);
+
+  const sendPhoneOtp = useCallback(async (phone) => {
+    try {
+      return await api.sendPhoneOtp(phone);
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  }, []);
+
+  const loginPhone = useCallback(async (phone, code) => {
+    try {
+      const res = await api.loginPhone(phone, code);
+      if (res.success && res.token) {
+        applySession(res.token, res.data);
+        return { success: true };
+      }
+      return res;
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  }, [applySession]);
+
+  const forgotPassword = useCallback(async (email) => {
+    try {
+      const res = await api.forgotPassword(email);
+      return res;
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  }, []);
+
+  const resetPassword = useCallback(async (token, password) => {
+    try {
+      const res = await api.resetPassword(token, password);
+      if (res.success && res.token) {
+        applySession(res.token, res.data);
+        return { success: true };
+      }
+      return res;
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  }, [applySession]);
+
   const updateUser = useCallback((patch) => {
     setUser((prev) => {
       const updated = prev ? { ...prev, ...patch } : prev;
@@ -190,6 +255,12 @@ export function AuthProvider({ children }) {
       logout,
       refreshProfile,
       verifyEmail,
+      registerPhone,
+      verifyPhone,
+      sendPhoneOtp,
+      loginPhone,
+      forgotPassword,
+      resetPassword,
       updateUser,
       purchaseCourses,
       addXP,

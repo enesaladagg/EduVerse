@@ -12,15 +12,21 @@ const UserSchema = new mongoose.Schema(
     },
     email: {
       type: String,
-      required: true,
+      required: false,
       unique: true,
+      sparse: true,
       lowercase: true,
       trim: true,
       match: [/^\S+@\S+\.\S+$/, 'Invalid email address'],
     },
+    phone: {
+      type: String,
+      unique: true,
+      sparse: true,
+      trim: true,
+    },
     password: {
       type: String,
-      // Optional for OAuth users
       required: false,
       minlength: 8,
       select: false,
@@ -29,8 +35,28 @@ const UserSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isPhoneVerified: {
+      type: Boolean,
+      default: false,
+    },
     verificationCode: {
       type: String,
+      select: false,
+    },
+    phoneOtp: {
+      type: String,
+      select: false,
+    },
+    phoneOtpExpires: {
+      type: Date,
+      select: false,
+    },
+    passwordResetToken: {
+      type: String,
+      select: false,
+    },
+    passwordResetExpires: {
+      type: Date,
       select: false,
     },
     googleId: {
@@ -134,6 +160,8 @@ UserSchema.methods.toSafeObject = function toSafeObject() {
     id: this._id,
     name: this.name,
     email: this.email,
+    phone: this.phone,
+    isPhoneVerified: this.isPhoneVerified,
     role: this.role,
     instructorStatus: this.instructorStatus,
     educationLevel: this.educationLevel,
