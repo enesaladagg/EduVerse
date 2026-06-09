@@ -93,20 +93,19 @@ app.use(passport.session());
 app.get('/api/debug/smtp', async (req, res) => {
   const nodemailer = require('nodemailer');
   const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,
+    host: process.env.SMTP_HOST || 'smtp-relay.brevo.com',
+    port: parseInt(process.env.SMTP_PORT || '587'),
+    secure: false,
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
     },
-    tls: { rejectUnauthorized: false },
   });
   try {
     await transporter.verify();
-    res.json({ ok: true, user: process.env.SMTP_USER, passLen: process.env.SMTP_PASS?.length });
+    res.json({ ok: true, host: process.env.SMTP_HOST || 'smtp-relay.brevo.com', user: process.env.SMTP_USER, passLen: process.env.SMTP_PASS?.length });
   } catch (err) {
-    res.json({ ok: false, error: err.message, code: err.code, user: process.env.SMTP_USER, passLen: process.env.SMTP_PASS?.length });
+    res.json({ ok: false, error: err.message, code: err.code, host: process.env.SMTP_HOST || 'smtp-relay.brevo.com', user: process.env.SMTP_USER, passLen: process.env.SMTP_PASS?.length });
   }
 });
 
