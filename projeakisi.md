@@ -1067,3 +1067,144 @@ commit: fix: register community & certificates routes, add purchasedCourses
 | 📄 Dokümantasyon | README sıfırdan yeniden yazıldı |
 | 🗑️ Teknik borç | temp.jsx silindi, import tutarsızlıkları giderildi |
 
+---
+
+---
+
+## SON SPRINT — Auth v2.0 & Pre-Production Sertleştirme
+
+**Tarih:** Haziran 2026  
+**Dal:** `feature/phase1-settings`  
+**Commit:** `035d3f0` — *feat: email/SMS auth, phone registration, password reset & pre-production hardening*
+
+---
+
+### 1. E-posta OTP Doğrulama Sistemi
+
+**Yapılan:** Kayıt sırasında kullanıcıya 6 haneli OTP kodu içeren HTML e-posta gönderilir. Kullanıcı kodu girmeden hesabı aktif olmaz.
+
+**Etkilenen dosyalar:**
+- `backend/utils/email.js` → `verifyEmail`, `welcome`, `resetPassword` HTML şablonları
+- `backend/routes/auth.js` → OTP oluşturma ve doğrulama endpoint'leri
+- `backend/models/User.js` → `isVerified`, e-posta OTP alanları
+- `frontend/src/views/RegisterView.jsx` → OTP giriş adımı eklendi
+
+---
+
+### 2. Şifremi Unuttum & Şifre Sıfırlama
+
+**Yapılan:** Kullanıcı e-posta adresini girer → SHA-256 hash'li güvenli token üretilir → sıfırlama linki maile gönderilir → yeni şifre belirlenir.
+
+**Güvenlik notu:** Ham token asla veritabanında saklanmaz. Yalnızca SHA-256 özeti saklanır — bu endüstri standardı yaklaşımdır.
+
+**Yeni dosya:**
+- `frontend/src/views/ResetPasswordView.jsx` → şifre güç göstergesi, eşleşme kontrolü, başarı animasyonu
+
+**Etkilenen dosyalar:**
+- `backend/routes/auth.js` → `POST /forgot-password`, `POST /reset-password/:token`
+- `backend/models/User.js` → `passwordResetToken`, `passwordResetExpires` alanları
+- `frontend/src/App.jsx` → URL'den `?action=reset-password&token=xxx` algılanır
+
+---
+
+### 3. Telefon Numarasıyla Kayıt & Giriş (SMS OTP)
+
+**Yapılan:** Kullanıcılar artık e-posta olmadan telefon numarasıyla kayıt olabilir ve şifresiz SMS OTP ile giriş yapabilir.
+
+**Yeni endpoint'ler:**
+| Endpoint | İşlev |
+|:---|:---|
+| `POST /api/auth/register-phone` | Telefon ile kayıt + SMS OTP gönder |
+| `POST /api/auth/verify-phone` | SMS OTP doğrula → hesap aktif |
+| `POST /api/auth/send-phone-otp` | OTP yeniden gönder |
+| `POST /api/auth/login-phone` | Şifresiz telefon girişi |
+
+**Yeni dosya:** `backend/utils/sms.js` — Twilio wrapper, Twilio yoksa `[SMS-TEST]` console çıktısı
+
+**Etkilenen dosyalar:**
+- `backend/models/User.js` → `phone` (sparse unique), `isPhoneVerified`, `phoneOtp`, `phoneOtpExpires`
+- `backend/middleware/validate.js` → `registerPhone`, `sendPhoneOtp` Joi şemaları
+- `frontend/src/views/RegisterView.jsx` → telefon kayıt akışı (2 adım)
+- `frontend/src/views/LoginView.jsx` → telefon giriş akışı (2 adım)
+
+---
+
+### 4. Google/LinkedIn OAuth — Hoş Geldin Maili
+
+**Yapılan:** OAuth ile ilk kez giriş yapan kullanıcılara `welcome` şablonuyla hoş geldin e-postası gönderilir. Hesap `isVerified: true` olarak oluşturulur.
+
+**Etkilenen dosyalar:**
+- `backend/config/passport.js` → `sendEmail` import, yeni kullanıcıda welcome maili
+
+---
+
+### 5. SVG İkon Tab Seçici
+
+**Yapılan:** Giriş ve Kayıt sayfalarındaki e-posta/telefon seçimi için emoji yerine SVG ikonlu sliding-pill animasyonlu tab seçici eklendi.
+
+- **Kayıt sayfası:** Mor (`#7c6cf0`) aktif renk
+- **Giriş sayfası:** Yeşil (`#00d4aa`) aktif renk
+- Zarf SVG (e-posta) + akıllı telefon SVG (telefon)
+
+---
+
+### 6. Pre-Production URL Sertleştirme
+
+**Yapılan:** Tüm hardcoded `localhost` URL'leri ortam değişkenlerine taşındı.
+
+| Dosya | Değişiklik |
+|:---|:---|
+| `backend/routes/auth.js` | `CLIENT_URL` env var |
+| `backend/routes/payment.js` | `CLIENT_URL` + `BACKEND_URL` env var |
+| `backend/routes/upload.js` | `BACKEND_URL` env var |
+| `frontend/src/views/LoginView.jsx` | `VITE_API_URL` env var |
+| `frontend/src/views/RegisterView.jsx` | `VITE_API_URL` env var |
+| `frontend/src/views/SettingsView.jsx` | `VITE_API_URL` env var |
+
+**Yeni dosya:** `frontend/.env.example` → yeni geliştiriciler için şablon
+
+---
+
+### 7. JWT_SECRET Güçlendirme
+
+**Yapılan:** `.env` dosyasındaki `JWT_SECRET` 96 karakterlik kriptografik rastgele değerle güncellendi. Kısa/tahmin edilebilir secret brute-force saldırısına karşı savunmasızdır.
+
+---
+
+### 8. Proje Dokümantasyonu Güncelleme
+
+**Yapılan:** Bu sprint kapsamında tüm belgeler güncellendi:
+
+| Dosya | Değişiklik |
+|:---|:---|
+| `README.md` | v2.0 — yeni özellikler, güncel API tablosu, mimari diyagram |
+| `docs/TAKIM_DOKUMANI.md` | **YENİ** — ekip için detaylı teknik rehber |
+| `docs/SUNUM_REHBERI.md` | **YENİ** — hoca sunumu konuşma metni (teknik + pazarlama) |
+| `projeakisi.md` | Bu sprint eklendi |
+
+---
+
+### 9. Pull Request
+
+**PR #62:** `feature/phase1-settings` → `main`  
+**URL:** https://github.com/enesaladagg/EduVerse/pull/62  
+**Değişiklikler:** 18 dosya · +1329 satır · -137 satır
+
+---
+
+### Sprint Özeti
+
+| Alan | Yapılan |
+|:---|:---|
+| 🔐 Kimlik doğrulama | 4 farklı yöntem (e-posta OTP, telefon OTP, şifresiz telefon, OAuth) |
+| 📱 SMS entegrasyonu | Twilio wrapper + geliştirme fallback |
+| 📧 E-posta servisi | 3 HTML şablon (OTP, hoş geldin, sıfırlama) |
+| 🔑 Şifre sıfırlama | SHA-256 hash'li güvenli token akışı |
+| 🎨 UI/UX | SVG tab seçici, ResetPasswordView (yeni sayfa) |
+| 🛡️ Güvenlik | 7+ sertleştirme adımı, URL'ler env var'a taşındı |
+| 📄 Dokümantasyon | README v2.0 (canlı & profesyonel format), projeakisi güncellendi |
+| 🔀 Git | PR #62 açıldı — merge için hazır |
+
+> **Not:** Ekip için hazırlanan detaylı teknik rehber ve hoca sunumu konuşma metni
+> repoya dahil edilmemiştir; ekip içinde ayrıca paylaşılmıştır.
+
