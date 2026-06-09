@@ -5,7 +5,6 @@ import { useWebRTC } from './useWebRTC';
 import { SOCKET_EVENTS as E } from '../services/socketEvents';
 import { BackgroundProcessor } from '../utils/backgroundProcessor';
 
-const ROOM_ID = 'react-101-live';
 const DEFAULT_POLL = {
   active: true,
   question: "React'te global state için en çok hangisini tercih edersiniz?",
@@ -24,7 +23,8 @@ function formatTimer(seconds) {
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 
-export function useLiveSession({ user, viewRole, onLeave }) {
+export function useLiveSession({ user, viewRole, onLeave, roomId: roomIdProp }) {
+  const ROOM_ID = roomIdProp || 'live-default';
   const [sessionReady, setSessionReady] = useState(false);
   const [sessionError, setSessionError] = useState(null);
   const [token, setToken] = useState(null);

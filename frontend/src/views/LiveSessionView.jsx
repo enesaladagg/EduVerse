@@ -520,6 +520,7 @@ const LiveSessionView = memo(function LiveSessionView({ user, isAuthenticated, o
     user,
     viewRole,
     onLeave: onNavigateHome,
+    roomId: joinedRoomCode || effectiveParams?.roomCode,
   });
 
   const [showEndModal, setShowEndModal] = useState(false);

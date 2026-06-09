@@ -50,6 +50,19 @@ router.post('/friends/accept/:id', authenticate, asyncHandler(async (req, res, n
   res.json({ success: true, message: 'Arkadaşlık isteği kabul edildi.' });
 }));
 
+// Gelen Arkadaşlık İsteklerini Listele
+router.get('/friends/requests', authenticate, asyncHandler(async (req, res) => {
+  const currentUser = await User.findById(req.user.id).populate('friendRequests', 'name profilePicture role');
+  res.json({ success: true, data: currentUser.friendRequests });
+}));
+
+// Arkadaş Listesi
+router.get('/friends', authenticate, asyncHandler(async (req, res) => {
+  const currentUser = await User.findById(req.user.id).populate('friends', 'name profilePicture role');
+  res.json({ success: true, data: currentUser.friends });
+}));
+
+
 // Yeni DM Konuşması Oluştur (veya varsa getir)
 router.post('/conversations', authenticate, asyncHandler(async (req, res, next) => {
   const { userId } = req.body;
