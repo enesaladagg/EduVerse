@@ -9,7 +9,7 @@ import LiveVideoPanel from '../components/eduflow/LiveVideoPanel';
 import LiveAiPanel from '../components/eduflow/LiveAiPanel';
 import api from '../services/api';
 
-import { Layers, Monitor, Share2, Sparkles, Code2, Presentation, Video, Copy, Check, Users, ArrowRight, BookOpen } from 'lucide-react';
+import { Layers, Monitor, Share2, Sparkles, Code2, Presentation, Video, Copy, Check, Users, ArrowRight, BookOpen, ShieldCheck, RefreshCw } from 'lucide-react';
 
 const CodeSandbox = lazy(() => import('../components/CodeSandbox'));
 const CollaborativeWhiteboard = lazy(() => import('../components/CollaborativeWhiteboard'));
@@ -173,6 +173,100 @@ const InstructorCodePanel = memo(function InstructorCodePanel({ studentCode }) {
     </div>
   );
 });
+
+function AdminLobby({ onJoin, onBack, p, t, isDark }) {
+  const [sessions, setSessions] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchSessions = async () => {
+    setLoading(true);
+    try {
+      const res = await api.getAllSessions('ongoing');
+      setSessions(Array.isArray(res.data) ? res.data : (Array.isArray(res) ? res : []));
+    } catch {
+      setSessions([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchSessions(); }, []);
+
+  return (
+    <div style={{
+      minHeight: '100vh', display: 'flex', flexDirection: 'column',
+      alignItems: 'center', justifyContent: 'center',
+      background: p.shell, color: p.text,
+      fontFamily: t.typography.fontFamily.base,
+      padding: 24,
+    }}>
+      <div style={{
+        background: p.panel, border: `1px solid ${p.border}`, borderRadius: 28,
+        padding: 48, maxWidth: 600, width: '100%',
+        boxShadow: '0 32px 64px rgba(0,0,0,0.25)',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 8 }}>
+          <div style={{
+            width: 56, height: 56, borderRadius: 16,
+            background: isDark ? 'rgba(124,108,240,0.15)' : 'rgba(124,108,240,0.1)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            border: '1px solid rgba(124,108,240,0.25)',
+          }}>
+            <ShieldCheck size={28} color="#7c6cf0" />
+          </div>
+          <div>
+            <h2 style={{ fontSize: 24, fontWeight: 800, margin: 0 }}>Yönetici — Canlı Dersler</h2>
+            <p style={{ margin: 0, color: p.textMuted, fontSize: 14 }}>Aktif dersleri izleyebilirsiniz</p>
+          </div>
+          <button onClick={fetchSessions} style={{ marginLeft: 'auto', background: 'transparent', border: `1px solid ${p.border}`, borderRadius: 10, padding: '8px 12px', cursor: 'pointer', color: p.textMuted, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <RefreshCw size={14} /> Yenile
+          </button>
+        </div>
+
+        <div style={{ borderTop: `1px solid ${p.border}`, margin: '24px 0' }} />
+
+        {loading ? (
+          <p style={{ textAlign: 'center', color: p.textMuted }}>Yükleniyor…</p>
+        ) : sessions.length === 0 ? (
+          <p style={{ textAlign: 'center', color: p.textMuted, padding: '24px 0' }}>Şu anda aktif canlı ders yok.</p>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {sessions.map((s) => (
+              <div key={s._id} style={{
+                display: 'flex', alignItems: 'center', gap: 16,
+                padding: '16px 20px', borderRadius: 16,
+                background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
+                border: `1px solid ${p.border}`,
+              }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 700, fontSize: 16 }}>{s.title || 'Canlı Ders'}</div>
+                  <div style={{ fontSize: 13, color: p.textMuted, marginTop: 2 }}>
+                    Kod: <b style={{ color: p.accent }}>{s.roomId}</b>
+                    {s.participantCount != null && <span style={{ marginLeft: 12 }}><Users size={12} style={{ verticalAlign: 'middle' }} /> {s.participantCount}</span>}
+                  </div>
+                </div>
+                <button
+                  onClick={() => onJoin(s.roomId)}
+                  style={{
+                    padding: '10px 20px', borderRadius: 12, border: 'none', cursor: 'pointer',
+                    background: '#7c6cf0', color: '#fff', fontWeight: 700, fontSize: 14,
+                    display: 'flex', alignItems: 'center', gap: 6,
+                  }}
+                >
+                  <ArrowRight size={16} /> Gir
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <button onClick={onBack} style={{ marginTop: 24, background: 'transparent', border: 'none', cursor: 'pointer', color: p.textMuted, fontSize: 14 }}>
+          ← Geri dön
+        </button>
+      </div>
+    </div>
+  );
+}
 
 /**
  * Eğitmenin ders oluşturduğu tam sayfa bileşeni.
@@ -466,7 +560,8 @@ const LiveSessionView = memo(function LiveSessionView({ user, isAuthenticated, o
   const [showEndModal, setShowEndModal] = useState(false);
   const [mountedModes, setMountedModes] = useState(new Set(['slide']));
 
-  const isTeacher = user?.role === 'teacher' || user?.role === 'admin';
+  const isAdmin = user?.role === 'admin';
+  const isTeacher = user?.role === 'teacher' || isAdmin;
   const inLobby = !joinedRoomCode && !params?.isHost;
 
   const effectiveParams = joinedRoomCode
@@ -507,6 +602,19 @@ const LiveSessionView = memo(function LiveSessionView({ user, isAuthenticated, o
           <button onClick={() => onNavigate('register')} style={{ padding: '10px 24px', background: 'transparent', color: p.accent, border: `2px solid ${p.accent}`, borderRadius: 8, cursor: 'pointer', fontWeight: 600, fontSize: 16 }}>Kayıt Ol</button>
         </div>
       </div>
+    );
+  }
+
+  // Admin → aktif dersleri listele, kod girmeden gir
+  if (isAdmin && inLobby) {
+    return (
+      <AdminLobby
+        p={p}
+        t={t}
+        isDark={isDark}
+        onJoin={(code) => setJoinedRoomCode(code)}
+        onBack={onNavigateHome}
+      />
     );
   }
 
