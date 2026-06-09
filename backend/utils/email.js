@@ -1,16 +1,41 @@
-const nodemailer = require('nodemailer');
+const https = require('https');
 
-function createTransporter() {
-  // Brevo (Sendinblue) SMTP — cloud sunuculardan çalışır, 300 email/gün ücretsiz
-  // Render free tier Gmail SMTP'yi bloke ettiği için Brevo kullanıyoruz
-  return nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp-relay.brevo.com',
-    port: parseInt(process.env.SMTP_PORT || '587'),
-    secure: false, // Brevo port 587 STARTTLS kullanır
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
+// Brevo HTTP API — SMTP yerine HTTPS (port 443) kullanır, Render'da kesinlikle çalışır
+async function sendBrevoEmail({ to, toName, subject, html }) {
+  const apiKey = process.env.BREVO_API_KEY;
+  if (!apiKey) throw new Error('BREVO_API_KEY env eksik');
+
+  const body = JSON.stringify({
+    sender: { name: 'EduVerse', email: process.env.SMTP_FROM || 'noreply@eduverse.app' },
+    to: [{ email: to, name: toName || to }],
+    subject,
+    htmlContent: html,
+  });
+
+  return new Promise((resolve, reject) => {
+    const req = https.request({
+      hostname: 'api.brevo.com',
+      path: '/v3/smtp/email',
+      method: 'POST',
+      headers: {
+        'api-key': apiKey,
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(body),
+      },
+    }, (res) => {
+      let data = '';
+      res.on('data', (chunk) => { data += chunk; });
+      res.on('end', () => {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          resolve(JSON.parse(data));
+        } else {
+          reject(new Error(`Brevo API hata ${res.statusCode}: ${data}`));
+        }
+      });
+    });
+    req.on('error', reject);
+    req.write(body);
+    req.end();
   });
 }
 
@@ -128,21 +153,16 @@ const templates = {
 };
 
 const sendEmail = async ({ email, subject, template, data, message }) => {
-  const transporter = createTransporter();
-
   const html = template && templates[template]
     ? templates[template](data || {})
-    : undefined;
+    : (message ? `<p>${message}</p>` : undefined);
 
-  const mailOptions = {
-    from: `EduVerse <${process.env.SMTP_USER}>`,
+  await sendBrevoEmail({
     to: email,
+    toName: data?.name,
     subject,
-    text: message,
     html,
-  };
-
-  await transporter.sendMail(mailOptions);
+  });
 };
 
 module.exports = sendEmail;

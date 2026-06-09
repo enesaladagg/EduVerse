@@ -89,24 +89,28 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-// GEÇICI DEBUG: SMTP bağlantı testi — route'lardan önce, auth gerektirmez
+// GEÇICI DEBUG: Brevo API testi — route'lardan önce, auth gerektirmez
 app.get('/api/debug/smtp', async (req, res) => {
-  const nodemailer = require('nodemailer');
-  const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp-relay.brevo.com',
-    port: parseInt(process.env.SMTP_PORT || '587'),
-    secure: false,
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
+  const https = require('https');
+  const apiKey = process.env.BREVO_API_KEY;
+  if (!apiKey) return res.json({ ok: false, error: 'BREVO_API_KEY env eksik' });
+  const req2 = https.request({
+    hostname: 'api.brevo.com', path: '/v3/account', method: 'GET',
+    headers: { 'api-key': apiKey },
+  }, (r) => {
+    let d = '';
+    r.on('data', c => d += c);
+    r.on('end', () => {
+      if (r.statusCode === 200) {
+        const info = JSON.parse(d);
+        res.json({ ok: true, email: info.email, plan: info.plan?.[0]?.type, keyLen: apiKey.length });
+      } else {
+        res.json({ ok: false, status: r.statusCode, body: d, keyLen: apiKey.length });
+      }
+    });
   });
-  try {
-    await transporter.verify();
-    res.json({ ok: true, host: process.env.SMTP_HOST || 'smtp-relay.brevo.com', user: process.env.SMTP_USER, passLen: process.env.SMTP_PASS?.length });
-  } catch (err) {
-    res.json({ ok: false, error: err.message, code: err.code, host: process.env.SMTP_HOST || 'smtp-relay.brevo.com', user: process.env.SMTP_USER, passLen: process.env.SMTP_PASS?.length });
-  }
+  req2.on('error', e => res.json({ ok: false, error: e.message }));
+  req2.end();
 });
 
 app.use('/api', healthRoutes);
