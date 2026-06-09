@@ -51,6 +51,15 @@ export const api = {
     return parseResponse(res);
   },
 
+  async resendEmailOtp(email) {
+    const res = await fetch(`${API_URL}/auth/resend-email-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    return parseResponse(res);
+  },
+
   async registerPhone(data) {
     const res = await fetch(`${API_URL}/auth/register-phone`, {
       method: 'POST',
