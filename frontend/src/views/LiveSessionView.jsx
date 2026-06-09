@@ -7,6 +7,7 @@ import ParticipantStrip from '../components/eduflow/ParticipantStrip';
 import ControlDock from '../components/eduflow/ControlDock';
 import LiveVideoPanel from '../components/eduflow/LiveVideoPanel';
 import LiveAiPanel from '../components/eduflow/LiveAiPanel';
+import api from '../services/api';
 
 import { Layers, Monitor, Share2, Sparkles, Code2, Presentation } from 'lucide-react';
 
@@ -173,8 +174,112 @@ const InstructorCodePanel = memo(function InstructorCodePanel({ studentCode }) {
   );
 });
 
+/**
+ * Öğrencinin oda kodunu girdiği tam sayfa bileşeni.
+ * Kod backend'e doğrulandıktan sonra onJoin(roomCode) çağrılır.
+ */
+function RoomCodeEntry({ onJoin, onBack, p, t }) {
+  const [code, setCode] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleJoin = async (e) => {
+    e.preventDefault();
+    const trimmed = code.trim().toUpperCase();
+    if (!trimmed) return;
+    setLoading(true);
+    setError('');
+    try {
+      await api.joinLiveSession(trimmed);
+      onJoin(trimmed);
+    } catch (err) {
+      setError(err.message || 'Oturum bulunamadı. Kodu kontrol et.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div style={{
+      minHeight: '100vh', display: 'flex', flexDirection: 'column',
+      alignItems: 'center', justifyContent: 'center',
+      background: p.shell, color: p.text,
+      fontFamily: t.typography.fontFamily.base,
+      padding: 24,
+    }}>
+      <div style={{
+        background: p.panel, border: `1px solid ${p.border}`, borderRadius: 24,
+        padding: 40, maxWidth: 420, width: '100%',
+        boxShadow: '0 24px 48px rgba(0,0,0,0.2)',
+        textAlign: 'center',
+      }}>
+        <div style={{
+          width: 72, height: 72, borderRadius: '50%',
+          background: `${p.accent}15`, color: p.accent,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          margin: '0 auto 20px', fontSize: 36,
+        }}>
+          🎓
+        </div>
+        <h2 style={{ fontSize: 26, fontWeight: 800, marginBottom: 8 }}>Canlı Derse Katıl</h2>
+        <p style={{ color: p.textMuted, fontSize: 15, marginBottom: 28, lineHeight: 1.5 }}>
+          Eğitmenin verdiği oda kodunu gir ve derse anında katıl.
+        </p>
+
+        <form onSubmit={handleJoin}>
+          <input
+            type="text"
+            value={code}
+            onChange={e => setCode(e.target.value.toUpperCase())}
+            placeholder="EDU-XXXX"
+            maxLength={8}
+            style={{
+              width: '100%', boxSizing: 'border-box',
+              padding: '14px 18px', borderRadius: 12,
+              border: `2px solid ${error ? '#ef4444' : p.border}`,
+              background: p.panelElevated, color: p.text,
+              fontSize: 22, fontWeight: 700, textAlign: 'center',
+              letterSpacing: 4, outline: 'none',
+              fontFamily: t.typography.fontFamily.mono || 'monospace',
+              marginBottom: 8,
+              transition: 'border-color 0.2s',
+            }}
+          />
+          {error && (
+            <p style={{ color: '#ef4444', fontSize: 13, marginBottom: 12, textAlign: 'left' }}>{error}</p>
+          )}
+          <button
+            type="submit"
+            disabled={loading || !code.trim()}
+            style={{
+              width: '100%', padding: '14px', borderRadius: 12, border: 'none',
+              background: p.accent, color: '#fff', fontSize: 16, fontWeight: 700,
+              cursor: loading || !code.trim() ? 'not-allowed' : 'pointer',
+              opacity: loading || !code.trim() ? 0.65 : 1,
+              marginTop: 4, transition: 'opacity 0.2s',
+            }}
+          >
+            {loading ? 'Kontrol ediliyor…' : 'Katıl'}
+          </button>
+        </form>
+
+        <button
+          onClick={onBack}
+          style={{
+            marginTop: 16, background: 'transparent', border: 'none',
+            color: p.textMuted, fontSize: 14, cursor: 'pointer',
+          }}
+        >
+          ← Geri dön
+        </button>
+      </div>
+    </div>
+  );
+}
+
 const LiveSessionView = memo(function LiveSessionView({ user, isAuthenticated, onNavigateHome, onNavigate, params }) {
-  const { palette: p, tokens: t } = useTheme();
+  const { isDark, palette: p, tokens: t } = useTheme();
+  const [joinedRoomCode, setJoinedRoomCode] = useState(params?.roomCode || null);
 
   if (!isAuthenticated) {
     return (
@@ -192,7 +297,23 @@ const LiveSessionView = memo(function LiveSessionView({ user, isAuthenticated, o
     );
   }
 
-  const viewRole = params?.isHost ? 'teacher' : 'student';
+  // Eğer öğrenci direkt geldi ve oda kodu yoksa, önce kodu girmesi gerekir
+  if (!params?.isHost && !joinedRoomCode) {
+    return (
+      <RoomCodeEntry
+        p={p}
+        t={t}
+        onJoin={(code) => setJoinedRoomCode(code)}
+        onBack={onNavigateHome}
+      />
+    );
+  }
+
+  const effectiveParams = joinedRoomCode
+    ? { ...params, roomCode: joinedRoomCode }
+    : params;
+
+  const viewRole = effectiveParams?.isHost ? 'teacher' : 'student';
 
   const session = useLiveSession({
     user,
@@ -383,8 +504,8 @@ const LiveSessionView = memo(function LiveSessionView({ user, isAuthenticated, o
         }
       `}</style>
       <SessionTopBar
-        courseTitle={`Canlı Ders ${params?.roomCode ? `(Oda: ${params.roomCode})` : ''}`}
-        moduleTitle={params?.isHost ? "Senin Dersin — Host" : "Sınıftasın"}
+        courseTitle={`Canlı Ders ${effectiveParams?.roomCode ? `(Oda: ${effectiveParams.roomCode})` : ''}`}
+        moduleTitle={effectiveParams?.isHost ? "Senin Dersin — Host" : "Sınıftasın"}
         sessionTimer={session.timerLabel}
         viewRole={viewRole}
         participantCount={session.participants.length || 1}

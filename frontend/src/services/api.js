@@ -217,6 +217,30 @@ export const api = {
     return parseResponse(res);
   },
 
+  async createLiveSession(data) {
+    const res = await fetch(`${API_URL}/sessions/create`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify(data),
+    });
+    return parseResponse(res);
+  },
+
+  async joinLiveSession(roomCode) {
+    const res = await fetch(`${API_URL}/sessions/join/${encodeURIComponent(roomCode)}`, {
+      headers: authHeaders(),
+    });
+    return parseResponse(res);
+  },
+
+  async endLiveSession(id) {
+    const res = await fetch(`${API_URL}/sessions/${id}/end`, {
+      method: 'PUT',
+      headers: authHeaders(),
+    });
+    return parseResponse(res);
+  },
+
   async checkout(items) {
     const res = await fetch(`${API_URL}/payment/checkout`, {
       method: 'POST',

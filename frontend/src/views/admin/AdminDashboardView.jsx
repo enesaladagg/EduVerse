@@ -314,9 +314,20 @@ export default function AdminDashboardView({ onNavigate }) {
             <p style={{ margin: '0 0 24px', color: p.textMuted }}>{selectedUser.name} ({selectedUser.email})</p>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24 }}>
-              <button disabled={processing} onClick={() => handleUpdateRole(selectedUser._id || selectedUser.id, 'admin')} style={{ padding: 12, borderRadius: 8, border: `1px solid ${selectedUser.role === 'admin' ? '#ef4444' : p.border}`, background: selectedUser.role === 'admin' ? 'rgba(239,68,68,0.1)' : 'transparent', color: p.text, cursor: 'pointer', textAlign: 'left', fontWeight: 600 }}>Admin Yap</button>
               <button disabled={processing} onClick={() => handleUpdateRole(selectedUser._id || selectedUser.id, 'teacher')} style={{ padding: 12, borderRadius: 8, border: `1px solid ${selectedUser.role === 'teacher' ? '#3b82f6' : p.border}`, background: selectedUser.role === 'teacher' ? 'rgba(59,130,246,0.1)' : 'transparent', color: p.text, cursor: 'pointer', textAlign: 'left', fontWeight: 600 }}>Eğitmen Yap</button>
-              <button disabled={processing} onClick={() => handleUpdateRole(selectedUser._id || selectedUser.id, 'student')} style={{ padding: 12, borderRadius: 8, border: `1px solid ${selectedUser.role === 'student' ? '#10b981' : p.border}`, background: selectedUser.role === 'student' ? 'rgba(16,185,129,0.1)' : 'transparent', color: p.text, cursor: 'pointer', textAlign: 'left', fontWeight: 600 }}>Öğrenci Yap</button>
+              <button
+                disabled={processing || (selectedUser.role === 'teacher' && selectedUser.instructorStatus === 'approved')}
+                onClick={() => handleUpdateRole(selectedUser._id || selectedUser.id, 'student')}
+                title={selectedUser.role === 'teacher' && selectedUser.instructorStatus === 'approved' ? 'Onaylı eğitmen öğrenciye düşürülemez' : undefined}
+                style={{
+                  padding: 12, borderRadius: 8,
+                  border: `1px solid ${selectedUser.role === 'student' ? '#10b981' : p.border}`,
+                  background: selectedUser.role === 'student' ? 'rgba(16,185,129,0.1)' : 'transparent',
+                  color: p.text, textAlign: 'left', fontWeight: 600,
+                  cursor: (selectedUser.role === 'teacher' && selectedUser.instructorStatus === 'approved') ? 'not-allowed' : 'pointer',
+                  opacity: (selectedUser.role === 'teacher' && selectedUser.instructorStatus === 'approved') ? 0.4 : 1,
+                }}
+              >Öğrenci Yap</button>
             </div>
 
             <div style={{ display: 'flex', gap: 12 }}>

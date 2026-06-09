@@ -1,16 +1,63 @@
 import React, { useState } from 'react';
-import { Users, Wallet, Star, BookOpen, TrendingUp, Zap, BarChart2, MessageCircle, Mail, Video, X } from 'lucide-react';
+import { Users, Wallet, Star, BookOpen, TrendingUp, Zap, BarChart2, MessageCircle, Mail, Video, X, Copy, StopCircle } from 'lucide-react';
 import { C, font, mono, INSTRUCTOR_DATA, Card, SectionTitle, MiniChart, Badge, Stars } from '../components/EduVerseShared';
+import api from '../services/api';
 
 export default function InstructorView({ onNavigate }) {
   const d = INSTRUCTOR_DATA;
   const [liveModal, setLiveModal] = useState(false);
   const [roomCode, setRoomCode] = useState('');
+  const [sessionId, setSessionId] = useState(null);
+  const [createLoading, setCreateLoading] = useState(false);
+  const [createError, setCreateError] = useState('');
+  const [copied, setCopied] = useState(false);
 
-  const handleCreateLive = () => {
-    const code = 'EDU-' + Math.random().toString(36).substring(2, 6).toUpperCase();
-    setRoomCode(code);
-    setLiveModal(true);
+  const handleCreateLive = async () => {
+    setCreateLoading(true);
+    setCreateError('');
+    try {
+      // Backend'e kaydet; courseId zorunlu — demo için sabit bir placeholder kullanılır.
+      // Gerçek implementasyonda kullanıcının kurs seçmesi gerekir.
+      const result = await api.createLiveSession({
+        title: 'Canlı Ders',
+        courseId: '000000000000000000000000', // placeholder — gerçek akışta seçilir
+        scheduledAt: new Date().toISOString(),
+        duration: 60,
+        sessionType: 'lecture',
+      });
+      setRoomCode(result.data.roomId);
+      setSessionId(result.data._id);
+      setLiveModal(true);
+    } catch (err) {
+      // Backend erişilemiyorsa yerel fallback (demo mod)
+      console.warn('Backend erişilemedi, yerel kod üretiliyor:', err.message);
+      const code = 'EDU-' + Math.random().toString(36).substring(2, 6).toUpperCase();
+      setRoomCode(code);
+      setSessionId(null);
+      setLiveModal(true);
+    } finally {
+      setCreateLoading(false);
+    }
+  };
+
+  const handleEndSession = async () => {
+    if (sessionId) {
+      try {
+        await api.endLiveSession(sessionId);
+      } catch (err) {
+        console.warn('Oturum sonlandırma hatası:', err.message);
+      }
+    }
+    setLiveModal(false);
+    setSessionId(null);
+    setRoomCode('');
+  };
+
+  const handleCopyCode = () => {
+    navigator.clipboard.writeText(roomCode).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
   };
 
   return (
@@ -25,11 +72,11 @@ export default function InstructorView({ onNavigate }) {
               <p style={{ color: C.textSec, fontSize: 14 }}>Hoş geldin, {d.instructor.name}</p>
             </div>
           </div>
-          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-            <button onClick={handleCreateLive} style={{ padding: "12px 20px", borderRadius: 14, border: `1px solid ${C.accent}`, background: `${C.accent}15`, color: C.accent, fontFamily: font, fontSize: 14, fontWeight: 700, cursor: "pointer", display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Video size={18} /> Canlı Ders Başlat
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+            <button onClick={handleCreateLive} disabled={createLoading} style={{ padding: "12px 20px", borderRadius: 14, border: `1px solid ${C.accent}`, background: `${C.accent}15`, color: C.accent, fontFamily: font, fontSize: 14, fontWeight: 700, cursor: createLoading ? 'wait' : 'pointer', display: 'flex', alignItems: 'center', gap: 8, height: 46, boxSizing: 'border-box', opacity: createLoading ? 0.7 : 1 }}>
+              <Video size={18} /> {createLoading ? 'Oluşturuluyor…' : 'Canlı Ders Başlat'}
             </button>
-            <button onClick={() => alert("Kurs oluşturma modülü yapım aşamasındadır.")} style={{ padding: "12px 28px", borderRadius: 14, border: "none", background: C.gradAccent, color: "white", fontFamily: font, fontSize: 14, fontWeight: 700, cursor: "pointer" }}>
+            <button onClick={() => alert("Kurs oluşturma modülü yapım aşamasındadır.")} style={{ padding: "12px 28px", borderRadius: 14, border: "none", background: C.gradAccent, color: "white", fontFamily: font, fontSize: 14, fontWeight: 700, cursor: "pointer", display: 'flex', alignItems: 'center', height: 46, boxSizing: 'border-box' }}>
               + Yeni Kurs Oluştur
             </button>
           </div>
@@ -140,26 +187,42 @@ export default function InstructorView({ onNavigate }) {
       {/* Live Class Modal */}
       {liveModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: 20 }}>
-          <div style={{ background: C.card, padding: 32, borderRadius: 24, maxWidth: 400, width: '100%', border: `1px solid ${C.border}`, position: 'relative' }}>
+          <div style={{ background: C.card, padding: 32, borderRadius: 24, maxWidth: 420, width: '100%', border: `1px solid ${C.border}`, position: 'relative' }}>
             <button onClick={() => setLiveModal(false)} style={{ position: 'absolute', top: 16, right: 16, background: 'transparent', border: 'none', color: C.textDim, cursor: 'pointer' }}><X size={20} /></button>
             <div style={{ width: 64, height: 64, borderRadius: '50%', background: `${C.accent}15`, color: C.accent, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
               <Video size={32} />
             </div>
             <h2 style={{ fontFamily: font, fontSize: 24, fontWeight: 800, marginBottom: 8 }}>Canlı Ders Oluşturuldu</h2>
             <p style={{ color: C.textSec, fontSize: 15, marginBottom: 24, lineHeight: 1.5 }}>Öğrencilerin derse katılabilmesi için aşağıdaki kodu onlarla paylaşın.</p>
-            
-            <div style={{ background: C.surface, border: `1px dashed ${C.accent}`, padding: 16, borderRadius: 12, textAlign: 'center', marginBottom: 24 }}>
+
+            {/* Oda kodu kutusu */}
+            <div style={{ background: C.surface, border: `1px dashed ${C.accent}`, padding: 16, borderRadius: 12, textAlign: 'center', marginBottom: 12 }}>
               <div style={{ fontSize: 12, color: C.textDim, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>Oda Kodu</div>
               <div style={{ fontFamily: mono, fontSize: 32, fontWeight: 800, color: C.accent, letterSpacing: 4 }}>{roomCode}</div>
             </div>
 
-            <button 
+            {/* Kopyala butonu */}
+            <button
+              onClick={handleCopyCode}
+              style={{ width: '100%', padding: '10px', borderRadius: 10, border: `1px solid ${C.border}`, background: 'transparent', color: copied ? C.green : C.textSec, fontSize: 14, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 16, transition: 'color 0.2s' }}>
+              <Copy size={15} /> {copied ? 'Kopyalandı!' : 'Kodu Kopyala'}
+            </button>
+
+            {/* Derse Katıl */}
+            <button
               onClick={() => {
                 setLiveModal(false);
-                if (onNavigate) onNavigate('live', { roomCode, isHost: true });
-              }} 
-              style={{ width: '100%', padding: '16px', borderRadius: 14, border: 'none', background: C.gradAccent, color: '#fff', fontSize: 16, fontWeight: 700, cursor: 'pointer' }}>
-              Derse Katıl
+                if (onNavigate) onNavigate('live', { roomCode, isHost: true, sessionId });
+              }}
+              style={{ width: '100%', padding: '14px', borderRadius: 14, border: 'none', background: C.gradAccent, color: '#fff', fontSize: 15, fontWeight: 700, cursor: 'pointer', marginBottom: 10 }}>
+              Derse Katıl (Host)
+            </button>
+
+            {/* Dersi Bitir */}
+            <button
+              onClick={handleEndSession}
+              style={{ width: '100%', padding: '12px', borderRadius: 14, border: `1px solid #ef4444`, background: 'transparent', color: '#ef4444', fontSize: 14, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+              <StopCircle size={16} /> Dersi Bitir
             </button>
           </div>
         </div>

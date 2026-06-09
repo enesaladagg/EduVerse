@@ -62,7 +62,7 @@ const LiveSessionSchema = new mongoose.Schema(
 );
 
 LiveSessionSchema.index({ courseId: 1, status: 1 });
-LiveSessionSchema.index({ roomId: 1 });
+LiveSessionSchema.index({ roomId: 1 }, { unique: true, sparse: true });
 
 /**
  * Seminer modunda bir katılımcının yayın yapıp yapamayacağını belirler.
